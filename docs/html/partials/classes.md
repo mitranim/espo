@@ -1,8 +1,8 @@
 ## Classes
 
 Espo's "classes" are defined using classic prototypal techniques and **don't
-follow** the ES2015 spec. They can be called without `new` and methods are
-enumerable. In addition, they use
+follow** the ES2015 spec. They can be called without `new`, methods are
+enumerable and instance-bound. In addition, they use
 [`isImplementation`](#-isimplementation-iface-value-)
 rather than `instanceof` for the constructor self-check, making them
 usable as mixins for multiple inheritance. They're subclassable in ES2015.
@@ -184,7 +184,8 @@ Current value of `atom`.
 where `mod = ƒ(atom.state, ...args)`
 
 Calls `mod` with the current value of the atom and the optional extra args.
-Resets `atom` to the resulting value and notifies the watchers.
+Resets `atom` to the resulting value and notifies the watchers. Returns the
+newly committed state.
 
 Swap commits the new state immediately, before it returns. However, watcher
 notifications are put on an internal [`TaskQue`](#-taskque-) so that they never
@@ -196,8 +197,8 @@ this code, even though it runs in the same call stack.
 const atom = Atom(10)
 // atom.state = 10
 const add = (a, b, c) => a + b + c
-atom.swap(add, 1, 2)
-// atom.state = add(10, 1, 2) = 13
+const newState = atom.swap(add, 1, 2)
+// newState = atom.state = add(10, 1, 2) = 13
 ```
 
 ### `atom.addWatcher(fun)`
