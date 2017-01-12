@@ -1,0 +1,56 @@
+{
+  "parser": "babel-eslint",
+  "extends": "eslint:recommended",
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "comma-dangle": "off",
+    "comma-spacing": "error",
+    "consistent-return": "error",
+    "curly": ["error", "multi-line"],
+    "dot-notation": ["error", {"allowKeywords": true}],
+    "eqeqeq": ["error", "allow-null"],
+    "indent": ["error", 2, {"SwitchCase": 1}],
+    "max-len": ["error", 100],
+    "no-cond-assign": "error",
+    "no-console": "off",
+    "no-empty": "off",
+    "no-extra-boolean-cast": "error",
+    "no-extra-semi": "error",
+    "no-func-assign": "error",
+    "no-inner-declarations": ["error", "both"],
+    "no-loop-func": "error",
+    "no-mixed-spaces-and-tabs": "error",
+    "no-restricted-globals": ["error",
+      // window (browser)
+      "alert", "blur", "confirm", "event", "fetch", "find", "focus", "history",
+      "length", "location", "name", "navigator", "open", "parent", "print",
+      "prompt", "scroll", "self", "status", "stop", "top",
+      // global (node)
+      "root"
+    ],
+    "no-shadow-restricted-names": "error",
+    "no-sparse-arrays": "off",
+    "no-throw-literal": "error",
+    "no-trailing-spaces": "error",
+    "no-unexpected-multiline": "error",
+    "no-unreachable": "error",
+    "no-unused-labels": "off",
+    "no-unused-vars": ["error", {"argsIgnorePattern": "^_", "varsIgnorePattern": "^_"}],
+    "no-var": "error",
+    "object-curly-spacing": ["error", "never"],
+    "object-shorthand": "error",
+    "one-var": ["error", "never"],
+    "prefer-const": "error",
+    "quote-props": ["error", "as-needed"],
+    "quotes": ["error", "single", {"avoidEscape": true, "allowTemplateLiterals": true}],
+    "semi": ["error", "never"],
+    "space-before-blocks": ["error", "always"],
+    "space-in-parens": ["error", "never"],
+    "spaced-comment": ["error", "always"],
+    "valid-typeof": "error",
+    "yoda": "error"
+  }
+}

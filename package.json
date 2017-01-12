@@ -1,0 +1,58 @@
+{
+  "name": "espo",
+  "version": "0.0.1",
+  "description": "Extensions for stateful programming (OOP utils)",
+  "main": "dist/espo.js",
+  "scripts": {
+    "start": "gulp",
+    "test": "node test/test",
+    "prepublish": "gulp build",
+    "push-docs": "env NODE_ENV=production gulp build && (cd gh-pages && git add -A . && git commit -a -m autocommit && git push origin gh-pages)"
+  },
+  "keywords": [
+    "state",
+    "oop"
+  ],
+  "authors": [
+    "Mitranim <me@mitranim.com>"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mitranim/espo.git"
+  },
+  "devDependencies": {
+    "babel-eslint": "7.1.1",
+    "babel-loader": "6.2.10",
+    "babel-plugin-check-es2015-constants": "6.8.0",
+    "babel-plugin-transform-es2015-arrow-functions": "6.8.0",
+    "babel-plugin-transform-es2015-block-scoping": "6.21.0",
+    "babel-plugin-transform-es2015-destructuring": "6.19.0",
+    "babel-plugin-transform-es2015-parameters": "6.21.0",
+    "babel-plugin-transform-es2015-shorthand-properties": "6.18.0",
+    "babel-plugin-transform-es2015-spread": "6.8.0",
+    "babel-plugin-transform-es2015-template-literals": "6.8.0",
+    "browser-sync": "2.18.5",
+    "del": "2.2.2",
+    "emerge": "0.0.27",
+    "eslint_d": "4.2.1",
+    "font-awesome": "4.7.0",
+    "fpx": "0.0.15",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-autoprefixer": "3.1.1",
+    "gulp-babel": "6.1.2",
+    "gulp-clean-css": "2.3.2",
+    "gulp-load-plugins": "1.4.0",
+    "gulp-rename": "1.2.2",
+    "gulp-sass": "3.0.0",
+    "gulp-statil": "0.1.0",
+    "gulp-uglify": "2.0.0",
+    "gulp-util": "3.0.8",
+    "gulp-watch": "4.3.11",
+    "gulp-wrap": "0.13.0",
+    "highlight.js": "9.9.0",
+    "marked": "0.3.6",
+    "stylific-lite": "0.0.1",
+    "webpack": "1.14.0"
+  }
+}

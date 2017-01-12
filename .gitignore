@@ -1,0 +1,9 @@
+# Files
+.DS_Store
+*.log
+/*.js
+
+# Folders
+dist
+gh-pages
+node_modules
