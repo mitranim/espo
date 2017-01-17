@@ -8,7 +8,7 @@ Source <span class="fa fa-github"></span>
 Utilities for stateful and OO programming: mutations, inheritance/mixins,
 queing. Work in progress.
 
-See sibling library
+See the sibling library
 <a href="http://mitranim.com/fpx/" target="_blank">`fpx`</a>
 for functional programming utils.
 

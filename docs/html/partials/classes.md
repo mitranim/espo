@@ -34,13 +34,37 @@ que.push('first')
 
 #### `que.push(value)`
 
-See example above.
-
 Adds `value` to the end of the queue. It will be processed by `deque` after all
-other values that are already in the queue. If the que is not dammed, this
-automatically triggers `.flush()`.
+other values that are already in the queue. If the que is not
+[dammed](#-que-dam-), this automatically triggers `.flush()`.
 
-Returns a function that removes `value` from the que when called.
+Returns a bound `que.pull` for `value` (see below).
+
+```js
+function deque (value) {
+  if (value === 'first') {
+    que.push('second')
+    que.push('third')
+  }
+  console.info(value)
+}
+
+const que = Que(deque)
+
+const abortFirst = que.push('first')
+
+// prints:
+// 'first'
+// 'second'
+// 'third'
+```
+
+#### `que.pull(value)`
+
+Removes the first occurrence of `value` from `que`, using
+<a href="http://mitranim.com/fpx/#-is-one-other-" target="_blank">`fpx.is`</a>
+for equality checks. Has no effect if all occurrences of `value` have already
+been dequed.
 
 ```js
 function deque (value) {console.info(value)}
@@ -55,7 +79,7 @@ que.flush()
 #### `que.dam()`
 
 Pauses an idle que. A dammed que accumulates values added by `.push()`, but
-doesn't flush automatically. This allows you to delay processing and batch
+doesn't flush automatically. This allows you to delay processing, batching
 multiple values. Call `.flush()` to unpause and resume processing.
 
 Has no effect if the que is already flushing at the time of the call.
@@ -115,9 +139,9 @@ taskQue.push(first)
 
 See example above.
 
-Adds `task` to the end of the queue. It will be called with `args` after all
-other tasks that are already in the queue. If the que is not dammed, this
-automatically triggers `.flush()`.
+Adds `task` to the end of the queue. It will be called with `args` as arguments
+and `taskQue` as `this` after executing all other tasks that are already in the
+queue. If the que is not dammed, this automatically triggers `.flush()`.
 
 Returns a function that removes the task from the que when called.
 
