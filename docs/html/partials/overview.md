@@ -27,4 +27,4 @@ const {someFunction} = require('espo')
 On this page, all `espo` words are exported into global scope. You can run
 examples in the browser console.
 
-----
+---

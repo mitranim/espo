@@ -1,8 +1,8 @@
 {
   "name": "espo",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Extensions for stateful programming (OOP utils)",
-  "main": "dist/espo.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "gulp",
     "test": "node test/test",
@@ -22,7 +22,8 @@
     "url": "https://github.com/Mitranim/espo.git"
   },
   "dependencies": {
-    "fpx": "0.0.18"
+    "fpx": "0.0.20",
+    "emerge": "0.0.28"
   },
   "devDependencies": {
     "babel-eslint": "7.1.1",

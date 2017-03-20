@@ -1,17 +1,18 @@
 ## Classes
 
-Espo's "classes" are defined using classic prototypal techniques and **don't
-follow** the ES2015 spec. They can be called without `new`, methods are
+Espo's "classes" are defined using classic prototypal techniques and don't
+follow the ES2015 class spec. They can be called without `new`, methods are
 enumerable and instance-bound. In addition, they use
 [`isImplementation`](#-isimplementation-iface-value-)
 rather than `instanceof` for the constructor self-check, making them
-usable as mixins for multiple inheritance. They're subclassable in ES2015.
+usable as mixins for multiple inheritance. Nevertheless, they're subclassable
+in ES2015.
 
 ### `Que(deque)`
 
-A synchronous, unbounded, FIFO queue. You teach it how to process values, then
-put values on it, and they get processed in a strict linear order. The calls
-to `deque` never overlap.
+A synchronous, unbounded, FIFO queue. Takes a `deque` function that will process
+the values put on the queue in a strict linear order. The calls to `deque` never
+overlap.
 
 ```js
 function deque (value) {
@@ -107,7 +108,7 @@ Unpauses and resumes processing. You only need to call it after `.dam()`.
 
 Self-explanatory.
 
-----
+---
 
 ### `TaskQue()`
 
@@ -166,17 +167,17 @@ See [`que.flush()`](#-que-flush-).
 
 See [`que.isEmpty()`](#-que-isempty-).
 
-----
+---
 
-## `Atom(state)`
+### `Atom(state)`
 
 Very similar to
 <a href="https://clojuredocs.org/clojure.core/atom" target="_blank">`clojure.core/atom`</a>.
 
-Conceptually, it can be viewed as a:
+Conceptually, it can be viewed as:
 
-  * cross between a smart pointer to an immutable value and an observable
-  * unit of reactive state with a strictly linear timeline that advances transactionally
+  * a cross between "smart pointer to an immutable value" and "observable"
+  * a unit of reactive state with a strictly linear timeline that advances transactionally
 
 You can use `Atom` as a unit of reactivity in JS applications, particularly as
 a substitute for Redux. In this case, it's highly recommended to pair it with
@@ -199,11 +200,11 @@ atom.swap(value => value + 100)
 removeWatcher()
 ```
 
-### `atom.state`
+#### `atom.state`
 
 Current value of `atom`.
 
-### `atom.swap(mod, ...args)`
+#### `atom.swap(mod, ...args)`
 
 where `mod = ƒ(atom.state, ...args)`
 
@@ -225,21 +226,86 @@ const newState = atom.swap(add, 1, 2)
 // newState = atom.state = add(10, 1, 2) = 13
 ```
 
-### `atom.addWatcher(fun)`
+#### `atom.addWatcher(fun)`
 
 where `fun = ƒ(atom, prevState, nextState)`
 
 Registers `fun` as a watcher that will be called on each state transition.
 Returns a function that removes `fun` from the watchers when called.
 
-### `atom.removeWatcher(fun)`
+#### `atom.removeWatcher(fun)`
 
 Removes `fun` from the watchers.
 
-### `atom.enque(task, ...args)`
+---
 
-Puts `task` on the atom's internal [`TaskQue`](#-taskque-). The task will
-receive `args` as arguments and `atom` as `this`. Returns a function that
-removes `task` from the que when called.
+### `Deconstructor()`
 
-----
+Satisfies [`isDeconstructible`](#-isdeconstructible-value-).
+
+Aggregator of deconstructibles that you assign directly onto it. It will
+deconstruct each of them when destroyed.
+
+```js
+const dc = Deconstructor()
+
+dc.lc = Lifecycler()
+
+// nesting works
+dc.otherDc = Deconstructor()
+
+dc.otherDc.lc = Lifecycler()
+
+dc.deconstructor()
+
+// both dc's are now empty, and both lc's have been deconstructed
+```
+
+---
+
+### `Lifecycler()`
+
+Satisfies [`isDeconstructible`](#-isdeconstructible-value-).
+
+Utility for reversible initialisation and reinitialisation.
+
+TODO document motivation and usage.
+
+`initer`, `reiniter`, `deiniter` look like this: `ƒ(root, onDeinit): void`
+
+#### `init(root, initer)`
+
+#### `reinit(newRoot, reiniter)`
+
+#### `deinit([deiniter])`
+
+#### `onDeinit(deiniter)`
+
+---
+
+### `FixedLifecycler(config)`
+
+Satisfies [`isDeconstructible`](#-isdeconstructible-value-).
+
+Version of [`Lifecycler`](#-lifecycler-) for cases where the actions for getting
+root, initing, and deiniting are always the same.
+
+TODO document motivation and usage.
+
+`config`:
+
+```
+interface {
+  getRoot(prevRoot, onDeinit): any
+  initer(root, onDeinit): void
+  deiniter(root, onDeinit): void
+}
+```
+
+#### `init()`
+
+#### `reinit()`
+
+#### `deinit()`
+
+---

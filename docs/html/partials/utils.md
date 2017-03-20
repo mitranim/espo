@@ -20,7 +20,7 @@ isMutable(null)                =   false
 isMutable(Object.freeze({}))   =   false
 ```
 
-----
+---
 
 ### `isImplementation(iface, value)`
 
@@ -57,7 +57,7 @@ assign(B.prototype, A.prototype)
 const b = B()
 ```
 
-----
+---
 
 ### `bindAll(object)`
 
@@ -79,7 +79,7 @@ const boundSelf = object.self
 boundSelf === object
 ```
 
-----
+---
 
 ### `final(object, key, value)`
 
@@ -93,7 +93,7 @@ object.one === 1
 object.one = 10  // exception in strict mode
 ```
 
-----
+---
 
 ### `assign(target, ...sources)`
 
@@ -111,7 +111,7 @@ assign({})                      =  {}
 assign({}, {one: 1}, {two: 2})  =  {one: 1, two: 2}
 ```
 
-----
+---
 
 ### `push(list, value)`
 
@@ -122,7 +122,7 @@ exactly one argument and returns `list`.
 push([10], 20) = [10, 20]
 ```
 
-----
+---
 
 ### `pull(list, value)`
 
@@ -134,7 +134,7 @@ Mutates `list`, removing one occurrence of `value`, comparing values with
 pull([10, 20], 10) = [20]
 ```
 
-----
+---
 
 ### `setIn(object, path, value)`
 
@@ -152,7 +152,7 @@ setIn(tree, ['one', 'two'], 100)
 // tree is now {one: {two: 100}}
 ```
 
-----
+---
 
 ### `redef(storage, path, reconstructor)`
 
@@ -164,7 +164,7 @@ function report (value) {console.info(value)}
 const que = redef(global, ['dev', 'que'], que => que || Que(report))
 ```
 
-----
+---
 
 ### `defonce(storage, path, constructor, ...args)`
 
@@ -176,4 +176,153 @@ function report (value) {console.info(value)}
 const que = defonce(global, ['dev', 'que'], Que, report)
 ```
 
-----
+---
+
+### `valueDescriptors(values)`
+
+Converts a dict of properties into _enumerable_ property descriptors for
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create" target="_blank">`Object.create`</a>
+or
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank">`Object.defineProperty`</a>.
+
+```js
+Object.create(somePrototype, valueDescriptors({
+  someProperty: 100,
+  someMethod () {},
+}))
+```
+
+---
+
+### `hiddenDescriptors(values)`
+
+Converts a dict of properties into _non-enumerable_ property descriptors for
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create" target="_blank">`Object.create`</a>
+or
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank">`Object.defineProperty`</a>.
+
+```js
+Object.create(somePrototype, hiddenDescriptors({
+  someProperty: 100,
+  someMethod () {},
+}))
+```
+
+---
+
+### `subclassOf(Superclass, Subclass)`
+
+Utility for manual inheritance. Makes the given subclass constructor inherit
+from the given superclass. This includes instance properties, instance methods,
+static properties, static methods.
+
+Unless you know you want this, use
+<a href="http://babeljs.io/learn-es2015/#ecmascript-2015-features-classes" target="_blank">ES2015 classes</a>
+instead.
+
+```js
+function Super () {
+  if (!(this instanceof Super)) return new Super(...arguments)
+  bindAll(this)
+}
+
+// Instance
+assign(Super.prototype, {
+  instanceProp: '<my instance prop>',
+  instanceMethod () {},
+})
+
+// Statics
+assign(Super, {
+  staticProp: '<my static prop>',
+  staticMethod () {},
+})
+
+function Sub () {
+  if (!(this instanceof Sub)) return new Sub(...arguments)
+  Super.apply(this, arguments)
+}
+
+subclassOf(Super, Sub)
+
+// Sub now has instance and static props from Super
+```
+
+---
+
+### `subclassWithProps(Superclass, props)`
+
+Creates a new subclass of `Superclass` with `props` added to its prototype. The
+resulting subclass may be called without `new`.
+
+```js
+const Subclass = subclassWithProps(SomeSuperclass, {
+  subProp: '<my instance prop>',
+  subMethod () {},
+})
+
+const sub = Subclass()
+```
+
+---
+
+### `subclassBy(getProps)`
+
+Creates a function that will accept a superclass and produce a
+[`subclassWithProps`](#-subclasswithprops-superclass-props-) with the result of
+calling `getProps` with the superclass.
+
+Useful when developing an API with customisable class transforms.
+
+```js
+const transform = subclassBy(Superclass => {
+  const {prototype: {someMethod}} = Superclass
+  return {
+    someProp: '<my instance prop>',
+    someMethod () {
+      // super
+      someMethod.apply(this, arguments)
+    },
+  }
+})
+
+const Subclass = transform(SomeSuperclass)
+
+const sub = Subclass()
+```
+
+---
+
+### `hackClassBy(getProps)`
+
+Similar to [`subclassBy`](#-subclassby-getprops-). Creates a function that will
+accept a superclass, but instead of creating a new subclass, it will assign the
+result of `getProps` directly to its prototype.
+
+Useful when developing an API with chainable class transforms, when you don't
+care about "losing" the original superclass. Should cost less memory and
+performance than `subclassBy`. Requires care: if one of the methods you're
+hacking dynamically reads its "super" method from the same prototype, you'll get
+infinite recursion. In this case, simply swap this for `subclassBy`.
+
+```js
+const transform = hackClassBy(Superclass => {
+  const {prototype: {someMethod}} = Superclass
+
+  return {
+    someProp: '<my instance prop>',
+    someMethod () {
+      // super
+      someMethod.apply(this, arguments)
+    },
+  }
+})
+
+const Subclass = transform(SomeSuperclass)
+
+Subclass === SomeSuperclass  // true
+
+const sub = Subclass()
+```
+
+---
