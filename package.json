@@ -1,6 +1,6 @@
 {
   "name": "espo",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Extensions for stateful programming (OOP utils)",
   "main": "dist/index.js",
   "scripts": {
@@ -21,21 +21,30 @@
     "type": "git",
     "url": "https://github.com/Mitranim/espo.git"
   },
-  "dependencies": {
-    "fpx": "0.0.20",
-    "emerge": "0.0.28"
+  "peerDependencies": {
+    "babel-runtime": "^6.0.0",
+    "emerge": "^0.0.28",
+    "fpx": "^0.0.20"
   },
   "devDependencies": {
     "babel-eslint": "7.1.1",
     "babel-loader": "6.2.10",
     "babel-plugin-check-es2015-constants": "6.8.0",
+    "babel-plugin-transform-class-properties": "6.23.0",
     "babel-plugin-transform-es2015-arrow-functions": "6.8.0",
+    "babel-plugin-transform-es2015-block-scoped-functions": "6.22.0",
     "babel-plugin-transform-es2015-block-scoping": "6.21.0",
+    "babel-plugin-transform-es2015-classes": "6.23.0",
     "babel-plugin-transform-es2015-destructuring": "6.19.0",
+    "babel-plugin-transform-es2015-function-name": "6.22.0",
+    "babel-plugin-transform-es2015-literals": "6.22.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "6.24.0",
     "babel-plugin-transform-es2015-parameters": "6.21.0",
     "babel-plugin-transform-es2015-shorthand-properties": "6.18.0",
     "babel-plugin-transform-es2015-spread": "6.8.0",
     "babel-plugin-transform-es2015-template-literals": "6.8.0",
+    "babel-plugin-transform-object-rest-spread": "6.23.0",
+    "babel-plugin-transform-runtime": "6.23.0",
     "browser-sync": "2.18.5",
     "del": "2.2.2",
     "emerge": "0.0.27",

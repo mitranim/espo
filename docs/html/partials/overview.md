@@ -5,8 +5,9 @@
 Source <span class="fa fa-github"></span>
 </a>
 
-Utilities for stateful and OO programming: mutations, inheritance/mixins,
-queing. Work in progress.
+Utilities for stateful, OO, and reactive programming: mutations,
+inheritance/mixins, queing, reactive data sources, implicit subscriptions. Work
+in progress.
 
 See the sibling library
 <a href="http://mitranim.com/fpx/" target="_blank">`fpx`</a>

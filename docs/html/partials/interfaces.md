@@ -5,13 +5,13 @@ for class instances.
 
 ### `isDeconstructible(value)`
 
-The `deconstructor` method should be the opposite of `constructor` that
-deinitialises the object into inert state.
+Defines an object with a `deconstructor` method. It should be the opposite of
+`constructor`: deinitialise the object into inert state.
 
 See [`Deconstructor`](#-deconstructor-).
 
 ```js
-interface isDeconstructible {
+interface Deconstructible {
   deconstructor(): void
 }
 
@@ -30,6 +30,27 @@ class Deconstructible {
 }
 
 isDeconstructible(new Deconstructible())
+// true
+```
+
+---
+
+### `isReactiveSource(value)`
+
+See [`Atom`](#-atom-state-) and [`Subber`](#-subber-).
+
+```js
+interface ReactiveSource {
+  deconstructor(): void
+  read(query): any
+  addSubscriber(subscriber): removeSubscriber
+  removeSubscriber(subscriber): void
+}
+
+isReactiveSource({})
+// false
+
+isReactiveSource(new Atom())
 // true
 ```
 

@@ -1,16 +1,11 @@
 ## Classes
 
-Espo's "classes" are defined using classic prototypal techniques and don't
-follow the ES2015 class spec. They can be called without `new`, methods are
-enumerable and instance-bound. In addition, they use
-[`isImplementation`](#-isimplementation-iface-value-)
-rather than `instanceof` for the constructor self-check, making them
-usable as mixins for multiple inheritance. Nevertheless, they're subclassable
-in ES2015.
+Espo provides several utility classes. They're subclassable in ES2015.
+Properties and methods are enumerable and instance-bound.
 
 ### `Que(deque)`
 
-A synchronous, unbounded, FIFO queue. Takes a `deque` function that will process
+Synchronous, unbounded, FIFO queue. Takes a `deque` function that will process
 the values put on the queue in a strict linear order. The calls to `deque` never
 overlap.
 
@@ -23,7 +18,7 @@ function deque (value) {
   console.info(value)
 }
 
-const que = Que(deque)
+const que = new Que(deque)
 
 que.push('first')
 
@@ -50,7 +45,7 @@ function deque (value) {
   console.info(value)
 }
 
-const que = Que(deque)
+const que = new Que(deque)
 
 const abortFirst = que.push('first')
 
@@ -69,7 +64,7 @@ been dequed.
 
 ```js
 function deque (value) {console.info(value)}
-const que = Que(deque)
+const que = new Que(deque)
 que.dam()
 const abort = que.push('test')
 abort()
@@ -88,7 +83,7 @@ Has no effect if the que is already flushing at the time of the call.
 ```js
 function deque (value) {console.info(value)}
 
-const que = Que(deque)
+const que = new Que(deque)
 
 que.dam()
 
@@ -116,7 +111,7 @@ Special case of `Que`: a synchronous, unbounded, FIFO task queue. You put
 functions on it, and they execute in a strict linear order.
 
 ```js
-const taskQue = TaskQue()
+const taskQue = new TaskQue()
 
 function first () {
   console.info('first started')
@@ -147,7 +142,7 @@ queue. If the que is not dammed, this automatically triggers `.flush()`.
 Returns a function that removes the task from the que when called.
 
 ```js
-const taskQue = TaskQue()
+const taskQue = new TaskQue()
 taskQue.dam()
 const abort = taskQue.push(function report () {console.info('reporting')})
 abort()
@@ -171,6 +166,8 @@ See [`que.isEmpty()`](#-que-isempty-).
 
 ### `Atom(state)`
 
+Satisfies [`isReactiveSource`](#-isreactivesource-value-).
+
 Very similar to
 <a href="https://clojuredocs.org/clojure.core/atom" target="_blank">`clojure.core/atom`</a>.
 
@@ -185,9 +182,9 @@ a substitute for Redux. In this case, it's highly recommended to pair it with
 efficient functional transformations of nested data structures.
 
 ```js
-const atom = Atom(10)
+const atom = new Atom(10)
 
-const removeWatcher = atom.addWatcher((atom, prev, next) => {
+const removeSubscriber = atom.addSubscriber((atom, prev, next) => {
   console.info(prev, next)
 })
 
@@ -197,7 +194,7 @@ atom.swap(value => value + 1)
 atom.swap(value => value + 100)
 // reports 11, 111
 
-removeWatcher()
+removeSubscriber()
 ```
 
 #### `atom.state`
@@ -209,33 +206,95 @@ Current value of `atom`.
 where `mod = ƒ(atom.state, ...args)`
 
 Calls `mod` with the current value of the atom and the optional extra args.
-Resets `atom` to the resulting value and notifies the watchers. Returns the
+Resets `atom` to the resulting value and notifies the subscribers. Returns the
 newly committed state.
 
-Swap commits the new state immediately, before it returns. However, watcher
+Swap commits the new state immediately, before it returns. However, subscriber
 notifications are put on an internal [`TaskQue`](#-taskque-) so that they never
-overlap. This means that if you're calling `swap` inside an ongoing watcher
+overlap. This means that if you're calling `swap` inside an ongoing subscriber
 notification, the next notification will happen "asynchronously" in relation to
 this code, even though it runs in the same call stack.
 
 ```js
-const atom = Atom(10)
+const atom = new Atom(10)
 // atom.state = 10
 const add = (a, b, c) => a + b + c
 const newState = atom.swap(add, 1, 2)
 // newState = atom.state = add(10, 1, 2) = 13
 ```
 
-#### `atom.addWatcher(fun)`
+#### `atom.addSubscriber(fun)`
 
 where `fun = ƒ(atom, prevState, nextState)`
 
-Registers `fun` as a watcher that will be called on each state transition.
-Returns a function that removes `fun` from the watchers when called.
+Registers `fun` as a subscriber that will be called on each state transition.
+Returns a function that removes `fun` from the subscribers when called.
 
-#### `atom.removeWatcher(fun)`
+#### `atom.removeSubscriber(fun)`
 
-Removes `fun` from the watchers.
+Removes `fun` from the subscribers.
+
+---
+
+### `Subber()`
+
+Satisfies [`isDeconstructible`](#-isdeconstructible-value-).
+
+Utility for establishing multiple subscriptions to multiple reactive data
+sources, implicitly, without any syntactic noise. It allows you to run a
+function that simply tries to read the data, which becomes the basis of
+subscriptions.
+
+```js
+const holly = new Atom({left: 10})
+const molly = new Atom({right: 20})
+
+const subber = new Subber()
+
+function reader (subber) {
+  return subber.read(holly, ['left']) * subber.read(molly, ['right'])
+}
+
+function updater (subber) {
+  console.info('got notified')
+  subber.run(reader, updater)
+}
+
+const value = subber.run(reader, updater)
+
+value === 200
+// true
+
+subber.value === value
+// true
+
+holly.swap(state => ({left: state.left * 3}))
+// $ 'got notified'
+
+subber.value === 600
+```
+
+#### `read(source, query)`
+
+where `source: isReactiveSource`
+
+Queries `source` with `query` via `source.read()`. Implicitly establishes
+a reactive subscription when called within a `subber.run()` (see below).
+
+#### `run(reader, updater)`
+
+where `reader: ƒ(subber)`, `updater: ƒ(subber)`
+
+Calls `reader`, passing self as the argument. During this call, every call to
+`subber.read()` implicitly establishes a reactive subscription for the given
+source/query pair. Multiple `.read()` calls create multiple subscriptions.
+Whenever the result of any of these queries changes, the subber will remove
+_all_ existing subscriptions and call `updater`, which is free to call
+`subber.run()` and restart the cycle.
+
+It's ok to `subber.run()` again before the updater has been called. It will
+forget the previous subscriptions and the previous updater, replacing them with
+the new ones.
 
 ---
 
@@ -247,14 +306,14 @@ Aggregator of deconstructibles that you assign directly onto it. It will
 deconstruct each of them when destroyed.
 
 ```js
-const dc = Deconstructor()
+const dc = new Deconstructor()
 
-dc.lc = Lifecycler()
+dc.lc = new Lifecycler()
 
 // nesting works
-dc.otherDc = Deconstructor()
+dc.otherDc = new Deconstructor()
 
-dc.otherDc.lc = Lifecycler()
+dc.otherDc.lc = new Lifecycler()
 
 dc.deconstructor()
 
@@ -280,6 +339,8 @@ TODO document motivation and usage.
 #### `deinit([deiniter])`
 
 #### `onDeinit(deiniter)`
+
+#### `Lifecycler.init(root, initer)`
 
 ---
 
