@@ -41,7 +41,6 @@ See [`Atom`](#-atom-state-) and [`Subber`](#-subber-).
 
 ```js
 interface ReactiveSource {
-  deconstructor(): void
   read(query): any
   addSubscriber(subscriber): removeSubscriber
   removeSubscriber(subscriber): void

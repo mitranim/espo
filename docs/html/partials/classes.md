@@ -256,8 +256,7 @@ function reader (subber) {
 }
 
 function updater (subber) {
-  console.info('got notified')
-  subber.run(reader, updater)
+  console.info('new value:', subber.run(reader, updater))
 }
 
 const value = subber.run(reader, updater)
