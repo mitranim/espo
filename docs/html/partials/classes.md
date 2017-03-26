@@ -329,17 +329,17 @@ Utility for reversible initialisation and reinitialisation.
 
 TODO document motivation and usage.
 
-`initer`, `reiniter`, `deiniter` look like this: `ƒ(root, onDeinit): void`
+`initer`, `reiniter`, `deiniter` all have the same shape: `ƒ(lifecycler): void`
 
-#### `init(root, initer)`
+#### `init(initer)`
 
-#### `reinit(newRoot, reiniter)`
+#### `reinit(reiniter)`
 
 #### `deinit([deiniter])`
 
 #### `onDeinit(deiniter)`
 
-#### `Lifecycler.init(root, initer)`
+#### `Lifecycler.init(initer)`
 
 ---
 
@@ -347,8 +347,8 @@ TODO document motivation and usage.
 
 Satisfies [`isDeconstructible`](#-isdeconstructible-value-).
 
-Version of [`Lifecycler`](#-lifecycler-) for cases where the actions for getting
-root, initing, and deiniting are always the same.
+Version of [`Lifecycler`](#-lifecycler-) for when initer and deiniter never
+change.
 
 TODO document motivation and usage.
 
@@ -356,9 +356,8 @@ TODO document motivation and usage.
 
 ```
 interface {
-  getRoot(prevRoot, onDeinit): any
-  initer(root, onDeinit): void
-  deiniter(root, onDeinit): void
+  initer(fixedLifecycler): void
+  deiniter(fixedLifecycler): void
 }
 ```
 
