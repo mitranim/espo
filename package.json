@@ -7,7 +7,7 @@
     "start": "gulp",
     "test": "node test/test",
     "prepublish": "gulp build",
-    "push-docs": "env NODE_ENV=production gulp build && (cd gh-pages && git add -A . && git commit -a -m autocommit && git push origin gh-pages)"
+    "build": "env NODE_ENV=production gulp build"
   },
   "keywords": [
     "state",
@@ -50,6 +50,7 @@
     "emerge": "0.0.27",
     "eslint_d": "4.2.1",
     "font-awesome": "4.7.0",
+    "fpx": "0.0.20",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-autoprefixer": "3.1.1",
     "gulp-babel": "6.1.2",
