@@ -14,11 +14,17 @@
 </div>
 
 <article id="main" class="pad">
-  {{include('partials/overview.md')}}
-  {{include('partials/utils.md')}}
-  {{include('partials/interfaces.md')}}
-  {{include('partials/classes.md')}}
-  {{include('partials/author.md')}}
+  {{md(include('partials/overview.md'))}}
+  {{md(include('partials/utils.md'))}}
+  {{md(include('partials/interfaces.md'))}}
+  {{md(include('partials/classes.md'))}}
+  {{md(include('partials/author.md'))}}
 </article>
+
+{% if (!prod) { %}
+<script>
+  window.devMode = true
+</script>
+{% } %}
 
 <script src="scripts/docs.js"></script>

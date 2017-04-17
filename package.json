@@ -1,17 +1,18 @@
 {
   "name": "espo",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Extensions for stateful programming (OOP utils)",
   "main": "dist/index.js",
   "scripts": {
     "start": "gulp",
-    "test": "node test/test",
-    "prepublish": "gulp build",
+    "gulp": "gulp",
     "build": "env NODE_ENV=production gulp build"
   },
   "keywords": [
-    "state",
-    "oop"
+    "reactive",
+    "observable",
+    "lifecycle",
+    "queue"
   ],
   "authors": [
     "Mitranim <me@mitranim.com>"
@@ -21,12 +22,12 @@
     "type": "git",
     "url": "https://github.com/Mitranim/espo.git"
   },
-  "peerDependencies": {
-    "babel-runtime": "^6.0.0",
+  "dependencies": {
     "emerge": "^0.0.28",
-    "fpx": "^0.0.20"
+    "fpx": "^0.1.0"
   },
   "devDependencies": {
+    "babel-core": "6.24.0",
     "babel-eslint": "7.1.1",
     "babel-loader": "6.2.10",
     "babel-plugin-check-es2015-constants": "6.8.0",
@@ -47,18 +48,16 @@
     "babel-plugin-transform-runtime": "6.23.0",
     "browser-sync": "2.18.5",
     "del": "2.2.2",
-    "emerge": "0.0.27",
     "eslint_d": "4.2.1",
     "font-awesome": "4.7.0",
-    "fpx": "0.0.20",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-autoprefixer": "3.1.1",
     "gulp-babel": "6.1.2",
     "gulp-clean-css": "2.3.2",
     "gulp-load-plugins": "1.4.0",
     "gulp-rename": "1.2.2",
-    "gulp-sass": "3.0.0",
-    "gulp-statil": "0.1.0",
+    "gulp-sass": "3.1.0",
+    "gulp-statil": "0.5.0",
     "gulp-uglify": "2.0.0",
     "gulp-util": "3.0.8",
     "gulp-watch": "4.3.11",
@@ -66,6 +65,6 @@
     "highlight.js": "9.9.0",
     "marked": "0.3.6",
     "stylific-lite": "0.0.1",
-    "webpack": "1.14.0"
+    "webpack": "2.3.2"
   }
 }

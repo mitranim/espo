@@ -2,8 +2,7 @@
 
 ### `global`
 
-Current global context. In browser, it's `window`, in Node.js, it's `global`, in
-webworkers, it's `self`, and so on.
+Current global context. Browser: `window`, Node.js: `global`, webworkers: `self`, and so on.
 
 ---
 
@@ -22,88 +21,46 @@ isMutable(Object.freeze({}))   =   false
 
 ---
 
-### `isImplementation(iface, value)`
-
-Rough approximation of `X implements interface Y` from statically typed
-languages. Takes an object emulating an "interface" and a value that needs to be
-tested. True if `value` has at least the same properties as `iface`,
-with the same types; ignores any other properties on `value`.
-
-Duck-typed replacement for `instanceof`, particularly useful in "class" constructors.
-
-```js
-const iface = {prop: 'blah', method () {}}
-isImplementation(iface, {})                                 =  false
-isImplementation(iface, {prop: 'blah blah', method () {}})  =  true
-
-// Usage in constructors
-
-function A () {
-  if (!isImplementation(A.prototype, this)) return new A()
-}
-
-assign(A.prototype, {someMethod () {}})
-
-function B () {
-  if (!isImplementation(B.prototype, this)) return new B()
-  A.call(this)
-}
-
-// B doesn't inherit directly from A; it uses A as a mixin.
-// Therefore, the B constructor wouldn't work properly if A used an `instanceof` check.
-assign(B.prototype, A.prototype)
-
-// This succeeds because isImplementation(A.prototype, B()) = true
-const b = B()
-```
-
----
-
 ### `bindAll(object)`
 
-Finds all properties of `object` that are functions and binds them to `object`
-so they become bound methods and can be freely detached.
+Takes a mutable object and binds all of its methods to it, via
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind" target="_blank">`Function.prototype.bind`</a>.
+They become _bound methods_ and can be freely detached.
+
+Currently supports only enumerable properties (both own and inherited), and
+therefore doesn't work with spec-compliant classes.
+
+Returns the same `object`.
 
 ```js
 // Setup
-const object = {self () {return this}}
-object.self() === object
+const object = {getSelf () {return this}}
+object.getSelf() === object
 
-// Detached methods don't work if unbound
-const self = object.self
-self() === global
+// Detached unbound method: doesn't work
+const unbound = object.getSelf
+unbound() === global  // true
 
-// After `bindAll`, detached methods work
+// Detached bound method: works
 bindAll(object)
-const boundSelf = object.self
-boundSelf === object
+const bound = object.getSelf
+bound() === object  // true
 ```
 
 ---
 
-### `final(object, key, value)`
+### `assign(object, ...sources)`
 
-Like `const`, but for object properties. Like `let` in Swift or `final` in Java.
-Defines a property that can't be reassigned or deleted. Returns `object`.
+Similar to
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" target="_blank">`Object.assign`</a>.
+Mutates `object`, assigning enumerable properties (own and inherited) from each
+`source`. Returns the same `object`.
 
-```js
-const object = {}
-final(object, 'one', 1)
-object.one === 1
-object.one = 10  // exception in strict mode
-```
-
----
-
-### `assign(target, ...sources)`
-
-Mutates `target`, assigning enumerable properties (own and inherited) from each
-`source`. Returns `target`.
-
-Mutation is often misused. It's necessary when dealing with prototypes, but when
-working with data, you should program in a functional style. Use a library like
+Be wary: mutation is often misused. When dealing with data, you should
+program in a functional style, treating your data structures as immutable. Use a
+library like
 <a href="https://github.com/Mitranim/emerge" target="_blank">Emerge</a>
-for functional transformations.
+for data transformations.
 
 ```js
 assign()                        =  {}
@@ -113,216 +70,59 @@ assign({}, {one: 1}, {two: 2})  =  {one: 1, two: 2}
 
 ---
 
-### `push(list, value)`
+### `pull(array, value)`
 
-Mutates `list`, appending `value`. Similar to `list.push(value)`, but takes
-exactly one argument and returns `list`.
+Mutates `array`, removing one occurrence of `value` from the start, comparing by
+<a href="http://mitranim.com/fpx/#-is-one-other-" target="_blank">`fpx.is`</a>.
+Returns `array`.
+
+Counterpart to the built-ins
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push" target="_blank">`Array.prototype.push`</a>
+and
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift" target="_blank">`Array.prototype.unshift`</a>.
 
 ```js
-push([10], 20) = [10, 20]
+const array = [10, 20]
+pull(array, 10)  // returns `array`
+array  // [20]
 ```
 
 ---
 
-### `pull(list, value)`
+### `deref(ref)`
 
-Mutates `list`, removing one occurrence of `value`, comparing values with
-<a href="http://mitranim.com/fpx/#-is-one-other-" target="_blank">`fpx.is`</a>
-. Returns `list`.
+Safely dereferences the provided [`ref`](#-isref-value-), recursively calling
+`.deref()` until it produces a non-ref.
 
 ```js
-pull([10, 20], 10) = [20]
+deref(10)                                            // 10
+deref({deref () {return 100}})                       // 100
+deref({deref () {return {deref () {return 1000}}}})  // 1000
 ```
 
 ---
 
-### `setIn(object, path, value)`
+### `derefIn(ref, path)`
 
-Mutates `object`, assigning `value` at `path`, where `path` is a list of keys.
-If the path doesn't exist, it's created as a series of nested dicts. Returns
-`value`.
-
-You should never use this for data. When dealing with data, you should program
-in a functional style, using a library like
-<a href="https://github.com/Mitranim/emerge" target="_blank">Emerge</a>.
+Like [`deref`](#-deref-ref-) but on a nested path. Recursively dereferences any
+nested refs while drilling down.
 
 ```js
-const tree = {}
-setIn(tree, ['one', 'two'], 100)
-// tree is now {one: {two: 100}}
-```
+derefIn(10, [])  // 10
 
----
-
-### `redef(storage, path, reconstructor)`
-
-Like `setIn`, but accepts a reconstructor function that will receive the current
-value at `path` and return the new value to be set. Returns the resulting value.
-
-```js
-function report (value) {console.info(value)}
-const que = redef(global, ['dev', 'que'], que => que || Que(report))
-```
-
----
-
-### `defonce(storage, path, constructor, ...args)`
-
-Similar to `redef`, but won't even call the `constructor` if a value already
-exists at `path`. Accepts additional arguments to pass to the constructor.
-
-```js
-function report (value) {console.info(value)}
-const que = defonce(global, ['dev', 'que'], Que, report)
-```
-
----
-
-### `valueDescriptors(values)`
-
-Converts a dict of properties into _enumerable_ property descriptors for
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create" target="_blank">`Object.create`</a>
-or
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank">`Object.defineProperty`</a>.
-
-```js
-Object.create(somePrototype, valueDescriptors({
-  someProperty: 100,
-  someMethod () {},
-}))
-```
-
----
-
-### `hiddenDescriptors(values)`
-
-Converts a dict of properties into _non-enumerable_ property descriptors for
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create" target="_blank">`Object.create`</a>
-or
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank">`Object.defineProperty`</a>.
-
-```js
-Object.create(somePrototype, hiddenDescriptors({
-  someProperty: 100,
-  someMethod () {},
-}))
-```
-
----
-
-### `subclassOf(Superclass, Subclass)`
-
-Utility for manual inheritance. Makes the given subclass constructor inherit
-from the given superclass. This includes instance properties, instance methods,
-static properties, static methods.
-
-Unless you know you want this, use
-<a href="http://babeljs.io/learn-es2015/#ecmascript-2015-features-classes" target="_blank">ES2015 classes</a>
-instead.
-
-```js
-function Super () {
-  if (!(this instanceof Super)) return new Super(...arguments)
-  bindAll(this)
+const ref = {
+  deref () {
+    return {
+      nested: {
+        deref () {
+          return 100
+        }
+      }
+    }
+  }
 }
 
-// Instance
-assign(Super.prototype, {
-  instanceProp: '<my instance prop>',
-  instanceMethod () {},
-})
-
-// Statics
-assign(Super, {
-  staticProp: '<my static prop>',
-  staticMethod () {},
-})
-
-function Sub () {
-  if (!(this instanceof Sub)) return new Sub(...arguments)
-  Super.apply(this, arguments)
-}
-
-subclassOf(Super, Sub)
-
-// Sub now has instance and static props from Super
-```
-
----
-
-### `subclassWithProps(Superclass, props)`
-
-Creates a new subclass of `Superclass` with `props` added to its prototype. The
-resulting subclass may be called without `new`.
-
-```js
-const Subclass = subclassWithProps(SomeSuperclass, {
-  subProp: '<my instance prop>',
-  subMethod () {},
-})
-
-const sub = Subclass()
-```
-
----
-
-### `subclassBy(getProps)`
-
-Creates a function that will accept a superclass and produce a
-[`subclassWithProps`](#-subclasswithprops-superclass-props-) with the result of
-calling `getProps` with the superclass.
-
-Useful when developing an API with customisable class transforms.
-
-```js
-const transform = subclassBy(Superclass => {
-  const {prototype: {someMethod}} = Superclass
-  return {
-    someProp: '<my instance prop>',
-    someMethod () {
-      // super
-      someMethod.apply(this, arguments)
-    },
-  }
-})
-
-const Subclass = transform(SomeSuperclass)
-
-const sub = Subclass()
-```
-
----
-
-### `hackClassBy(getProps)`
-
-Similar to [`subclassBy`](#-subclassby-getprops-). Creates a function that will
-accept a superclass, but instead of creating a new subclass, it will assign the
-result of `getProps` directly to its prototype.
-
-Useful when developing an API with chainable class transforms, when you don't
-care about "losing" the original superclass. Should cost less memory and
-performance than `subclassBy`. Requires care: if one of the methods you're
-hacking dynamically reads its "super" method from the same prototype, you'll get
-infinite recursion. In this case, simply swap this for `subclassBy`.
-
-```js
-const transform = hackClassBy(Superclass => {
-  const {prototype: {someMethod}} = Superclass
-
-  return {
-    someProp: '<my instance prop>',
-    someMethod () {
-      // super
-      someMethod.apply(this, arguments)
-    },
-  }
-})
-
-const Subclass = transform(SomeSuperclass)
-
-Subclass === SomeSuperclass  // true
-
-const sub = Subclass()
+derefIn(ref, ['nested'])  // 100
 ```
 
 ---

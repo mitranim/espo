@@ -1,82 +1,41 @@
-const {
-  and, bind, defer, rest, getAt, seq, pipe, id: exists, ifelse, ifthen,
-  slice, find
-} = require('fpx')
+const {procure} = require('fpx')
+const {global, assign, each} = require('espo')
+const {Throttle, hasNoSpill, getVisibleId, reachedScrollEdge, findParent,
+  setHash, unsetHash, scrollIntoViewIfNeeded} = require('./utils')
 
-const espo = require('espo')
+const scroller = new Throttle(updateLinksAndHash, {delay: 250})
 
-espo.assign(espo.global, {espo}, espo)
+global.addEventListener('scroll', scroller.run)
 
-const {global: {history, location}} = espo
-
-// Elems
-
-const sidenav = document.getElementById('sidenav')
-
-const main = document.getElementById('main')
-
-const links = slice(sidenav.getElementsByTagName('a'))
-
-const targets = main.querySelectorAll('[id]:not([id=""])')
-
-// Utils
-
-const getf = rest(defer(getAt))
-
-const hasVisibleId = and(exists, tangible, withinViewport, getf('id'))
-
-const findId = pipe(bind(find, hasVisibleId, targets), getf('id'))
-
-const ifexists = bind(ifthen, exists)
-
-const getLink = ifexists(function getLink (id) {
-  return find(bind(matchHref, id), links)
+global.addEventListener('wheel', function preventSpill (event) {
+  const node = findParent(hasNoSpill, event.target)
+  if (node && reachedScrollEdge(node, event)) event.preventDefault()
 })
 
-const updateHash = ifelse(exists, setHash, unsetHash)
+// global.addEventListener('popstate', function toHash () {
+//   scroller.stop()
+//   const hash = window.location.hash.replace(/^#/, '')
+//   if (hash) updateSidenavLinks(hash)
+// })
 
-function linksOff () {links.forEach(deactivate)}
-
-const reactivate = ifexists(seq(activate, scrollIntoViewIfNeeded))
-
-const update = pipe(findId, seq(updateHash, linksOff, pipe(getLink, reactivate)))
-
-const reachedScrollEdge = ifexists(function reachedScrollEdge (elem, {deltaY}) {
-  return (
-    deltaY < 0 && reachedTop(elem) ||
-    deltaY > 0 && reachedBottom(elem)
-  )
-})
-
-const reachedTop = ifexists(function reachedTop ({scrollTop}) {return scrollTop < 3})
-
-const reachedBottom = ifexists(function reachedBottom (elem) {
-  return Math.abs(elem.scrollHeight - absBottom(elem)) < 3
-})
-
-function absBottom (elem) {
-  return elem.getBoundingClientRect().height + elem.scrollTop
+function updateLinksAndHash () {
+  const id = procure(getVisibleId, document.querySelectorAll('#main [id]'))
+  if (id) {
+    setHash(id)
+    updateSidenavLinks(id)
+  }
+  else {
+    unsetHash(id)
+  }
 }
 
-function findParent (test, node) {
-  return !node ? null : (test(node) ? node : findParent(test, node.parentNode))
-}
-
-function hasAttr (name, elem) {
-  return elem && elem.hasAttribute && elem.hasAttribute(name)
-}
-
-function tangible (elem) {
-  const {height, width} = elem.getBoundingClientRect()
-  return height > 0 && width > 0
-}
-
-function withinViewport (elem) {
-  const {top, bottom} = elem.getBoundingClientRect()
-  return (
-    bottom > -3 && bottom < window.innerHeight ||
-    top > 3 && top < (window.innerHeight + 3)
-  )
+function updateSidenavLinks (id) {
+  each(document.querySelectorAll('#sidenav a.active'), deactivate)
+  const link = document.querySelector(`#sidenav a[href*="#${id}"]`)
+  if (link) {
+    activate(link)
+    scrollIntoViewIfNeeded(link)
+  }
 }
 
 function activate (elem) {
@@ -87,51 +46,18 @@ function deactivate (elem) {
   elem.classList.remove('active')
 }
 
-function matchHref (id, link) {
-  return !!~link.href.indexOf('#' + id)
+// REPL
+
+const fpx = require('fpx')
+const emerge = require('emerge')
+const espo = require('espo')
+
+assign(global, {fpx, emerge, espo, scroller}, fpx, emerge, espo)
+
+if (global.devMode) {
+  ['log', 'info', 'warn', 'error', 'clear'].forEach(key => {
+    if (!/bound/.test(console[key].name)) {
+      global[key] = console[key] = console[key].bind(console)
+    }
+  })
 }
-
-function setHash (id) {
-  history.replaceState('', null, `${location.origin}${location.pathname}#${id}`)
-}
-
-function unsetHash () {
-  history.replaceState('', null, location.origin + location.pathname)
-}
-
-function scrollIntoViewIfNeeded (elem) {
-  if (!withinViewport(elem)) elem.scrollIntoView()
-}
-
-function throttle (fun, delay) {
-  let id
-  let tail = false
-
-  function start () {
-    return setInterval(function runThrottled () {
-      if (!tail) {
-        clearInterval(id)
-        id = null
-      }
-      tail = false
-      fun(...arguments)
-    }, delay)
-  }
-
-  return function throttled () {
-    if (!id) id = start(...arguments)
-    else if (!tail) tail = true
-  }
-}
-
-// Setup
-
-window.addEventListener('scroll', throttle(update, 250))
-
-const hasNoSpill = bind(hasAttr, 'data-nospill')
-
-window.addEventListener('wheel', function preventSpill (event) {
-  if (reachedScrollEdge(findParent(hasNoSpill, event.target), event)) {
-    event.preventDefault()
-  }
-})

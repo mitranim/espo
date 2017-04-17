@@ -20,7 +20,6 @@ const src = {
   docStyles: 'docs/styles/**/*.scss',
   docStylesMain: 'docs/styles/docs.scss',
   docFonts: 'node_modules/font-awesome/fonts/**/*',
-  test: 'test/**/*.js'
 }
 
 const out = {
@@ -30,23 +29,19 @@ const out = {
   docFonts: 'gh-pages/fonts',
 }
 
-const testCommand = require('./package').scripts.test
-
-function noop () {}
-
-let testProc
+const Err = (pluginName, err) => new $.util.PluginError(pluginName, err, {showProperties: false})
 
 /* ********************************* Tasks ***********************************/
 
 /* --------------------------------- Clear ---------------------------------- */
 
 gulp.task('lib:clear', () => (
-  del(out.lib).catch(noop)
+  del(out.lib).catch(console.error.bind(console))
 ))
 
 gulp.task('docs:clear', () => (
   // Skips dotfiles like `.git` and `.gitignore`
-  del(out.docRoot + '/*').catch(noop)
+  del(out.docRoot + '/*').catch(console.error.bind(console))
 ))
 
 gulp.task('clear', gulp.parallel('lib:clear', 'docs:clear'))
@@ -59,7 +54,7 @@ gulp.task('lib:compile', () => (
     .pipe(gulp.dest(out.lib))
 ))
 
-// Purely for evaluating minified code size.
+// For evaluating minified code size
 gulp.task('lib:minify', () => (
   gulp.src(src.dist, {ignore: '**/*.min.js'})
     .pipe($.uglify({
@@ -73,33 +68,10 @@ gulp.task('lib:minify', () => (
     .pipe(gulp.dest(out.lib))
 ))
 
-gulp.task('lib:test', done => {
-  if (testProc) {
-    // Just started, let it finish
-    if (testProc.exitCode == null) return
-    testProc.kill()
-  }
-
-  $.util.log('Test started')
-
-  testProc = exec(testCommand, (err, stdout, stderr) => {
-    process.stdout.write(stdout)
-    process.stderr.write(stderr)
-
-    if (err) {
-      throw new $.util.PluginError('lib:test', 'Test failed', {showProperties: false})
-    } else {
-      $.util.log('Test finished')
-      done()
-    }
-  })
-})
-
 gulp.task('lib:build', gulp.series('lib:compile', 'lib:minify'))
 
 gulp.task('lib:watch', () => {
-  $.watch(src.lib, gulp.parallel('lib:test', gulp.series('lib:build')))
-  $.watch(src.test, gulp.series('lib:test'))
+  $.watch(src.lib, gulp.series('lib:build'))
 })
 
 /* --------------------------------- HTML -----------------------------------*/
@@ -148,13 +120,12 @@ gulp.task('docs:fonts:watch', () => {
 gulp.task('docs:scripts:build', done => {
   webpack(webpackConfig, (err, stats) => {
     if (err) {
-      throw new $.util.PluginError('webpack', err, {showProperties: false})
+      done(Err('webpack', err))
     }
-    $.util.log('[webpack]', stats.toString(webpackConfig.stats))
-    if (stats.hasErrors()) {
-      throw new $.util.PluginError('webpack', 'plugin error', {showProperties: false})
+    else {
+      $.util.log('[webpack]', stats.toString(webpackConfig.stats))
+      done(stats.hasErrors() ? Err('webpack', 'plugin error') : null)
     }
-    done()
   })
 })
 
@@ -212,6 +183,6 @@ gulp.task('watch', gulp.parallel(
   'docs:server'
 ))
 
-gulp.task('build', gulp.series('clear', 'buildup', 'lib:test', 'docs:scripts:build'))
+gulp.task('build', gulp.series('clear', 'buildup', 'docs:scripts:build'))
 
-gulp.task('default', gulp.series('clear', 'buildup', 'lib:test', 'watch'))
+gulp.task('default', gulp.series('clear', 'buildup', 'watch'))

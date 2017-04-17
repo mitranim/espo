@@ -1,56 +1,79 @@
 ## Interfaces
 
-Espo's "interfaces" are abstract definitions and, at the same time, boolean tests
-for class instances.
+Espo's "interfaces" are runtime boolean tests that also serve as abstract
+definitions. Espo checks its inputs with these interfaces rather than `instanceof`.
 
-### `isDeconstructible(value)`
-
-Defines an object with a `deconstructor` method. It should be the opposite of
-`constructor`: deinitialise the object into inert state.
-
-See [`Deconstructor`](#-deconstructor-).
+#### `isDeinitable(value)`
 
 ```js
-interface Deconstructible {
-  deconstructor(): void
+interface isDeinitable {
+  deinit(): void
 }
+```
 
-isDeconstructible({})
-// false
+`.deinit()` should make the object inert, releasing any resources it owns,
+tearing down any subscriptions, etc. After a `.deinit()` call, it should be safe
+to leave the object to the GC.
 
-class Deconstructible {
-  constructor () {
-    this.state = acquireExternalState()
-  }
 
-  deconstructor () {
-    this.state.free()
-    this.state = null
-  }
+```js
+isDeinitable(null)            // false
+isDeinitable(new Que())       // true
+isDeinitable({deinit () {}})  // true
+```
+
+Use [`DeinitDict`](#-deinitdict-) to aggregate multiple deinitables.
+
+---
+
+#### `isRef(value)`
+
+```js
+interface isRef {
+  deref(): any
 }
+```
 
-isDeconstructible(new Deconstructible())
-// true
+Interface for objects that wrap a value, such as [`Atom`](#-atom-value-) or any
+other [observable ref](#-isobservableref-value-). `.deref()` should return the
+underlying value. Note: an object may point to _itself_, returning `this` from
+`.deref()`.
+
+```js
+isRef(new Atom())      // true
+new Atom(100).deref()  // 100
 ```
 
 ---
 
-### `isReactiveSource(value)`
-
-See [`Atom`](#-atom-state-) and [`Subber`](#-subber-).
+#### `isObservable(value)`
 
 ```js
-interface ReactiveSource {
-  read(query): any
-  addSubscriber(subscriber): removeSubscriber
-  removeSubscriber(subscriber): void
+interface isObservable {
+  subscribe(subscriber: ƒ): isDeinitable
+  unsubscribe(subscription: isDeinitable): void
 }
-
-isReactiveSource({})
-// false
-
-isReactiveSource(new Atom())
-// true
 ```
+
+Interface for objects that let you subscribe to notifications, such as
+[`MessageQue`](#-messageque-), [`Atom`](#-atom-value-) or
+[`Reaction`](#-reaction-def-).
+
+---
+
+#### `isObservableRef(value)`
+
+```js
+interface isObservableRef {
+  deref(): any
+  subscribe(subscriber: ƒ(observable)): isDeinitable
+  unsubscribe(subscription: isDeinitable): void
+}
+```
+
+Signifies that you can subscribe to be notified whenever the value wrapped
+by the object changes, and call `.deref()` to get the new value.
+
+Example: [`Atom`](#-atom-value-).
 
 ---
