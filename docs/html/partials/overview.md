@@ -15,7 +15,7 @@ for functional programming utils.
 Install with `npm` (version {{version}}):
 
 ```sh
-npm i --save espo
+npm i --save --save-exact espo
 ```
 
 All examples imply an import:
