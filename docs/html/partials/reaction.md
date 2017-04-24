@@ -13,9 +13,10 @@ doesn't update when it has no subscribers.
 ```js
 const one = new Atom(10)
 const other = new Atom({outer: {inner: 20}})
+const inOther = new PathQuery(other, ['outer', 'inner'], (a, b) => a === b)
 
-const reaction = new Reaction(({deref, derefIn}) => {
-  return deref(one) + derefIn(other, ['outer', 'inner'])
+const reaction = new Reaction(({deref}) => {
+  return deref(one) + deref(inOther)
 })
 
 reaction.deref()  // undefined

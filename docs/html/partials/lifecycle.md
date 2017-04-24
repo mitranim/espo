@@ -6,15 +6,15 @@ Utility for safe, reversible initialisation, reinitialisation and deinitialisati
 
 TODO examples.
 
-#### `lifecycler.init()`
+#### `lifecycler.init(...args)`
 
-If idle, calls `.onInit()`. Otherwise a no-op. Automatically deduplicated, safe
+If idle, calls `.onInit(...args)`. Otherwise a no-op. Automatically deduplicated, safe
 to call multiple times, whether during an ongoing initialisation or afterwards.
 If called during an ongoing deinitialisation, will reinit afterwards.
 
-#### `lifecycler.reinit()`
+#### `lifecycler.reinit(...args)`
 
-If idle, calls `.init()`. Otherwise, calls `.deinit()` and then `.init()`.
+If idle, calls `.init(...args)`. Otherwise, calls `.deinit()` and then `.init(...args)`.
 
 #### `lifecycler.deinit()`
 
@@ -23,7 +23,7 @@ becomes idle. Otherwise a no-op. Automatically deduplicated, safe to call
 multiple times, whether during an ongoing deinitialisation or afterwards. If
 called during an ongoing initialisation, will deinit afterwards.
 
-#### `lifecycler.onInit()`
+#### `lifecycler.onInit(...args)`
 
 No-op by default. Override in a subclass or on a plain `Lifecycler` instance.
 Called when initialising.

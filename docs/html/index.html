@@ -7,13 +7,15 @@
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,600,300italic,600italic&subset=latin" rel="stylesheet">
 <link rel="icon" href="data:;base64,=">
 
-<body></body>
+<body class="row-start-stretch padding-0 no-scroll-x" style="width: 100vw"></body>
 
-<div id="sidenav" class="pad" data-nospill>
+<div id="sidenav" class="layout fixed-fit padding-1 no-scroll-x" style="width: calc(20% - 1.5rem)" data-nospill>
   {{include('partials/sidenav.html')}}
 </div>
 
-<article id="main" class="pad">
+<div id="offset" class="layout" style="width: calc(20% - 1.5rem)"></div>
+
+<article id="main" class="layout" class="padding-1" style="width: 80%">
   {{md(include('partials/overview.md'))}}
   {{md(include('partials/utils.md'))}}
   {{md(include('partials/interfaces.md'))}}

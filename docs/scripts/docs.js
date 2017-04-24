@@ -49,10 +49,9 @@ function deactivate (elem) {
 // REPL
 
 const fpx = require('fpx')
-const emerge = require('emerge')
 const espo = require('espo')
 
-assign(global, {fpx, emerge, espo, scroller}, fpx, emerge, espo)
+assign(global, {fpx, espo, scroller}, fpx, espo)
 
 if (global.devMode) {
   ['log', 'info', 'warn', 'error', 'clear'].forEach(key => {

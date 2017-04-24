@@ -46,8 +46,8 @@ $color-code-bg: floralwhite;
  * Libs
  */
 
-@import './node_modules/stylific-lite/scss/stylific-lite';
-@import './node_modules/stylific-lite/scss/classes';
+@import './node_modules/stylific-lite/scss/_variables';
+@import './node_modules/stylific-lite/scss/norm';
 
 /**
  * Icons
@@ -75,13 +75,13 @@ $color-code-bg: floralwhite;
 }
 
 .fa.inline {
-  margin-right: $sf-space / 2;
+  margin-right: 0.5rem;
   &:last-child {margin-right: 0}
 }
 
 // wtf
 :not(:empty) .fa.inline:not(:first-child) {
-  margin-left: $sf-space / 2;
+  margin-left: 0.5rem;
 }
 
 a.fa {
@@ -100,6 +100,58 @@ article a[target~=_blank]:not(.fa)::after {
 }
 
 /**
+ * Layout
+ */
+
+%flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+%flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+%flex-main-between {
+  justify-content: space-between;
+}
+
+%flex-main-start {
+  justify-content: flex-start;
+}
+
+%flex-cross-stretch {
+  align-items: stretch;
+}
+
+.row-between-normal {
+  @extend %flex-row;
+  @extend %flex-main-between;
+}
+
+.row-start-stretch {
+  @extend %flex-row;
+  @extend %flex-main-start;
+  @extend %flex-cross-stretch;
+}
+
+.col-start-stretch {
+  @extend %flex-col;
+  @extend %flex-main-start;
+  @extend %flex-cross-stretch;
+}
+
+.flex-1 {flex: 1}
+.flex-2 {flex: 2}
+.flex-3 {flex: 3}
+.flex-4 {flex: 4}
+
+.padding-1 {
+  padding: 1rem;
+}
+
+/**
  * Misc
  */
 
@@ -108,99 +160,58 @@ html {
 }
 
 body {
-  margin: 0;
   padding: 0;
 }
 
-body > :not(#main):not(#sidenav) {
+body, .layout {
+  margin: 0;
+}
+
+body > :not(.layout) {
   display: none;
 }
 
-body > #sidenav {
-  display: inline-block;
+.fixed-fit {
   position: fixed;
+  margin: 0;
   top: 0;
-  right: 80vw;
+  right: 0;
   bottom: 0;
   left: 0;
-  // Enables scroll
-  overflow: auto;
 }
 
-body > #main {
-  display: inline-block;
-  position: relative;
-  left: 20vw;
-  width: 80vw;
+.no-scroll-x {
+  overflow-x: hidden;
 }
 
-article code {
+code, .hljs {
   background-color: $color-code-bg;
 }
 
-article .hljs {
-  background-color: $color-code-bg;
+.sidenav-list {
+  @extend .col-start-stretch;
 }
 
-.flex-row {
-  display: flex;
-  flex-direction: row;
+.sidenav-list .sidenav-list {
+  margin-left: 0.5rem;
 }
 
-.flex-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.flex-between {
-  justify-content: space-between;
-}
-
-.flex-stretch {
-  align-items: stretch;
-}
-
-.frb {
-  @extend .flex-row;
-  @extend .flex-between;
-}
-
-.list {
-  display: flex;
-  flex-direction: column;
-}
-
-.list .list {
-  margin-left: $sf-space / 2;
-}
-
-.list a {
+.sidenav-link {
+  @extend .row-between-normal;
   line-height: 1.6em;
+  > * {
+    border-bottom: 1px dotted;
+  }
+  &:hover > *, &:focus > * {
+    border-bottom: 1px solid;
+  }
+  &.active::after, &:hover::after {
+    content: '→';
+  }
 }
-
-.list a > * {
-  border-bottom: 1px dotted;
-}
-
-.list a:hover > *, .list a:focus > * {
-  border-bottom: 1px solid;
-}
-
-.list .active::after, .list a:hover::after {
-  content: '→';
-}
-
-.flex-1 {flex: 1}
-.flex-2 {flex: 2}
-.flex-3 {flex: 3}
-.flex-4 {flex: 4}
 
 .opacity-40 {
   opacity: 0.4;
-}
-
-.margin-left {
-  margin-left: 1rem;
 }
 
 a.heading-anchor {

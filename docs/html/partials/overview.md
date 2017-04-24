@@ -6,7 +6,7 @@ Source <span class="fa fa-github"></span>
 </a>
 
 Library for stateful and reactive programming: queing, lifecycles, observables,
-implicit reactivity. Work in progress.
+implicit reactivity. Lightweight alternative to RxJS.
 
 See sibling library
 <a href="http://mitranim.com/fpx/" target="_blank">`fpx`</a>

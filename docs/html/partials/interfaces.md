@@ -50,14 +50,15 @@ new Atom(100).deref()  // 100
 
 ```js
 interface isObservable {
-  subscribe(subscriber: ƒ): isDeinitable
-  unsubscribe(subscription: isDeinitable): void
+  subscribe(subscriber: ƒ(...any)): isSubscription
+  unsubscribe(subscription: isSubscription): void
 }
 ```
 
 Interface for objects that let you subscribe to notifications, such as
 [`MessageQue`](#-messageque-), [`Atom`](#-atom-value-) or
-[`Reaction`](#-reaction-def-).
+[`Reaction`](#-reaction-def-). See [`isSubscription`](#-issubscription-value-)
+below.
 
 ---
 
@@ -66,8 +67,8 @@ Interface for objects that let you subscribe to notifications, such as
 ```js
 interface isObservableRef {
   deref(): any
-  subscribe(subscriber: ƒ(observable)): isDeinitable
-  unsubscribe(subscription: isDeinitable): void
+  subscribe(subscriber: ƒ(observable)): isSubscription
+  unsubscribe(subscription: isSubscription): void
 }
 ```
 
@@ -75,5 +76,22 @@ Signifies that you can subscribe to be notified whenever the value wrapped
 by the object changes, and call `.deref()` to get the new value.
 
 Example: [`Atom`](#-atom-value-).
+
+---
+
+#### `isSubscription(value)`
+
+```js
+interface isSubscription {
+  trigger(...any): void
+  deinit(): void
+}
+```
+
+Interface for subscription objects returned by
+[`observable.subscribe()`](#-observable-subscribe-subscriber-).
+The `.trigger()` method is called by the observable. Calling `.deinit()` should
+stop the subscription _immediately_, even if the observable has a pending
+notification.
 
 ---

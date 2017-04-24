@@ -1,6 +1,6 @@
 {
   "name": "espo",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Extensions for stateful programming (OOP utils)",
   "main": "dist/index.js",
   "scripts": {
@@ -23,7 +23,6 @@
     "url": "https://github.com/Mitranim/espo.git"
   },
   "dependencies": {
-    "emerge": "^0.0.28",
     "fpx": "^0.1.0"
   },
   "devDependencies": {

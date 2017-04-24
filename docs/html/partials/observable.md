@@ -15,18 +15,18 @@ teardown any external resources it needs, such as HTTP requests or websockets.
 
 #### `observable.subscribe(subscriber)`
 
-where `subscriber: ƒ(observable)`
+where `subscriber: ƒ(...any)`
 
 Conscripts `subscriber` to be called every time the observable is
-[triggered](#-observable-trigger-).
+[triggered](#-observable-trigger-args-).
 
-Returns a subscription object that you can `.deinit()`. Deiniting a subscription
-is immediate, even during an ongoing trigger.
+Returns a [subscription object](#-issubscription-value-) that you can
+`.deinit()`. Deiniting a subscription is immediate, even during an ongoing
+trigger.
 
 ```js
-const sub = someObservableRef.subscribe(function subscriber (observable) {
-  // get current value, do stuff
-  observable.deref()
+const sub = someObservable.subscribe(function subscriber (...args) {
+  // ...
 })
 
 // call when you're done
@@ -37,10 +37,11 @@ sub.deinit()
 
 Same as `subscription.deinit()`.
 
-#### `observable.trigger()`
+#### `observable.trigger(...args)`
 
-Call to notify subscribers. Non-reentrant: if `.trigger()` is called during an
-ongoing trigger, the redundant call is ignored.
+Call to notify subscribers, passing `...args` to each. Triggers never overlap:
+if `.trigger()` is called during _another ongoing trigger_, the redundant call
+is put on an internal [`Que`](#-que-deque-) to be executed later.
 
 #### `observable.onInit()`
 

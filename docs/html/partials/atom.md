@@ -4,12 +4,11 @@
 
 `implements` [`isObservableRef`](#-isobservableref-value-)
 
-Somewhat similar to
+Basic observable reference. Inspired by
 <a href="https://clojuredocs.org/clojure.core/atom" target="_blank">`clojure.core/atom`</a>.
-
-Basic reactive pointer. Should be paired with
+Should be paired with
 <a href="https://github.com/Mitranim/emerge" target="_blank">Emerge</a> for
-efficient updates of nested values.
+efficient nested updates.
 
 ```js
 const atom = new Atom(10)
@@ -52,6 +51,19 @@ const add = (a, b, c) => a + b + c
 atom.swap(add, 1, 2)
 
 atom.deref()  // add(20, 1, 2) = 23
+```
+
+### `atom.reset(value)`
+
+Resets `atom`'s value to the provided `value` and triggers subscribers if the
+value has changed at all.
+
+```js
+const atom = new Atom(10)
+
+atom.reset(20)
+
+atom.deref()  // 20
 ```
 
 ---
