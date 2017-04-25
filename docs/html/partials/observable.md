@@ -4,7 +4,7 @@
 
 Base class for implementing [`observables`](#-isobservable-value-) and
 [`observable refs`](#-isobservableref-value-). Not useful on its own.
-See [`Atom`](#-atom-value-) and [`Reaction`](#-reaction-def-), which are based
+See [`Atom`](#-atom-value-) and [`Computation`](#-computation-def-equal-), which are based
 on this.
 
 Uses subscription counting to lazily initialise and deinitialise. Calls

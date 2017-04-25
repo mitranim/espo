@@ -24,7 +24,7 @@ isMutable(Object.freeze({}))   =   false
 ### `bindAll(object)`
 
 Takes a mutable object and binds all of its methods to it, via
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind" target="_blank">`Function.prototype.bind`</a>.
+[`Function.prototype.bind`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind).
 They become _bound methods_ and can be freely detached.
 
 Currently supports only enumerable properties (both own and inherited), and
@@ -52,15 +52,13 @@ bound() === object  // true
 ### `assign(object, ...sources)`
 
 Similar to
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign" target="_blank">`Object.assign`</a>.
+[`Object.assign`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
 Mutates `object`, assigning enumerable properties (own and inherited) from each
 `source`. Returns the same `object`.
 
-Be wary: mutation is often misused. When dealing with data, you should
-program in a functional style, treating your data structures as immutable. Use a
-library like
-<a href="https://github.com/Mitranim/emerge" target="_blank">Emerge</a>
-for data transformations.
+Be wary: mutation is often misused. When dealing with data, you should program
+in a functional style, treating your data structures as immutable. Use a library
+like [Emerge](https://github.com/Mitranim/emerge) for data transformations.
 
 ```js
 assign()                        =  {}
@@ -73,13 +71,12 @@ assign({}, {one: 1}, {two: 2})  =  {one: 1, two: 2}
 ### `pull(array, value)`
 
 Mutates `array`, removing one occurrence of `value` from the start, comparing by
-<a href="http://mitranim.com/fpx/#-is-one-other-" target="_blank">`fpx.is`</a>.
-Returns `array`.
+[`fpx.is`](https://mitranim.com/fpx/#-is-one-other-). Returns `array`.
 
 Counterpart to the built-ins
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push" target="_blank">`Array.prototype.push`</a>
+[`Array.prototype.push`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push)
 and
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift" target="_blank">`Array.prototype.unshift`</a>.
+[`Array.prototype.unshift`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift).
 
 ```js
 const array = [10, 20]
@@ -124,5 +121,13 @@ const ref = {
 
 derefIn(ref, ['nested'])  // 100
 ```
+
+---
+
+### `derefAt(path, ref)`
+
+Same as `derefIn(ref, path)`. Useful for
+[partial application](https://mitranim.com/fpx/#-bind-fun-args-)
+when `path` is known in advance.
 
 ---

@@ -57,7 +57,7 @@ interface isObservable {
 
 Interface for objects that let you subscribe to notifications, such as
 [`MessageQue`](#-messageque-), [`Atom`](#-atom-value-) or
-[`Reaction`](#-reaction-def-). See [`isSubscription`](#-issubscription-value-)
+[`Computation`](#-computation-def-equal-). See [`isSubscription`](#-issubscription-value-)
 below.
 
 ---
@@ -90,8 +90,8 @@ interface isSubscription {
 
 Interface for subscription objects returned by
 [`observable.subscribe()`](#-observable-subscribe-subscriber-).
-The `.trigger()` method is called by the observable. Calling `.deinit()` should
-stop the subscription _immediately_, even if the observable has a pending
-notification.
+The `.trigger()` method is called by the observable that created the
+subscription. Calling `.deinit()` should stop the subscription _immediately_,
+even if the observable has a pending notification.
 
 ---

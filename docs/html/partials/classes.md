@@ -7,7 +7,7 @@ Properties and methods are enumerable. On some classes, methods are instance-bou
 {{include('partials/deinit.md')}}
 {{include('partials/lifecycle.md')}}
 {{include('partials/observable.md')}}
-{{include('partials/query.md')}}
 {{include('partials/atom.md')}}
-{{include('partials/runner.md')}}
 {{include('partials/reaction.md')}}
+{{include('partials/computation.md')}}
+{{include('partials/query.md')}}

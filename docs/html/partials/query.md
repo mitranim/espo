@@ -1,27 +1,60 @@
-### `PathQuery(observableRef, path, equal)`
+### `Query(observableRef, query, equal)`
 
-where `equal: ƒ(any, any): bool`
+where `query: ƒ(any): any, equal: ƒ(any, any): bool`
 
 `extends` [`Observable`](#-observable-)
 
 `implements` [`isObservableRef`](#-isobservableref-value-)
 
-Reactive equivalent of [`derefIn(observableRef, path)`](#-derefin-ref-path-).
-Filters redundant updates using the `equal` function. You can pair this with
-<a href="https://github.com/Mitranim/emerge" target="_blank">Emerge</a> for
-data transformations and deep value equality.
-
-Lazy: doesn't update when it has no subscribers.
+Creates an observable that derives its value from `observableRef` by calling
+`query` and filters redundant updates by calling `equal`. Lazy: doesn't update
+when it has no subscribers.
 
 ```js
-// This will do for numbers
-function equal (one, other) {
-  return one === other
-}
-
+const eq = (a, b) => a === b
 const atom = new Atom({outer: {inner: 10}})
+const query = new Query(atom, (value => value.outer.inner * 2), eq)
 
-const query = new PathQuery(atom, ['outer', 'inner'], equal)
+query.deref()  // undefined
+
+const sub = query.subscribe(query => {
+  console.info(query.deref())
+})
+
+query.deref()  // 20
+
+atom.swap(value => ({outer: {inner: 20}}))
+// prints 40
+
+// now the query is inert again
+sub.deinit()
+```
+
+In RxJS terms, `new Query(observableRef, query, equal)` is equivalent to
+`observable.map(query).distinctUntilChanged(equal)`.
+
+---
+
+### `PathQuery(observableRef, path, equal)`
+
+where `path: [string|number], equal: ƒ(any, any): bool`
+
+`extends` [`Query`](#-query-observableref-query-equal-)
+
+`implements` [`isObservableRef`](#-isobservableref-value-)
+
+Special case of `Query`. Shortcut to accessing value by path.
+
+```js
+new PathQuery(observableRef, path, equal)
+// equivalent to:
+new Query(observableRef, value => derefIn(value, path), equal)
+```
+
+```js
+const eq = (a, b) => a === b
+const atom = new Atom({outer: {inner: 10}})
+const query = new PathQuery(atom, ['outer', 'inner'], eq)
 
 query.deref()  // undefined
 
@@ -37,8 +70,5 @@ atom.swap(value => ({outer: {inner: 20}}))
 // now the query is inert again
 sub.deinit()
 ```
-
-In RxJS terms, `new PathQuery(observable, path, equal)` is roughly equivalent to
-`observable.map(value => fpx.getIn(value, path)).distinct(equal)`.
 
 ---

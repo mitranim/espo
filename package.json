@@ -1,6 +1,6 @@
 {
   "name": "espo",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Extensions for stateful programming (OOP utils)",
   "main": "dist/index.js",
   "scripts": {
@@ -47,6 +47,7 @@
     "babel-plugin-transform-runtime": "6.23.0",
     "browser-sync": "2.18.5",
     "del": "2.2.2",
+    "emerge": "0.0.28",
     "eslint_d": "4.2.1",
     "font-awesome": "4.7.0",
     "gulp": "github:gulpjs/gulp#4.0",

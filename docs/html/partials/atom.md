@@ -5,10 +5,9 @@
 `implements` [`isObservableRef`](#-isobservableref-value-)
 
 Basic observable reference. Inspired by
-<a href="https://clojuredocs.org/clojure.core/atom" target="_blank">`clojure.core/atom`</a>.
-Should be paired with
-<a href="https://github.com/Mitranim/emerge" target="_blank">Emerge</a> for
-efficient nested updates.
+[`clojure.core/atom`](https://clojuredocs.org/clojure.core/atom).
+Should be paired with [Emerge](https://github.com/Mitranim/emerge)
+for efficient nested updates.
 
 ```js
 const atom = new Atom(10)

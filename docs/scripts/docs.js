@@ -50,8 +50,14 @@ function deactivate (elem) {
 
 const fpx = require('fpx')
 const espo = require('espo')
+const emerge = require('emerge')
 
-assign(global, {fpx, espo, scroller}, fpx, espo)
+assign(exports, {fpx, emerge, espo, scroller}, fpx, emerge, espo)
+
+delete exports.isNaN
+delete exports.isFinite
+
+assign(global, exports)
 
 if (global.devMode) {
   ['log', 'info', 'warn', 'error', 'clear'].forEach(key => {

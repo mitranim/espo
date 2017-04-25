@@ -25,6 +25,37 @@ marked.Renderer.prototype.heading = function (text, level, raw) {
   )
 }
 
+// Adds target="_blank" to external links.
+marked.Renderer.prototype.link = function (href, title, text) {
+  if (this.options.sanitize) {
+    try {
+      const protocol = decodeURIComponent(unescape(href))
+        .replace(/[^\w:]/g, '')
+        .toLowerCase()
+      if (/javascript:|vbscript:/i.test(protocol)) return ''
+    }
+    catch (err) {
+      console.error(err)
+      return ''
+    }
+  }
+
+  // The site is mounted on a base href. Links starting with / are usually
+  // typos. Links starting with // are a stupid idea anyway and need a protocol
+  // prepended.
+  if (/^\//.test(href)) {
+    throw Error(`Unexpected domain-relative href: ${href}`)
+  }
+
+  const attrs = [
+    href                      && `href="${href}"`,
+    title                     && `title="${title}"`,
+    /^[a-z]+:\/\//.test(href) && `target="_blank"`,
+  ].filter(Boolean)
+
+  return `<a ${attrs.join(' ')}>${text || ''}</a>`
+}
+
 module.exports = {
   imports: {
     version,
