@@ -13,7 +13,7 @@ Combines three big ideas. It's a tool for building:
 In addition to its `Atom` qualities, an agent automatically manages the
 lifetimes of the objects it contains, directly or indirectly. Modifying an
 agent's value via `agent.swap()` or `agent.reset()` invokes
-[`deinitDiff`](#-deinitdiff-prev-next-) to diff the previous and next value,
+[`deinitDiff`](#-deinitdiff-prev-next-) on the previous and next value,
 automatically deiniting any removed objects that implement
 [`isDeinitable`](#-isdeinitable-value-).
 
@@ -53,7 +53,7 @@ agent.deref()
 #### `agent.swap(mod, ...args)`
 
 In addition to modifying the agent's value (see
-[`atom.swap()`](#-atom-swap-mod-args-)), diffs diff the previous and the next
+[`atom.swap()`](#-atom-swap-mod-args-)), diffs the previous and the next
 value, deiniting any removed objects.
 
 See the example above.
@@ -76,10 +76,10 @@ See the example above.
 
 #### `agent.unwrap()`
 
-Resets `agent` to `undefined` without deiniting the previous value. Returns the
-previous value as-is. If one of the subscriptions triggered by `.unwrap()`
-produces an exception before `.unwrap()` returns, the value is automatically
-deinited to avoid leaks.
+Resets `agent` to `undefined`, returning the previous value as-is, without
+deiniting it. If one of the subscriptions triggered by `.unwrap()` produces an
+exception before `.unwrap()` returns, the value is automatically deinited to
+avoid leaks.
 
 In Rust terms, `.unwrap()` implies
 [moving](https://doc.rust-lang.org/book/ownership.html#move-semantics) the value
