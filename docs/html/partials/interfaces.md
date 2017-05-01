@@ -1,9 +1,10 @@
 ## Interfaces
 
-Espo's "interfaces" are runtime boolean tests that also serve as abstract
-definitions. Espo checks its inputs with these interfaces rather than `instanceof`.
+Espo's "interfaces" are abstract definitions _and_ runtime boolean tests. Espo
+utilities and classes check their inputs with these interfaces rather than with
+`instanceof`.
 
-#### `isDeinitable(value)`
+### `isDeinitable(value)`
 
 ```js
 interface isDeinitable {
@@ -11,10 +12,9 @@ interface isDeinitable {
 }
 ```
 
-`.deinit()` should make the object inert, releasing any resources it owns,
-tearing down any subscriptions, etc. After a `.deinit()` call, it should be safe
-to leave the object to the GC.
-
+Interface for objects that have a _lifetime_ and must be deinitialised before
+you can leave them to the GC. `.deinit()` should make the object inert,
+releasing any resources it owns, tearing down any subscriptions, etc.
 
 ```js
 isDeinitable(null)            // false
@@ -22,11 +22,41 @@ isDeinitable(new Que())       // true
 isDeinitable({deinit () {}})  // true
 ```
 
-Use [`DeinitDict`](#-deinitdict-) to aggregate multiple deinitables.
+See complementary functions [`deinit`](#-deinit-ref-) and
+[`deinitDiff`](#-deinitdiff-prev-next-).
 
 ---
 
-#### `isRef(value)`
+### `isOwner(value)`
+
+```js
+interface isOwner {
+  deinit(): void
+  unwrap(): any
+}
+```
+
+Interface for objects that wrap a value, automatically managing its lifetime.
+Deiniting an owner should also deinit the inner value. See
+[ownership](https://doc.rust-lang.org/book/ownership.html#ownership) in Rust.
+
+`.unwrap()` should remove the inner value from the owner without deiniting it,
+and return it to the caller. See
+[move](https://doc.rust-lang.org/book/ownership.html#move-semantics) in Rust.
+
+See [`Agent`](#-agent-value-) and [`agent.unwrap()`](#-agent-unwrap-) for
+practical examples.
+
+See complementary function [`unwrap`](#-unwrap-ref-).
+
+```js
+isOwner(new Atom())   // false
+isOwner(new Agent())  // true
+```
+
+---
+
+### `isRef(value)`
 
 ```js
 interface isRef {
@@ -46,7 +76,7 @@ new Atom(100).deref()  // 100
 
 ---
 
-#### `isObservable(value)`
+### `isObservable(value)`
 
 ```js
 interface isObservable {
@@ -62,7 +92,7 @@ below.
 
 ---
 
-#### `isObservableRef(value)`
+### `isObservableRef(value)`
 
 ```js
 interface isObservableRef {
@@ -79,7 +109,7 @@ Example: [`Atom`](#-atom-value-).
 
 ---
 
-#### `isSubscription(value)`
+### `isSubscription(value)`
 
 ```js
 interface isSubscription {

@@ -5,8 +5,8 @@
 Source <span class="fa fa-github"></span>
 </a>
 
-Library for stateful and reactive programming: queing, lifecycles, observables,
-procedural reactivity. Lightweight alternative to RxJS.
+Library for stateful and reactive programming: queues, observables, ownership
+and lifetimes, procedural reactivity. Lightweight alternative to RxJS.
 
 See sibling library [`fpx`](https://mitranim.com/fpx/) for functional
 programming utils.

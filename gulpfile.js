@@ -16,6 +16,7 @@ const src = {
   lib: 'lib/**/*.js',
   dist: 'dist/**/*.js',
   docHtml: 'docs/html/**/*',
+  docScripts: 'docs/scripts/**/*.js',
   docStyles: 'docs/styles/**/*.scss',
   docStylesMain: 'docs/styles/docs.scss',
   docFonts: 'node_modules/font-awesome/fonts/**/*',
@@ -140,6 +141,15 @@ gulp.task('docs:scripts:watch', () => {
   const _watcher = compiler.watch({}, report)
 })
 
+/* --------------------------------- Lint ---------------------------------- */
+
+gulp.task('lint', () => (
+  gulp.src([src.lib, src.docScripts])
+    .pipe($.eslint())
+    .pipe($.eslint.format())
+    .pipe($.eslint.failAfterError())
+))
+
 /* -------------------------------- Server ----------------------------------*/
 
 gulp.task('docs:server', () => (
@@ -182,6 +192,6 @@ gulp.task('watch', gulp.parallel(
   'docs:server'
 ))
 
-gulp.task('build', gulp.series('clear', 'buildup', 'docs:scripts:build'))
+gulp.task('build', gulp.series('clear', 'lint', 'buildup', 'docs:scripts:build'))
 
 gulp.task('default', gulp.series('clear', 'buildup', 'watch'))

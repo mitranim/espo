@@ -86,23 +86,114 @@ array  // [20]
 
 ---
 
-### `deref(ref)`
+### `deinit(ref)`
 
-Safely dereferences the provided [`ref`](#-isref-value-), recursively calling
-`.deref()` until it produces a non-ref.
+Complementary function for [`isDeinitable`](#-isdeinitable-value-). Calls
+`ref.deinit()` if available. Safe to call on values that don't implement
+[`isDeinitable`](#-isdeinitable-value-).
 
 ```js
-deref(10)                                            // 10
-deref({deref () {return 100}})                       // 100
-deref({deref () {return {deref () {return 1000}}}})  // 1000
+const ref = {
+  deinit () {
+    console.info('deiniting')
+  }
+}
+
+deinit(ref)
+// 'deiniting'
+
+// calling with a non-deinitable does nothing
+deinit('non-deinitable')
+```
+
+---
+
+### `deinitDiff(prev, next)`
+
+Utility for automatic management of object lifetimes. See
+[`isDeinitable`](#-isdeinitable-value-), [`isOwner`](#-isowner-value-),
+[`Agent`](#-agent-value-) for more details and examples.
+
+Diffs `prev` and `next`, deiniting any objects that implement
+[`isDeinitable`](#-isdeinitable-value-) and are present in `prev` but not in
+`next`. The diff algorithm recursively traverses plain data structures
+([`fpx.isDict`](https://mitranim.com/fpx/#-isdict-value-) and
+[`fpx.isArray`](https://mitranim.com/fpx/#-isarray-value-)), but stops at
+non-plain objects, allowing you to safely include third party objects of unknown
+size and structure. It also detects and avoids circular references.
+
+```js
+class Resource {
+  constructor (name) {this.name = name}
+  deinit () {console.info('deiniting:', this.name)}
+}
+
+class BlackBox {
+  constructor (inner) {this.inner = inner}
+}
+
+const prev = {
+  root: new Resource('Sirius'),
+  dict: {
+    inner: new Resource('Arcturus'),
+  },
+  list: [new Resource('Rigel')],
+  // Sun is untouchable to deinitDiff because it's wrapped
+  // into a non-plain object that doesn't implement isDeinitable
+  blackBox: new BlackBox(new Resource('Sun'))
+}
+
+const next = {
+  root: prev.root,
+  dict: {
+    inner: new Resource('Bellatrix')
+  },
+  list: null,
+}
+
+deinitDiff(prev, next)
+
+// 'deiniting: Arcturus'
+// 'deiniting: Rigel'
+
+deinitDiff(next, null)
+
+// 'deiniting: Sirius'
+// 'deiniting: Bellatrix'
+```
+
+---
+
+### `unwrap(ref)`
+
+Complementary function for [`isOwner`](#-isowner-value-). Calls `ref.unwrap()`,
+returning the inner value. Safe to call on values that don't implement
+[`isOwner`](#-isowner-value-).
+
+See [`agent.unwrap()`](#-agent-unwrap-) for examples.
+
+---
+
+### `deref(ref)`
+
+Complementary function for [`isRef`](#-isref-value-). Calls `ref.deref()` and
+continues recursively, eventually returning a non-ref. Safe to call on values
+that don't implement [`isRef`](#-isref-value-).
+
+```js
+deref('value')                      // 'value'
+deref(new Atom('value'))            // 'value'
+deref(new Atom(new Atom('value')))  // 'value'
+deref({deref () {return 'value'}})  // 'value'
 ```
 
 ---
 
 ### `derefIn(ref, path)`
 
-Like [`deref`](#-deref-ref-) but on a nested path. Recursively dereferences any
-nested refs while drilling down.
+Like [`deref`](#-deref-ref-), but on a nested path. Recursively dereferences any
+nested refs while drilling down. Safe to call on values that don't implement
+[`isRef`](#-isref-value-).
 
 ```js
 derefIn(10, [])  // 10
