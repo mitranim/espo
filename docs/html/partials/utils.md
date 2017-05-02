@@ -120,7 +120,13 @@ Diffs `prev` and `next`, deiniting any objects that implement
 ([`fpx.isDict`](https://mitranim.com/fpx/#-isdict-value-) and
 [`fpx.isArray`](https://mitranim.com/fpx/#-isarray-value-)), but stops at
 non-plain objects, allowing you to safely include third party objects of unknown
-size and structure. It also detects and avoids circular references.
+size and structure.
+
+Resilient to exceptions: if a deiniter or a property accessor produces an
+exception, `deinitDiff` will still traverse the rest of the tree, delaying
+exceptions until the end.
+
+Detects and avoids circular references.
 
 ```js
 class Resource {

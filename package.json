@@ -1,6 +1,6 @@
 {
   "name": "espo",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Library for stateful and reactive programming: queues, observables, ownership and lifetimes, procedural reactivity. Lightweight alternative to RxJS.",
   "main": "dist/index.js",
   "scripts": {
