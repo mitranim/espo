@@ -1,5 +1,9 @@
-const {get, and, bind, truthy, isFunction, validate} = require('fpx')
+const {get, and, truthy, isFunction, validate} = require('fpx')
 const {global, global: {history}, bindAll} = require('espo')
+
+// Pixel measurements are inaccurate when the browser is zoomed in or out, so we
+// have to use a small non-zero value in some geometry checks.
+const PX_ERROR_MARGIN = 3
 
 export class Throttle {
   constructor (fun, options) {
@@ -36,34 +40,13 @@ function restartThrottle () {
   }, get(this.options, 'delay'))
 }
 
-export const hasNoSpill = bind(hasAttr, 'data-nospill')
-
 export const getVisibleId = and(truthy, hasArea, withinViewport, elem => elem.id)
-
-export function reachedScrollEdge (elem, {deltaY}) {
-  return (
-    deltaY < 0 && reachedTop(elem) ||
-    deltaY > 0 && reachedBottom(elem)
-  )
-}
-
-function reachedTop ({scrollTop}) {
-  return scrollTop < 3
-}
-
-function reachedBottom (elem) {
-  return Math.abs(elem.scrollHeight - absBottom(elem)) < 3
-}
-
-function absBottom (elem) {
-  return elem.getBoundingClientRect().height + elem.scrollTop
-}
 
 export function findParent (test, node) {
   return !node ? null : (test(node) ? node : findParent(test, node.parentNode))
 }
 
-function hasAttr (name, elem) {
+export function hasAttr (name, elem) {
   return elem && elem.hasAttribute && elem.hasAttribute(name)
 }
 
@@ -75,8 +58,8 @@ function hasArea (elem) {
 function withinViewport (elem) {
   const {top, bottom} = elem.getBoundingClientRect()
   return (
-    bottom > -3 && bottom < global.innerHeight ||
-    top > 3 && top < (global.innerHeight + 3)
+    bottom > -PX_ERROR_MARGIN && bottom < global.innerHeight ||
+    top > PX_ERROR_MARGIN && top < (global.innerHeight + PX_ERROR_MARGIN)
   )
 }
 
@@ -90,4 +73,10 @@ export function unsetHash () {
 
 export function scrollIntoViewIfNeeded (elem) {
   if (!withinViewport(elem)) elem.scrollIntoView()
+}
+
+export function preventScrollSpill (elem, event) {
+  event.preventDefault()
+  elem.scrollLeft += event.deltaX
+  elem.scrollTop += event.deltaY
 }

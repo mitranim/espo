@@ -1,15 +1,17 @@
-const {procure} = require('fpx')
+const {bind, procure} = require('fpx')
 const {global, assign, each} = require('espo')
-const {Throttle, hasNoSpill, getVisibleId, reachedScrollEdge, findParent,
+const {Throttle, getVisibleId, hasAttr, preventScrollSpill, findParent,
   setHash, unsetHash, scrollIntoViewIfNeeded} = require('./utils')
 
 const scroller = new Throttle(updateLinksAndHash, {delay: 250})
 
 global.addEventListener('scroll', scroller.run)
 
+const shouldPreventSpill = bind(hasAttr, 'data-nospill')
+
 global.addEventListener('wheel', function preventSpill (event) {
-  const node = findParent(hasNoSpill, event.target)
-  if (node && reachedScrollEdge(node, event)) event.preventDefault()
+  const node = findParent(shouldPreventSpill, event.target)
+  if (node) preventScrollSpill(node, event)
 })
 
 // global.addEventListener('popstate', function toHash () {
