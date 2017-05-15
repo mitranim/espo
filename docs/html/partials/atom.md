@@ -2,7 +2,7 @@
 
 `extends` [`Observable`](#-observable-)
 
-`implements` [`isObservableRef`](#-isobservableref-value-)
+`implements` [`isAtom`](#-isatom-value-)
 
 Basic observable reference. Inspired by
 [`clojure.core/atom`](https://clojuredocs.org/clojure.core/atom).

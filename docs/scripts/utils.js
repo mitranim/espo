@@ -1,5 +1,5 @@
 const {get, and, truthy, isFunction, validate} = require('fpx')
-const {global, global: {history}, bindAll} = require('espo')
+const {global, global: {history}} = require('espo')
 
 // Pixel measurements are inaccurate when the browser is zoomed in or out, so we
 // have to use a small non-zero value in some geometry checks.
@@ -8,7 +8,6 @@ const PX_ERROR_MARGIN = 3
 export class Throttle {
   constructor (fun, options) {
     validate(isFunction, fun)
-    if (this.constructor === Throttle) bindAll(this)
     this.fun = fun
     this.options = options
     this.timerId = null

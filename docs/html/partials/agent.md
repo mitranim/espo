@@ -2,7 +2,7 @@
 
 `extends` [`Atom`](#-atom-value-)
 
-`implements` [`isOwner`](#-isowner-value-)
+`implements` [`isAgent`](#-isagent-value-)
 
 Combines three big ideas. It's a tool for building:
 

@@ -5,7 +5,7 @@ const {Throttle, getVisibleId, hasAttr, preventScrollSpill, findParent,
 
 const scroller = new Throttle(updateLinksAndHash, {delay: 250})
 
-global.addEventListener('scroll', scroller.run)
+global.addEventListener('scroll', scroller.run.bind(scroller))
 
 const shouldPreventSpill = bind(hasAttr, 'data-nospill')
 

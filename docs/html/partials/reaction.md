@@ -67,11 +67,13 @@ atom.swap(value => 20)
 reaction.deinit()
 ```
 
-#### `reaction.deref(ref)`
+#### `reaction.deref(ref)` <span class="text-italic fg-gray font-smaller">bound method</span>
 
 Outside a `.run()`, equivalent to [`deref(ref)`](#-deref-ref-). During a
 `.run()`, and if `ref` implements [`isObservable `](#-isobservable-value-),
 implicitly subscribes to `ref`. See the examples above.
+
+`.deref()` is instance-bound for compatibility with destructuring.
 
 #### static `Reaction.loop(fun)`
 

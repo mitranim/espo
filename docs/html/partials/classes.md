@@ -1,7 +1,7 @@
 ## Classes
 
-Espo provides several utility classes. They're subclassable in ES2015.
-Properties and methods are enumerable. On some classes, methods are instance-bound.
+Espo provides several utility classes. Some of them are intended for direct
+use, some should be subclassed.
 
 {{include('partials/ques.md')}}
 {{include('partials/observable.md')}}

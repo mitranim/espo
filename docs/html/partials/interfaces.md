@@ -30,8 +30,7 @@ See complementary functions [`deinit`](#-deinit-ref-) and
 ### `isOwner(value)`
 
 ```js
-interface isOwner {
-  deinit(): void
+interface isOwner extends isDeinitable {
   unwrap(): any
 }
 ```
@@ -79,7 +78,7 @@ new Atom(100).deref()  // 100
 ### `isObservable(value)`
 
 ```js
-interface isObservable {
+interface isObservable extends isDeinitable {
   subscribe(subscriber: ƒ(...any)): isSubscription
   unsubscribe(subscription: isSubscription): void
 }
@@ -95,8 +94,7 @@ below.
 ### `isObservableRef(value)`
 
 ```js
-interface isObservableRef {
-  deref(): any
+interface isObservableRef extends isRef, isDeinitable {
   subscribe(subscriber: ƒ(observable)): isSubscription
   unsubscribe(subscription: isSubscription): void
 }
@@ -109,19 +107,47 @@ Example: [`Atom`](#-atom-value-).
 
 ---
 
+### `isAtom(value)`
+
+```js
+interface isAtom extends isObservableRef {
+  swap(ƒ(...any), ...any): void
+  reset(any): void
+}
+```
+
+Interface for observable references with FP-style state transitions, in the style
+of [`clojure.core/atom`](https://clojuredocs.org/clojure.core/atom).
+
+See [`Atom`](#-atom-value-).
+
+---
+
+### `isAgent(value)`
+
+```js
+interface isAgent extends isAtom, isOwner {}
+```
+
+Interface for observable references with FP-style state transitions that
+automatically manage the lifetimes of owned resources.
+
+See [`Agent`](#-agent-value-).
+
+---
+
 ### `isSubscription(value)`
 
 ```js
-interface isSubscription {
+interface isSubscription extends isDeinitable {
   trigger(...any): void
-  deinit(): void
 }
 ```
 
 Interface for subscription objects returned by
-[`observable.subscribe()`](#-observable-subscribe-subscriber-).
-The `.trigger()` method is called by the observable that created the
-subscription. Calling `.deinit()` should stop the subscription _immediately_,
-even if the observable has a pending notification.
+[`observable.subscribe()`](#-observable-subscribe-subscriber-). The `.trigger()`
+method is called by the observable that created the subscription. Calling
+`.deinit()` should stop the subscription _immediately_, even if the observable
+has a pending notification.
 
 ---

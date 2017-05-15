@@ -215,7 +215,19 @@ code, .hljs {
 }
 
 a.heading-anchor {
-  color: gray;
-  font-size: 0.8em;
+  @extend .fg-gray;
+  @extend .font-smaller;
   margin-left: 0.2em;
+}
+
+.fg-gray {
+  color: gray;
+}
+
+.font-smaller {
+  font-size: 0.8rem;
+}
+
+.text-italic {
+  font-style: italic;
 }
