@@ -16,6 +16,10 @@ Interface for objects that have a _lifetime_ and must be deinitialised before
 you can leave them to the GC. `.deinit()` should make the object inert,
 releasing any resources it owns, tearing down any subscriptions, etc.
 
+`.deinit()` must be idempotent and reentrant: redundant calls to `.deinit()`,
+even when accidentally overlapping with an ongoing `.deinit()` call, should have
+no adverse effects.
+
 ```js
 isDeinitable(null)            // false
 isDeinitable(new Que())       // true
