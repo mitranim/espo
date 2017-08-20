@@ -1,14 +1,11 @@
-'use strict'
-
-const {slice, is, isFunction, validate} = require('fpx')
-const {Observable, isObservableRef} = require('./observable')
+import {slice, is, isFunction, validate} from 'fpx'
+import {Observable, isObservableRef} from './observable'
 
 /**
  * Interfaces
  */
 
-exports.isAtom = isAtom
-function isAtom (value) {
+export function isAtom (value) {
   return isObservableRef(value) && isFunction(value.swap) && isFunction(value.reset)
 }
 
@@ -16,7 +13,7 @@ function isAtom (value) {
  * Classes
  */
 
-class Atom extends Observable {
+export class Atom extends Observable {
   constructor (value) {
     super()
     this.value = value
@@ -37,5 +34,3 @@ class Atom extends Observable {
     if (!is(prev, next)) this.trigger(this)
   }
 }
-
-exports.Atom = Atom

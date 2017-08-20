@@ -1,12 +1,13 @@
 {
   "name": "espo",
-  "version": "0.0.14",
+  "version": "0.1.0",
   "description": "Library for stateful and reactive programming: queues, observables, ownership and lifetimes, procedural reactivity. Lightweight alternative to RxJS.",
-  "main": "dist/index.js",
+  "main": "dist/espo.js",
+  "module": "es/espo.js",
   "scripts": {
-    "start": "gulp",
-    "gulp": "gulp",
-    "build": "env NODE_ENV=production gulp build"
+    "start": "(gulp & rollup -cw)",
+    "compile": "NODE_ENV=production gulp build && rollup -c",
+    "prepublishOnly": "npm run compile"
   },
   "keywords": [
     "reactive",
@@ -30,13 +31,13 @@
     "url": "https://github.com/Mitranim/espo.git"
   },
   "dependencies": {
-    "fpx": "^0.1.0 || ^0.2.0"
+    "fpx": "^0.3.0"
   },
   "devDependencies": {
-    "babel-core": "6.24.0",
+    "babel-core": "6.26.0",
     "babel-eslint": "7.1.1",
-    "babel-loader": "6.2.10",
     "babel-plugin-check-es2015-constants": "6.8.0",
+    "babel-plugin-external-helpers": "6.22.0",
     "babel-plugin-transform-class-properties": "6.23.0",
     "babel-plugin-transform-es2015-arrow-functions": "6.8.0",
     "babel-plugin-transform-es2015-block-scoped-functions": "6.22.0",
@@ -45,34 +46,34 @@
     "babel-plugin-transform-es2015-destructuring": "6.19.0",
     "babel-plugin-transform-es2015-function-name": "6.22.0",
     "babel-plugin-transform-es2015-literals": "6.22.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "6.24.0",
     "babel-plugin-transform-es2015-parameters": "6.21.0",
     "babel-plugin-transform-es2015-shorthand-properties": "6.18.0",
     "babel-plugin-transform-es2015-spread": "6.8.0",
     "babel-plugin-transform-es2015-template-literals": "6.8.0",
     "babel-plugin-transform-object-rest-spread": "6.23.0",
-    "babel-plugin-transform-runtime": "6.23.0",
     "browser-sync": "2.18.5",
     "del": "2.2.2",
-    "emerge": "0.0.30",
+    "emerge": "0.1.0",
     "eslint_d": "4.2.1",
     "font-awesome": "4.7.0",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-autoprefixer": "3.1.1",
-    "gulp-babel": "6.1.2",
     "gulp-clean-css": "2.3.2",
     "gulp-eslint": "3.0.1",
     "gulp-load-plugins": "1.4.0",
     "gulp-rename": "1.2.2",
     "gulp-sass": "3.1.0",
     "gulp-statil": "0.5.0",
-    "gulp-uglify": "2.0.0",
     "gulp-util": "3.0.8",
     "gulp-watch": "4.3.11",
     "gulp-wrap": "0.13.0",
     "highlight.js": "9.9.0",
     "marked": "0.3.6",
-    "stylific-lite": "0.0.1",
-    "webpack": "2.3.2"
+    "rollup": "0.47.6",
+    "rollup-plugin-alias": "1.3.1",
+    "rollup-plugin-babel": "3.0.2",
+    "rollup-plugin-node-resolve": "3.0.0",
+    "rollup-plugin-uglify": "2.0.1",
+    "stylific-lite": "0.0.1"
   }
 }

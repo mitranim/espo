@@ -1,15 +1,12 @@
-'use strict'
-
-const {isFunction, validate} = require('fpx')
-const {isDeinitable} = require('./lifetime')
+import {isFunction, isObject, validate} from 'fpx'
+import {isDeinitable} from './lifetime'
 
 /**
  * Interfaces
  */
 
 // Happens to be a subset of `isObservable`. Potential confusion. How to fix?
-exports.isSubscription = isSubscription
-function isSubscription (value) {
+export function isSubscription (value) {
   return isDeinitable(value) && isFunction(value.trigger)
 }
 
@@ -17,7 +14,7 @@ function isSubscription (value) {
  * Classes
  */
 
-class Subscription {
+export class Subscription {
   constructor (observable, callback) {
     validate(isObservable, observable)
     validate(isFunction, callback)
@@ -40,8 +37,6 @@ class Subscription {
   }
 }
 
-exports.Subscription = Subscription
-
 Subscription.prototype.states = {
   ACTIVE: 'ACTIVE',
   IDLE: 'IDLE',
@@ -49,5 +44,5 @@ Subscription.prototype.states = {
 
 // Duplicated to avoid circular dependency
 function isObservable (value) {
-  return Boolean(value) && isFunction(value.subscribe) && isFunction(value.unsubscribe)
+  return isObject(value) && isFunction(value.subscribe) && isFunction(value.unsubscribe)
 }

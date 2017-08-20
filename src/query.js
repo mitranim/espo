@@ -1,10 +1,8 @@
-'use strict'
+import {getAt, pipe, every, isList, isPrimitive, isFunction, validate} from 'fpx'
+import {Observable, isObservableRef} from './observable'
+import {deref} from './ref'
 
-const {getAt, pipe, every, isList, isPrimitive, isFunction, validate} = require('fpx')
-const {Observable, isObservableRef} = require('./observable')
-const {deref} = require('./ref')
-
-class Query extends Observable {
+export class Query extends Observable {
   constructor (observableRef, query, equal) {
     super()
     validate(isObservableRef, observableRef)
@@ -22,7 +20,7 @@ class Query extends Observable {
   }
 
   onInit () {
-    this.sub = this.observableRef.subscribe(onTrigger.bind(this))
+    this.sub = this.observableRef.subscribe(onTrigger.bind(null, this))
     this.value = this.query(this.observableRef.deref())
   }
 
@@ -32,22 +30,18 @@ class Query extends Observable {
   }
 }
 
-exports.Query = Query
-
-function onTrigger (observableRef) {
-  const prev = this.value
-  const next = this.value = this.query(observableRef.deref())
-  if (!this.equal(prev, next)) this.trigger(this)
+function onTrigger (query, observableRef) {
+  const prev = query.value
+  const next = query.value = query.query(observableRef.deref())
+  if (!query.equal(prev, next)) query.trigger(query)
 }
 
-class PathQuery extends Query {
+export class PathQuery extends Query {
   constructor (observableRef, path, equal) {
     validate(isPath, path)
     super(observableRef, pipe(deref, getAt.bind(null, path)), equal)
   }
 }
-
-exports.PathQuery = PathQuery
 
 function isPath (value) {
   return isList(value) && every(isPrimitive, value)

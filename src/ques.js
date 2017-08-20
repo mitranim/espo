@@ -1,11 +1,9 @@
-'use strict'
+import {call, slice, isFunction, validate} from 'fpx'
+import {Subscription} from './subscription'
+import {deinit} from './lifetime'
+import {pull, flushBy, forceEach} from './utils'
 
-const {call, slice, isFunction, validate} = require('fpx')
-const {Subscription} = require('./subscription')
-const {deinit} = require('./lifetime')
-const {pull, flushBy, forceEach} = require('./utils')
-
-class Que {
+export class Que {
   constructor (deque) {
     validate(isFunction, deque)
     this.state = this.states.IDLE
@@ -46,8 +44,6 @@ class Que {
   }
 }
 
-exports.Que = Que
-
 Que.prototype.states = {
   IDLE: 'IDLE',
   DAMMED: 'DAMMED',
@@ -56,10 +52,10 @@ Que.prototype.states = {
 
 // Masks extra args from flushBy
 function deque (value) {
-  this.deque(value)
+  this.deque(value)  // eslint-disable-line no-invalid-this
 }
 
-class TaskQue extends Que {
+export class TaskQue extends Que {
   constructor () {
     super(call)
   }
@@ -72,9 +68,7 @@ class TaskQue extends Que {
   }
 }
 
-exports.TaskQue = TaskQue
-
-class MessageQue extends TaskQue {
+export class MessageQue extends TaskQue {
   constructor () {
     super()
     this.subscriptions = []
@@ -100,10 +94,8 @@ class MessageQue extends TaskQue {
   }
 }
 
-exports.MessageQue = MessageQue
-
 function triggerSubscriptions (args) {
-  forceEach(this.subscriptions.slice(), triggerSubscription, args)
+  forceEach(this.subscriptions.slice(), triggerSubscription, args)  // eslint-disable-line no-invalid-this
 }
 
 function triggerSubscription (subscription, args) {

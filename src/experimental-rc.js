@@ -1,15 +1,12 @@
-'use strict'
-
-const {isFunction, validate} = require('fpx')
-const {isDeinitable} = require('./lifetime')
-const {isRef} = require('./ref')
+import {isFunction, validate} from 'fpx'
+import {isDeinitable} from './lifetime'
+import {isRef} from './ref'
 
 /**
  * Interfaces
  */
 
-exports.isRc = isRc
-function isRc (value) {
+export function isRc (value) {
   return (
     isDeinitable(value) &&
     isRef(value) &&
@@ -18,8 +15,7 @@ function isRc (value) {
   )
 }
 
-exports.isWeak = isWeak
-function isWeak (value) {
+export function isWeak (value) {
   return (
     isRef(value) &&
     isFunction(value.isEmpty) &&
@@ -29,8 +25,7 @@ function isWeak (value) {
 }
 
 // TODO duck-typed interface (currently subset of isWeak, easy to mistake)
-exports.isLazyRc = isLazyRc
-function isLazyRc (value) {
+export function isLazyRc (value) {
   return value instanceof LazyRc
 }
 
@@ -47,7 +42,7 @@ function isLazyRc (value) {
 //   ...
 //   rc1.deinit()                      // refcount = 1
 //   rc2.deinit()                      // refcount = 0, myDeinitable is dropped and deinited
-class Rc {
+export class Rc {
   constructor (ptr) {
     if (!(ptr instanceof RcPtr)) throw Error(`Expected an RcPtr`)
     if (ptr.isEmpty()) throw Error(`Expected non-empty RcPtr`)
@@ -79,14 +74,12 @@ class Rc {
   }
 }
 
-exports.Rc = Rc
-
 Rc.prototype.states = {
   ALIVE: 'ALIVE',
   DEAD: 'DEAD',
 }
 
-class Weak {
+export class Weak {
   constructor (ptr) {
     if (!(ptr instanceof RcPtr)) throw Error(`Expected an RcPtr`)
     if (ptr.isEmpty()) throw Error(`Expected non-empty RcPtr`)
@@ -110,9 +103,7 @@ class Weak {
   }
 }
 
-exports.Weak = Weak
-
-class RcPtr {
+export class RcPtr {
   constructor (value) {
     this.state = this.states.ALIVE
     this.value = value
@@ -156,14 +147,12 @@ class RcPtr {
   // no deinit: value is shared-owned by Rcs
 }
 
-exports.RcPtr = RcPtr
-
 RcPtr.prototype.states = {
   ALIVE: 'ALIVE',
   DEAD: 'DEAD',
 }
 
-class LazyRc {
+export class LazyRc {
   constructor (construct) {
     validate(isFunction, construct)
     this.construct = construct
@@ -185,5 +174,3 @@ class LazyRc {
 
   // no deinit: doesn't own its value
 }
-
-exports.LazyRc = LazyRc

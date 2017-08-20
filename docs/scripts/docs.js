@@ -1,7 +1,7 @@
-const {bind, procure} = require('fpx')
-const {global, assign, each} = require('espo')
-const {Throttle, getVisibleId, hasAttr, preventScrollSpill, findParent,
-  setHash, unsetHash, scrollIntoViewIfNeeded} = require('./utils')
+import {bind, procure} from 'fpx'
+import {global, assign, each} from 'espo'
+import {Throttle, getVisibleId, hasAttr, preventScrollSpill, findParent,
+  setHash, unsetHash, scrollIntoViewIfNeeded} from './utils'
 
 const scroller = new Throttle(updateLinksAndHash, {delay: 250})
 
@@ -50,11 +50,13 @@ function deactivate (elem) {
 
 // REPL
 
-const fpx = require('fpx')
-const espo = require('espo')
-const emerge = require('emerge')
+/* eslint-disable no-duplicate-imports */
 
-assign(exports, {fpx, emerge, espo, scroller}, fpx, emerge, espo)
+import * as fpx from 'fpx'
+import * as espo from 'espo'
+import * as emerge from 'emerge'
+
+const exports = assign({}, {fpx, emerge, espo, scroller}, fpx, emerge, espo)
 
 delete exports.isNaN
 delete exports.isFinite

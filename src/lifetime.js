@@ -1,18 +1,14 @@
-'use strict'
-
-const {includes, is, isList, isArray, isDict, isObject, isFunction, validate} = require('fpx')
+import {includes, is, isList, isArray, isDict, isObject, isFunction, validate} from 'fpx'
 
 /**
  * Interfaces
  */
 
-exports.isDeinitable = isDeinitable
-function isDeinitable (value) {
-  return Boolean(value) && isFunction(value.deinit)
+export function isDeinitable (value) {
+  return isObject(value) && isFunction(value.deinit)
 }
 
-exports.isOwner = isOwner
-function isOwner (value) {
+export function isOwner (value) {
   return isDeinitable(value) && isFunction(value.unwrap)
 }
 
@@ -20,18 +16,15 @@ function isOwner (value) {
  * Utils
  */
 
-exports.deinit = deinit
-function deinit (value) {
+export function deinit (value) {
   if (isDeinitable(value)) value.deinit()
 }
 
-exports.deinitDiff = deinitDiff
-function deinitDiff (prev, next) {
+export function deinitDiff (prev, next) {
   deinitDiffAcyclic(prev, next, [])
 }
 
-exports.unwrap = unwrap
-function unwrap (value) {
+export function unwrap (value) {
   return isOwner(value) ? value.unwrap() : undefined
 }
 
@@ -64,8 +57,8 @@ function traverseDiffBy (fun, prev, next, visitedRefs) {
   validate(isFunction, fun)
 
   if (isList(prev)) {
-    let error
-    for (let i = -1; ++i < prev.length;) {
+    let error = null
+    for (let i = -1; (i += 1) < prev.length;) {
       const prevValue = prev[i]
       if (includes(next, prevValue)) continue
       const nextValue = isList(next) ? next[i] : undefined
@@ -77,7 +70,7 @@ function traverseDiffBy (fun, prev, next, visitedRefs) {
   }
 
   if (isObject(prev)) {
-    let error
+    let error = null
     for (const key in prev) {
       const prevValue = prev[key]
       const nextValue = isObject(next) ? next[key] : undefined

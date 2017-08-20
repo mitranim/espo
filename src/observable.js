@@ -1,23 +1,19 @@
-'use strict'
-
-const {isFunction, validate} = require('fpx')
-const {Que} = require('./ques')
-const {deinit, isDeinitable} = require('./lifetime')
-const {Subscription} = require('./subscription')
-const {forceEach, pull, flushBy} = require('./utils')
-const {isRef} = require('./ref')
+import {isFunction, validate} from 'fpx'
+import {Que} from './ques'
+import {deinit, isDeinitable} from './lifetime'
+import {Subscription} from './subscription'
+import {forceEach, pull, flushBy} from './utils'
+import {isRef} from './ref'
 
 /**
  * Interfaces
  */
 
-exports.isObservable = isObservable
-function isObservable (value) {
+export function isObservable (value) {
   return isDeinitable(value) && isFunction(value.subscribe) && isFunction(value.unsubscribe)
 }
 
-exports.isObservableRef = isObservableRef
-function isObservableRef (value) {
+export function isObservableRef (value) {
   return isRef(value) && isObservable(value)
 }
 
@@ -25,11 +21,11 @@ function isObservableRef (value) {
  * Classes
  */
 
-class Observable {
+export class Observable {
   constructor () {
     this.state = this.states.IDLE
     this.subscriptions = []
-    this.que = new Que(triggerSubscriptions.bind(this))
+    this.que = new Que(triggerSubscriptions.bind(null, this))
   }
 
   // override in subclass
@@ -68,15 +64,13 @@ class Observable {
   }
 }
 
-exports.Observable = Observable
-
 Observable.prototype.states = {
   IDLE: 'IDLE',
   ACTIVE: 'ACTIVE',
 }
 
-function triggerSubscriptions (args) {
-  forceEach(this.subscriptions.slice(), triggerSubscription, args)
+function triggerSubscriptions ({subscriptions}, args) {
+  forceEach(subscriptions.slice(), triggerSubscription, args)
 }
 
 function triggerSubscription (subscription, args) {

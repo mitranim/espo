@@ -1,22 +1,18 @@
-'use strict'
-
-const {get, isFunction} = require('fpx')
+import {get, isFunction, isObject} from 'fpx'
 
 /**
  * Interfaces
  */
 
-exports.isRef = isRef
-function isRef (value) {
-  return Boolean(value) && isFunction(value.deref)
+export function isRef (value) {
+  return isObject(value) && isFunction(value.deref)
 }
 
 /**
  * Utils
  */
 
-exports.deref = deref
-function deref (ref) {
+export function deref (ref) {
   if (isRef(ref)) {
     const value = ref.deref()
     return value === ref ? value : deref(value)
@@ -24,8 +20,7 @@ function deref (ref) {
   return ref
 }
 
-exports.derefIn = derefIn
-function derefIn (ref, path) {
+export function derefIn (ref, path) {
   return deref(path.reduce(derefByKey, ref))
 }
 
@@ -37,7 +32,6 @@ function derefByKey (cursor, key) {
   return get(cursor, key)
 }
 
-exports.derefAt = derefAt
-function derefAt (path, ref) {
+export function derefAt (path, ref) {
   return derefIn(ref, path)
 }

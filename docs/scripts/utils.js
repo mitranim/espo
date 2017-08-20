@@ -1,5 +1,7 @@
-const {get, and, truthy, isFunction, validate} = require('fpx')
-const {global, global: {history}} = require('espo')
+import {get, and, truthy, isFunction, validate} from 'fpx'
+import {global} from 'espo'
+
+const {history} = global
 
 // Pixel measurements are inaccurate when the browser is zoomed in or out, so we
 // have to use a small non-zero value in some geometry checks.
@@ -16,7 +18,7 @@ export class Throttle {
 
   run () {
     if (this.timerId) this.tailPending = true
-    else restartThrottle.call(this)
+    else restartThrottle(this)
   }
 
   isPending () {
@@ -29,14 +31,14 @@ export class Throttle {
   }
 }
 
-function restartThrottle () {
-  this.stop()
-  this.timerId = setTimeout(() => {
-    this.timerId = null
-    if (this.tailPending) restartThrottle.call(this)
-    this.tailPending = false
-    this.fun(...arguments)
-  }, get(this.options, 'delay'))
+function restartThrottle (throttle) {
+  throttle.stop()
+  throttle.timerId = setTimeout(() => {
+    throttle.timerId = null
+    if (throttle.tailPending) restartThrottle(throttle)
+    throttle.tailPending = false
+    throttle.fun(...arguments)
+  }, get(throttle.options, 'delay'))
 }
 
 export const getVisibleId = and(truthy, hasArea, withinViewport, elem => elem.id)
@@ -57,8 +59,8 @@ function hasArea (elem) {
 function withinViewport (elem) {
   const {top, bottom} = elem.getBoundingClientRect()
   return (
-    bottom > -PX_ERROR_MARGIN && bottom < global.innerHeight ||
-    top > PX_ERROR_MARGIN && top < (global.innerHeight + PX_ERROR_MARGIN)
+    bottom > (-PX_ERROR_MARGIN && bottom < global.innerHeight) ||
+    top > (PX_ERROR_MARGIN && top < (global.innerHeight + PX_ERROR_MARGIN))
   )
 }
 

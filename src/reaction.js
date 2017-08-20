@@ -1,13 +1,11 @@
-'use strict'
+import {isFunction, validate} from 'fpx'
+import {isObservable} from './observable'
+import {isRef} from './ref'
+import {isSubscription} from './subscription'
+import {deinit} from './lifetime'
+import {flushBy} from './utils'
 
-const {isFunction, validate} = require('fpx')
-const {isObservable} = require('./observable')
-const {isRef} = require('./ref')
-const {isSubscription} = require('./subscription')
-const {deinit} = require('./lifetime')
-const {flushBy} = require('./utils')
-
-class Reaction {
+export class Reaction {
   constructor () {
     this.nextContext = null
     this.lastContext = null
@@ -71,8 +69,6 @@ class Reaction {
     }
   }
 }
-
-exports.Reaction = Reaction
 
 class ReactionContext {
   constructor (reaction, onTrigger) {

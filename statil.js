@@ -11,7 +11,7 @@ marked.setOptions({
   smartypants: true,
   highlight (code, lang) {
     return (lang ? hljs.highlight(lang, code) : hljs.highlightAuto(code)).value
-  }
+  },
 })
 
 marked.Renderer.prototype.heading = function (text, level, raw) {

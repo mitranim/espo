@@ -1,14 +1,11 @@
-'use strict'
-
-const {Atom, isAtom} = require('./atom')
-const {deinitDiff, isOwner} = require('./lifetime')
+import {Atom, isAtom} from './atom'
+import {deinitDiff, isOwner} from './lifetime'
 
 /**
  * Interfaces
  */
 
-exports.isAgent = isAgent
-function isAgent (value) {
+export function isAgent (value) {
   return isAtom(value) && isOwner(value)
 }
 
@@ -17,7 +14,7 @@ function isAgent (value) {
  */
 
 // WTB better name
-class Agent extends Atom {
+export class Agent extends Atom {
   reset (next) {
     const prev = this.value
     try {super.reset(next)}
@@ -42,5 +39,3 @@ class Agent extends Atom {
     finally {this.reset(undefined)}
   }
 }
-
-exports.Agent = Agent
