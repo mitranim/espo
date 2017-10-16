@@ -52,7 +52,13 @@ export class Reaction {
       if (nextContext) nextContext.deinit()
     }
     finally {
-      if (lastContext) lastContext.deinit()
+      try {
+        if (lastContext) lastContext.deinit()
+      }
+      finally {
+        this.nextContext = null
+        this.lastContext = null
+      }
     }
   }
 

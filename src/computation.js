@@ -24,7 +24,6 @@ export class Computation extends Observable {
 
   onDeinit () {
     this.reaction.deinit()
-    this.reaction = null
   }
 }
 
