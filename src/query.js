@@ -16,6 +16,9 @@ export class Query extends Observable {
   }
 
   deref () {
+    if (this.state === this.states.IDLE) {
+      this.value = this.query(this.observableRef.deref())
+    }
     return this.value
   }
 

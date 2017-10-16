@@ -9,16 +9,17 @@ export class Computation extends Observable {
     super()
     this.def = def
     this.equal = equal
-    this.reaction = null
+    this.reaction = new Reaction()
     this.value = undefined
   }
 
   deref () {
+    if (this.state === this.states.IDLE) this.value = this.def(this.reaction)
     return this.value
   }
 
   onInit () {
-    this.reaction = Reaction.loop(computationUpdate.bind(null, this))
+    this.reaction.loop(computationUpdate.bind(null, this))
   }
 
   onDeinit () {
