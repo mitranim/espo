@@ -170,13 +170,13 @@ deinitDiff(next, null)
 
 ---
 
-### `unwrap(ref)`
+### `unown(ref)`
 
-Complementary function for [`isOwner`](#-isowner-value-). Calls `ref.unwrap()`,
+Complementary function for [`isOwner`](#-isowner-value-). Calls `ref.unown()`,
 returning the inner value. Safe to call on values that don't implement
 [`isOwner`](#-isowner-value-).
 
-See [`agent.unwrap()`](#-agent-unwrap-) for examples.
+See [`agent.unown()`](#-agent-unown-) for examples.
 
 ---
 

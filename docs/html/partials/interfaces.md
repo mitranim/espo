@@ -35,7 +35,7 @@ See complementary functions [`deinit`](#-deinit-ref-) and
 
 ```js
 interface isOwner extends isDeinitable {
-  unwrap(): any
+  unown(): any
 }
 ```
 
@@ -43,14 +43,14 @@ Interface for objects that wrap a value, automatically managing its lifetime.
 Deiniting an owner should also deinit the inner value. See
 [ownership](https://doc.rust-lang.org/book/ownership.html#ownership) in Rust.
 
-`.unwrap()` should remove the inner value from the owner without deiniting it,
+`.unown()` should remove the inner value from the owner without deiniting it,
 and return it to the caller. See
 [move](https://doc.rust-lang.org/book/ownership.html#move-semantics) in Rust.
 
-See [`Agent`](#-agent-value-) and [`agent.unwrap()`](#-agent-unwrap-) for
+See [`Agent`](#-agent-value-) and [`agent.unown()`](#-agent-unown-) for
 practical examples.
 
-See complementary function [`unwrap`](#-unwrap-ref-).
+See complementary function [`unown`](#-unown-ref-).
 
 ```js
 isOwner(new Atom())   // false

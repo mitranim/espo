@@ -74,14 +74,14 @@ deiniting the previous value.
 
 See the example above.
 
-#### `agent.unwrap()`
+#### `agent.unown()`
 
 Resets `agent` to `undefined`, returning the previous value as-is, without
-deiniting it. If one of the subscriptions triggered by `.unwrap()` produces an
-exception before `.unwrap()` returns, the value is automatically deinited to
+deiniting it. If one of the subscriptions triggered by `.unown()` produces an
+exception before `.unown()` returns, the value is automatically deinited to
 avoid leaks.
 
-In Rust terms, `.unwrap()` implies
+In Rust terms, `.unown()` implies
 [moving](https://doc.rust-lang.org/book/ownership.html#move-semantics) the value
 out of the agent. The caller _must take responsibility_ for the lifetime of the
 returned value.
@@ -101,7 +101,7 @@ agent.deref()
 atom.reset(20)
 // 'updated: 20'
 
-const value = agent.unwrap()
+const value = agent.unown()
 // {sub: Subscription{state: 'ACTIVE', ...}}
 
 // The value has been moved out of the agent

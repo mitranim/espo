@@ -21,7 +21,7 @@ export class Agent extends Atom {
     finally {deinitDiff(prev, next)}
   }
 
-  unwrap () {
+  unown () {
     const {value} = this
     this.value = undefined
     try {

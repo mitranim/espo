@@ -9,7 +9,7 @@ export function isDeinitable (value) {
 }
 
 export function isOwner (value) {
-  return isDeinitable(value) && isFunction(value.unwrap)
+  return isDeinitable(value) && isFunction(value.unown)
 }
 
 /**
@@ -24,8 +24,13 @@ export function deinitDiff (prev, next) {
   deinitDiffAcyclic(prev, next, [])
 }
 
-export function unwrap (value) {
-  return isOwner(value) ? value.unwrap() : undefined
+// TODO document
+export function deinitDeep (value) {
+  deinitDiffAcyclic(value, undefined, [])
+}
+
+export function unown (value) {
+  return isOwner(value) ? value.unown() : undefined
 }
 
 /**
