@@ -3,9 +3,15 @@
 const hljs = require('highlight.js')
 const marked = require('marked')
 const pt = require('path')
-const {ifonly, not, test, testOr} = require('fpx')
-const {version} = require('./package.json')
-const prod = process.env.NODE_ENV === 'production'
+const fs = require('fs')
+
+const {version: VERSION} = require('./package.json')
+const PROD = process.env.NODE_ENV === 'production'
+const iconDir = pt.join(process.cwd(), 'node_modules/feather-icons/dist/icons')
+
+/**
+ * Markdown
+ */
 
 marked.setOptions({
   smartypants: true,
@@ -14,19 +20,21 @@ marked.setOptions({
   },
 })
 
-marked.Renderer.prototype.heading = function (text, level, raw) {
+const linkSvg = fs.readFileSync(pt.join(iconDir, 'link-2.svg'))
+
+marked.Renderer.prototype.heading = function heading (text, level, raw) {
   const id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, '-')
   return (
 `<h${level}>
   <span>${text}</span>
-  <a class="heading-anchor fa fa-link" href="#${id}" id="${id}"></a>
+  <a class="heading-anchor" href="#${id}" id="${id}">${linkSvg}</a>
 </h${level}>
 `
   )
 }
 
 // Adds target="_blank" to external links.
-marked.Renderer.prototype.link = function (href, title, text) {
+marked.Renderer.prototype.link = function link (href, title, text) {
   if (this.options.sanitize) {
     try {
       const protocol = decodeURIComponent(unescape(href))
@@ -56,22 +64,30 @@ marked.Renderer.prototype.link = function (href, title, text) {
   return `<a ${attrs.join(' ')}>${text || ''}</a>`
 }
 
+/**
+ * Statil
+ */
+
 module.exports = {
   imports: {
-    version,
-    prod,
-    url (path) {
-      return pt.join(pt.dirname(path), pt.parse(path).name)
-    },
+    VERSION,
+    PROD,
     md (content) {
       return marked(content)
         .replace(/<pre><code class="(.*)">|<pre><code>/g, '<pre><code class="hljs $1">')
         .replace(/<!--\s*:((?:[^:]|:(?!\s*-->))*):\s*-->/g, '$1')
     },
+    url (path) {
+      return pt.join(pt.dirname(path), pt.parse(path).name)
+    },
+    featherIcon (name) {
+      return fs.readFileSync(pt.join(iconDir, name))
+    },
   },
-  ignorePath: test(/^partials/),
-  renamePath: ifonly(
-    not(testOr('index.html', '404.html')),
-    (path, {dir, name}) => pt.join(dir, name, 'index.html')
+  ignorePath: path => /^partials/.test(path),
+  renamePath: (path, {dir, name}) => (
+    path === 'index.html' || path === '404.html'
+    ? path
+    : pt.join(dir, name, 'index.html')
   ),
 }

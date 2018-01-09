@@ -1,21 +1,18 @@
 ## Overview
 
-`espo`: **e**xtensions for **s**tateful **p**r**o**gramming in JavaScript.
-<a href="https://github.com/Mitranim/espo" target="_blank">
-Source <span class="fa fa-github"></span>
-</a>
+`Espo`: **e**xtensions for **s**tateful **p**r**o**gramming in JavaScript. Source: <a href="https://github.com/Mitranim/espo" target="_blank">https://github.com/Mitranim/espo</a>
 
-Library for stateful and reactive programming: queues, observables, ownership
-and lifetimes, procedural reactivity. Lightweight alternative to RxJS for GUI
-programs.
+Library for reactive and stateful programming: observables, implicit reactivity, automatic resource cleanup.
 
-See sibling library [`fpx`](https://mitranim.com/fpx/) for functional
-programming utils.
+See sibling libraries:
 
-Install with `npm` (version {{version}}):
+  * Emerge: <a href="https://github.com/Mitranim/emerge" target="_blank">https://github.com/Mitranim/emerge</a>. Efficient patching and merging of plain JS data.
+  * fpx: <a href="https://mitranim.com/fpx/" target="_blank">https://mitranim.com/fpx/</a>. Utils for functional programming.
+
+Install with `npm`. Current version: `{{VERSION}}`.
 
 ```sh
-npm i --save --save-exact espo
+npm i --save espo
 ```
 
 All examples imply an import:
@@ -24,7 +21,6 @@ All examples imply an import:
 const {someFunction} = require('espo')
 ```
 
-On this page, all Espo words are exported into global scope. You can run
-examples in the browser console.
+On this page, all Espo words are exported into global scope. You can run the examples in the browser console.
 
 ---

@@ -1,27 +1,107 @@
-import {bind, procure} from 'fpx'
-import {global, assign, each} from 'espo'
-import {Throttle, getVisibleId, hasAttr, preventScrollSpill, findParent,
-  setHash, unsetHash, scrollIntoViewIfNeeded} from './utils'
+import {bind, get, and, truthy, procure, slice, isFunction, validate} from 'fpx'
 
-const scroller = new Throttle(updateLinksAndHash, {delay: 250})
+const {history} = window
 
-global.addEventListener('scroll', scroller.run.bind(scroller))
+/**
+ * Utils
+ */
+
+// Pixel measurements are inaccurate when the browser is zoomed in or out, so we
+// have to use a small non-zero value in some geometry checks.
+const PX_ERROR_MARGIN = 3
+
+function Throttle(fun, options) {
+  validate(fun, isFunction)
+  let timerId = null
+  let tailPending = false
+
+  function init () {
+    if (timerId) tailPending = true
+    else restartThrottle()
+  }
+
+  function deinit () {
+    clearTimeout(timerId)
+    timerId = null
+  }
+
+  function restartThrottle () {
+    deinit()
+    timerId = setTimeout(() => {
+      timerId = null
+      if (tailPending) restartThrottle()
+      tailPending = false
+      fun(...arguments)
+    }, get(options, 'delay'))
+  }
+
+  return {init, deinit}
+}
+
+const getVisibleId = and(truthy, hasArea, withinViewport, elem => elem.id)
+
+function findParent (test, node) {
+  return !node ? null : (test(node) ? node : findParent(test, node.parentNode))
+}
+
+function hasAttr (name, elem) {
+  return elem && elem.hasAttribute && elem.hasAttribute(name)
+}
+
+function hasArea (elem) {
+  const {height, width} = elem.getBoundingClientRect()
+  return height > 0 && width > 0
+}
+
+function withinViewport (elem) {
+  const {top, bottom} = elem.getBoundingClientRect()
+  return (
+    (bottom > -PX_ERROR_MARGIN && bottom < window.innerHeight) ||
+    (top > PX_ERROR_MARGIN && top < (window.innerHeight + PX_ERROR_MARGIN))
+  )
+}
+
+function setHash (id) {
+  history.replaceState(null, '', `#${id}`)
+}
+
+function unsetHash () {
+  history.replaceState(null, '', '')
+}
+
+function scrollIntoViewIfNeeded (elem) {
+  if (!withinViewport(elem)) elem.scrollIntoView()
+}
+
+function preventScrollSpill (elem, event) {
+  event.preventDefault()
+  elem.scrollLeft += event.deltaX
+  elem.scrollTop += event.deltaY
+}
+
+/**
+ * Init
+ */
+
+const scroller = Throttle(updateLinksAndHash, {delay: 250})
+
+window.addEventListener('scroll', scroller.init)
 
 const shouldPreventSpill = bind(hasAttr, 'data-nospill')
 
-global.addEventListener('wheel', function preventSpill (event) {
+window.addEventListener('wheel', function preventSpill (event) {
   const node = findParent(shouldPreventSpill, event.target)
   if (node) preventScrollSpill(node, event)
 })
 
-// global.addEventListener('popstate', function toHash () {
-//   scroller.stop()
+// window.addEventListener('popstate', function toHash () {
+//   scroller.deinit()
 //   const hash = window.location.hash.replace(/^#/, '')
 //   if (hash) updateSidenavLinks(hash)
 // })
 
 function updateLinksAndHash () {
-  const id = procure(getVisibleId, document.querySelectorAll('#main [id]'))
+  const id = procure(document.querySelectorAll('#main [id]'), getVisibleId)
   if (id) {
     setHash(id)
     updateSidenavLinks(id)
@@ -32,7 +112,7 @@ function updateLinksAndHash () {
 }
 
 function updateSidenavLinks (id) {
-  each(document.querySelectorAll('#sidenav a.active'), deactivate)
+  slice(document.querySelectorAll('#sidenav a.active')).forEach(deactivate)
   const link = document.querySelector(`#sidenav a[href*="#${id}"]`)
   if (link) {
     activate(link)
@@ -48,7 +128,9 @@ function deactivate (elem) {
   elem.classList.remove('active')
 }
 
-// REPL
+/**
+ * REPL
+ */
 
 /* eslint-disable no-duplicate-imports */
 
@@ -56,17 +138,17 @@ import * as fpx from 'fpx'
 import * as espo from 'espo'
 import * as emerge from 'emerge'
 
-const exports = assign({}, {fpx, emerge, espo, scroller}, fpx, emerge, espo)
+const exports = espo.assign({}, {fpx, emerge, espo, scroller}, fpx, emerge, espo)
 
 delete exports.isNaN
 delete exports.isFinite
 
-assign(global, exports)
+espo.assign(window, exports)
 
-if (global.devMode) {
+if (window.DEV) {
   ['log', 'info', 'warn', 'error', 'clear'].forEach(key => {
     if (!/bound/.test(console[key].name)) {
-      global[key] = console[key] = console[key].bind(console)
+      window[key] = console[key] = console[key].bind(console)
     }
   })
 }

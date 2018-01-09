@@ -2,9 +2,6 @@
  * Vars
  */
 
-// Relative to stylesheet URL
-$fa-font-path: '../fonts';
-
 // http://brandcolors.net
 $color-github:  #4183c4;  // unverified
 $color-twitter: #55acee;  // verified
@@ -12,7 +9,10 @@ $color-twitter: #55acee;  // verified
 $sf-font-weight: 300;
 $sf-body-max-width: none;
 
-$sf-rem: 12pt;
+$sf-rem: 18px;
+
+$column-max-width: 320px;
+$content-max-width: 1440px;
 
 // cornsilk
 // floralwhite
@@ -46,113 +46,11 @@ $color-code-bg: floralwhite;
  * Libs
  */
 
-@import './node_modules/stylific-lite/scss/_variables';
-@import './node_modules/stylific-lite/scss/norm';
+@import './node_modules/stylific-lite/scss/stylific-lite';
+@import './node_modules/stylific-lite/scss/classes';
 
 /**
- * Icons
- */
-
-@import './node_modules/font-awesome/scss/variables';
-@import './node_modules/font-awesome/scss/path';
-@import './node_modules/font-awesome/scss/core';
-@import './node_modules/font-awesome/scss/mixins';
-
-.fa-arrow-up::before      {content: $fa-var-arrow-up}
-.fa-code::before          {content: $fa-var-code}
-.fa-github::before        {content: $fa-var-github}
-.fa-link::before          {content: $fa-var-link}
-.fa-external-link::before {content: $fa-var-external-link}
-.fa-twitter::before       {content: $fa-var-twitter}
-
-.fa-github, a.fa-github   {color: $color-github}
-.fa-twitter, a.fa-twitter {color: $color-twitter}
-
-.fa::before {
-  display: inline-block;
-  width: 1em;
-  text-align: center;
-}
-
-.fa.inline {
-  margin-right: 0.5rem;
-  &:last-child {margin-right: 0}
-}
-
-// wtf
-:not(:empty) .fa.inline:not(:first-child) {
-  margin-left: 0.5rem;
-}
-
-a.fa {
-  border: none;
-}
-
-article a[target~=_blank]:not(.fa)::after {
-  // Icon.
-  content: $fa-var-external-link;
-  @include fa-icon();
-
-  // Cosmetic.
-  margin-left: 0.3em;
-  opacity: 0.5;
-  font-size: 0.8em;
-}
-
-/**
- * Layout
- */
-
-%flex-row {
-  display: flex;
-  flex-direction: row;
-}
-
-%flex-col {
-  display: flex;
-  flex-direction: column;
-}
-
-%flex-main-between {
-  justify-content: space-between;
-}
-
-%flex-main-start {
-  justify-content: flex-start;
-}
-
-%flex-cross-stretch {
-  align-items: stretch;
-}
-
-.row-between-normal {
-  @extend %flex-row;
-  @extend %flex-main-between;
-}
-
-.row-start-stretch {
-  @extend %flex-row;
-  @extend %flex-main-start;
-  @extend %flex-cross-stretch;
-}
-
-.col-start-stretch {
-  @extend %flex-col;
-  @extend %flex-main-start;
-  @extend %flex-cross-stretch;
-}
-
-.flex-1 {flex: 1}
-.flex-2 {flex: 2}
-.flex-3 {flex: 3}
-.flex-4 {flex: 4}
-
-.padding-1 {
-  padding: 1rem;
-}
-
-/**
- * Misc
+ * Global
  */
 
 html {
@@ -160,74 +58,139 @@ html {
 }
 
 body {
-  padding: 0;
-}
-
-body, .layout {
   margin: 0;
+  padding: 0;
+  @extend .flex-row;
 }
 
-body > :not(.layout) {
+body > :not(.main-column):not(.side-column) {
   display: none;
 }
 
-.fixed-fit {
+.side-column {
   position: fixed;
-  margin: 0;
   top: 0;
-  right: 0;
   bottom: 0;
   left: 0;
-}
+  width: 20vw;
+  // max-width: $column-max-width;
 
-.no-scroll-x {
+  // Enables scroll
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
-code, .hljs {
+.main-column {
+  @extend .flex-col;
+  padding: 1rem;
+  padding-left: calc(20vw + 1rem);
+  max-width: $content-max-width;
+}
+
+/**
+ * Icons
+ */
+
+.external-link::after {
+  // Icon
+  content: '';
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  // Feather icon: external-link.svg
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItZXh0ZXJuYWwtbGluayI+PHBhdGggZD0iTTE4IDEzdjZhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJWOGEyIDIgMCAwIDEgMi0yaDYiPjwvcGF0aD48cG9seWxpbmUgcG9pbnRzPSIxNSAzIDIxIDMgMjEgOSI+PC9wb2x5bGluZT48bGluZSB4MT0iMTAiIHkxPSIxNCIgeDI9IjIxIiB5Mj0iMyI+PC9saW5lPjwvc3ZnPg==);
+  background-position: center;
+  background-size: cover;
+
+  // Cosmetic
+  margin-left: 0.2rem;
+  opacity: 0.5;
+}
+
+article a[target~=_blank] {
+  @extend .external-link;
+}
+
+svg.feather {
+  width: 0.8em;
+  height: 0.8em;
+}
+
+/**
+ * Misc
+ */
+
+article code {
   background-color: $color-code-bg;
 }
 
-.sidenav-list {
-  @extend .col-start-stretch;
+article .hljs {
+  background-color: $color-code-bg;
 }
 
-.sidenav-list .sidenav-list {
-  margin-left: 0.5rem;
+.flex-row {
+  display: flex;
+  flex-direction: row;
 }
 
-.sidenav-link {
-  @extend .row-between-normal;
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-between {
+  justify-content: space-between;
+}
+
+.flex-stretch {
+  align-items: stretch;
+}
+
+.frb {
+  @extend .flex-row;
+  @extend .flex-between;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.list .list {
+  margin-left: $sf-space / 2;
+}
+
+.list a {
   line-height: 1.6em;
-  > * {
-    border-bottom: 1px dotted;
-  }
-  &:hover > *, &:focus > * {
-    border-bottom: 1px solid;
-  }
-  &.active::after, &:hover::after {
-    content: '→';
-  }
 }
+
+.list a > * {
+  border-bottom: 1px dotted;
+}
+
+.list a:hover > *, .list a:focus > * {
+  border-bottom: 1px solid;
+}
+
+.list .active::after, .list a:hover::after {
+  content: '→';
+}
+
+.flex-1 {flex: 1}
+.flex-2 {flex: 2}
+.flex-3 {flex: 3}
+.flex-4 {flex: 4}
 
 .opacity-40 {
   opacity: 0.4;
 }
 
+.margin-left {
+  margin-left: 1rem;
+}
+
 a.heading-anchor {
-  @extend .fg-gray;
-  @extend .font-smaller;
-  margin-left: 0.2em;
-}
-
-.fg-gray {
   color: gray;
-}
-
-.font-smaller {
-  font-size: 0.8rem;
-}
-
-.text-italic {
-  font-style: italic;
+  margin-left: 0.2rem;
+  &, &:focus:not(:hover) {border: none}
 }

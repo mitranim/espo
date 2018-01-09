@@ -21,34 +21,6 @@ isMutable(Object.freeze({}))   =   false
 
 ---
 
-### `bindAll(object)`
-
-Takes a mutable object and binds all of its methods to it, via
-[`Function.prototype.bind`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind).
-They become _bound methods_ and can be freely detached.
-
-Currently supports only enumerable properties (both own and inherited), and
-therefore doesn't work with spec-compliant classes.
-
-Returns the same `object`.
-
-```js
-// Setup
-const object = {getSelf () {return this}}
-object.getSelf() === object
-
-// Detached unbound method: doesn't work
-const unbound = object.getSelf
-unbound() === global  // true
-
-// Detached bound method: works
-bindAll(object)
-const bound = object.getSelf
-bound() === object  // true
-```
-
----
-
 ### `assign(object, ...sources)`
 
 Similar to
@@ -197,34 +169,15 @@ deref({deref () {return 'value'}})  // 'value'
 
 ### `derefIn(ref, path)`
 
-Like [`deref`](#-deref-ref-), but on a nested path. Recursively dereferences any
-nested refs while drilling down. Safe to call on values that don't implement
-[`isRef`](#-isref-value-).
+Derefs the ref and returns the value at `path` via [`fpx.getIn`](https://mitranim.com/fpx/#-getin-value-path-). When called on values that don't implement [`isRef`](#-isref-value-), this is equivalent to `fpx.getIn`.
 
 ```js
-derefIn(10, [])  // 10
-
-const ref = {
-  deref () {
-    return {
-      nested: {
-        deref () {
-          return 100
-        }
-      }
-    }
-  }
-}
-
-derefIn(ref, ['nested'])  // 100
+derefIn(new Atom({one: {two: 2}}), ['one', 'two'])
+// 2
+derefIn(new Atom({nested: new Atom('val')}), ['nested'])
+// Atom('val')
+derefIn({one: {two: 2}}, ['one', 'two'])
+// 2
 ```
-
----
-
-### `derefAt(path, ref)`
-
-Same as `derefIn(ref, path)`. Useful for
-[partial application](https://mitranim.com/fpx/#-bind-fun-args-)
-when `path` is known in advance.
 
 ---

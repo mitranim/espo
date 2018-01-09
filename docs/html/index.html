@@ -2,7 +2,7 @@
 
 <base href="/espo/">
 <meta charset="utf-8">
-<title>espo</title>
+<title>Espo</title>
 <link rel="stylesheet" href="styles/docs.css">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,600,300italic,600italic&subset=latin" rel="stylesheet">
 <link rel="icon" href="data:;base64,=">
@@ -14,14 +14,12 @@
 <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
 <meta http-equiv="pragma" content="no-cache" />
 
-<body class="row-start-stretch padding-0 no-scroll-x" style="width: 100vw">
-  <div id="sidenav" class="layout fixed-fit padding-1 no-scroll-x" style="width: calc(20% - 2rem)" data-nospill>
+<body>
+  <div id="sidenav" class="side-column pad" data-nospill>
     {{include('partials/sidenav.html')}}
   </div>
 
-  <div id="offset" class="layout" style="width: calc(20% - 1.5rem)"></div>
-
-  <article id="main" class="layout" class="padding-1" style="width: 80%">
+  <article id="main" class="main-column pad">
     {{md(include('partials/overview.md'))}}
     {{md(include('partials/interfaces.md'))}}
     {{md(include('partials/classes.md'))}}
@@ -30,9 +28,9 @@
   </article>
 </body>
 
-{% if (!prod) { %}
+{% if (!PROD) { %}
 <script>
-  window.devMode = true
+  window.DEV = true
 </script>
 {% } %}
 

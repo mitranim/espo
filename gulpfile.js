@@ -1,6 +1,8 @@
 'use strict'
 
-/* ***************************** Dependencies ********************************/
+/**
+ * Dependencies
+ */
 
 const $ = require('gulp-load-plugins')()
 const bs = require('browser-sync').create()
@@ -8,48 +10,46 @@ const del = require('del')
 const gulp = require('gulp')
 const statilConfig = require('./statil')
 
-/* ******************************** Globals **********************************/
+/**
+ * Globals
+ */
 
-const src = {
-  scripts: 'src/**/*.js',
-  docScripts: 'docs/scripts/**/*.js',
-  docHtml: 'docs/html/**/*',
-  docStyles: 'docs/styles/**/*.scss',
-  docStylesMain: 'docs/styles/docs.scss',
-  docFonts: 'node_modules/font-awesome/fonts/**/*',
-}
+const srcScriptFiles = 'src/**/*.js'
+const srcDocScriptFiles = 'docs/scripts/**/*.js'
+const srcDocHtmlFiles = 'docs/html/**/*'
+const srcDocStyleFiles = 'docs/styles/**/*.scss'
+const srcDocStyleMain = 'docs/styles/docs.scss'
 
-const out = {
-  docRoot: 'gh-pages',
-  docStyles: 'gh-pages/styles',
-  docFonts: 'gh-pages/fonts',
-}
+const outDocRootDir = 'gh-pages'
+const outDocStyleDir = 'gh-pages/styles'
 
-/* ********************************* Tasks ***********************************/
+/**
+ * Tasks
+ */
 
 /* --------------------------------- Clear ---------------------------------- */
 
 gulp.task('clear', () => (
   // Skips dotfiles like `.git` and `.gitignore`
-  del(`${out.docRoot}/*`).catch(console.error.bind(console))
+  del(`${outDocRootDir}/*`).catch(console.error.bind(console))
 ))
 
 /* --------------------------------- HTML -----------------------------------*/
 
 gulp.task('docs:html:build', () => (
-  gulp.src(src.docHtml)
+  gulp.src(srcDocHtmlFiles)
     .pipe($.statil(statilConfig))
-    .pipe(gulp.dest(out.docRoot))
+    .pipe(gulp.dest(outDocRootDir))
 ))
 
 gulp.task('docs:html:watch', () => {
-  $.watch(src.docHtml, gulp.series('docs:html:build'))
+  $.watch(srcDocHtmlFiles, gulp.series('docs:html:build'))
 })
 
 /* -------------------------------- Styles ----------------------------------*/
 
 gulp.task('docs:styles:build', () => (
-  gulp.src(src.docStylesMain)
+  gulp.src(srcDocStyleMain)
     .pipe($.sass())
     .pipe($.autoprefixer())
     .pipe($.cleanCss({
@@ -58,27 +58,17 @@ gulp.task('docs:styles:build', () => (
       advanced: false,
       compatibility: {properties: {colors: false}},
     }))
-    .pipe(gulp.dest(out.docStyles))
+    .pipe(gulp.dest(outDocStyleDir))
 ))
 
 gulp.task('docs:styles:watch', () => {
-  $.watch(src.docStyles, gulp.series('docs:styles:build'))
-})
-
-/* -------------------------------- Fonts -----------------------------------*/
-
-gulp.task('docs:fonts:build', () => (
-  gulp.src(src.docFonts).pipe(gulp.dest(out.docFonts))
-))
-
-gulp.task('docs:fonts:watch', () => {
-  $.watch(src.docFonts, gulp.series('docs:fonts:build'))
+  $.watch(srcDocStyleFiles, gulp.series('docs:styles:build'))
 })
 
 /* --------------------------------- Lint ---------------------------------- */
 
 gulp.task('lint', () => (
-  gulp.src([src.scripts, src.docScripts])
+  gulp.src([srcScriptFiles, srcDocScriptFiles])
     .pipe($.eslint())
     .pipe($.eslint.format())
     .pipe($.eslint.failAfterError())
@@ -112,14 +102,12 @@ gulp.task('docs:server', () => (
 
 gulp.task('buildup', gulp.parallel(
   'docs:html:build',
-  'docs:styles:build',
-  'docs:fonts:build'
+  'docs:styles:build'
 ))
 
 gulp.task('watch', gulp.parallel(
   'docs:html:watch',
   'docs:styles:watch',
-  'docs:fonts:watch',
   'docs:server'
 ))
 

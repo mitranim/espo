@@ -2,7 +2,7 @@
 
 module.exports = [
   {
-    entry: 'src/index.js',
+    entry: 'src/espo.js',
     dest: 'es/espo.js',
     format: 'es',
     external: ['fpx'],
