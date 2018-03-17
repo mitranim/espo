@@ -1,6 +1,4 @@
-import {call, getIn, getAt, slice, includes, every, indexOf, pipe,
-  is, isList, isArray, isDict, isObject, isFunction, isPrimitive, isComplex,
-  validate} from 'fpx'
+import * as f from 'fpx'
 
 const {isFrozen} = Object
 const {reduce} = Array.prototype
@@ -10,24 +8,24 @@ const {reduce} = Array.prototype
  */
 
 export function isDeinitable(value) {
-  return isObject(value) && isFunction(value.deinit)
+  return f.isComplex(value) && f.isFunction(value.deinit)
 }
 
 export function isOwner(value) {
-  return isDeinitable(value) && isFunction(value.unown)
+  return isDeinitable(value) && f.isFunction(value.unown)
 }
 
 export function isRef(value) {
-  return isObject(value) && isFunction(value.deref)
+  return f.isComplex(value) && f.isFunction(value.deref)
 }
 
 // Happens to be a subset of `isObservable`. Potential confusion. How to fix?
 export function isSubscription(value) {
-  return isDeinitable(value) && isFunction(value.trigger)
+  return isDeinitable(value) && f.isFunction(value.trigger)
 }
 
 export function isObservable(value) {
-  return isDeinitable(value) && isFunction(value.subscribe) && isFunction(value.unsubscribe)
+  return isDeinitable(value) && f.isFunction(value.subscribe) && f.isFunction(value.unsubscribe)
 }
 
 export function isObservableRef(value) {
@@ -35,7 +33,7 @@ export function isObservableRef(value) {
 }
 
 export function isAtom(value) {
-  return isObservableRef(value) && isFunction(value.swap) && isFunction(value.reset)
+  return isObservableRef(value) && f.isFunction(value.swap) && f.isFunction(value.reset)
 }
 
 export function isAgent(value) {
@@ -48,7 +46,7 @@ export function isAgent(value) {
 
 export class Que {
   constructor(deque) {
-    validate(deque, isFunction)
+    f.validate(deque, f.isFunction)
     this.state = this.states.IDLE
     this.pending = []
     this.deque = deque
@@ -95,12 +93,12 @@ Que.prototype.states = {
 
 export class TaskQue extends Que {
   constructor() {
-    super(call)
+    super(f.call)
   }
 
   push(fun) {
-    validate(fun, isFunction)
-    const task = fun.bind(this, ...slice(arguments, 1))
+    f.validate(fun, f.isFunction)
+    const task = fun.bind(this, ...f.slice(arguments, 1))
     super.push(task)
     return super.pull.bind(this, task)
   }
@@ -134,8 +132,8 @@ export class MessageQue extends TaskQue {
 
 export class Subscription {
   constructor(observable, callback) {
-    validate(observable, isObservable)
-    validate(callback, isFunction)
+    f.validate(observable, isObservable)
+    f.validate(callback, f.isFunction)
     this.observable = observable
     this.callback = callback
     this.state = this.states.ACTIVE
@@ -174,7 +172,7 @@ export class Observable {
   onDeinit() {}
 
   subscribe(callback) {
-    validate(callback, isFunction)
+    f.validate(callback, f.isFunction)
 
     if (this.state === this.states.IDLE) {
       this.state = this.states.ACTIVE
@@ -227,14 +225,14 @@ export class Atom extends Observable {
   }
 
   swap(mod) {
-    validate(mod, isFunction)
-    this.reset(mod(this.value, ...slice(arguments, 1)))
+    f.validate(mod, f.isFunction)
+    this.reset(mod(this.value, ...f.slice(arguments, 1)))
   }
 
   reset(next) {
     const prev = this.value
     this.value = next
-    if (!is(prev, next)) this.trigger(this)
+    if (!f.is(prev, next)) this.trigger(this)
   }
 }
 
@@ -273,14 +271,14 @@ export class Reaction {
   }
 
   deref(ref) {
-    validate(ref, isRef)
+    f.validate(ref, isRef)
     if (this.nextContext && isObservable(ref)) this.nextContext.subscribeTo(ref)
     return ref.deref()
   }
 
   run(fun, onTrigger) {
-    validate(fun, isFunction)
-    validate(onTrigger, isFunction)
+    f.validate(fun, f.isFunction)
+    f.validate(onTrigger, f.isFunction)
 
     if (this.nextContext) throw Error(`Unexpected overlapping .run()`)
 
@@ -299,7 +297,7 @@ export class Reaction {
 
   // TODO document
   loop(fun) {
-    validate(fun, isFunction)
+    f.validate(fun, f.isFunction)
     const loop = () => {
       this.run(fun, loop)
     }
@@ -323,7 +321,7 @@ export class Reaction {
   }
 
   static loop(fun) {
-    validate(fun, isFunction)
+    f.validate(fun, f.isFunction)
     const reaction = new this()
     try {
       reaction.loop(fun)
@@ -348,7 +346,7 @@ class ReactionContext {
   subscribeTo(observable) {
     if (this.state === this.states.PENDING) {
       const sub = observable.subscribe(this.trigger)
-      validate(sub, isSubscription)
+      f.validate(sub, isSubscription)
       this.subscriptions.push(sub)
     }
   }
@@ -374,8 +372,8 @@ ReactionContext.prototype.states = {
 
 export class Computation extends Observable {
   constructor(def, equal) {
-    validate(def, isFunction)
-    validate(equal, isFunction)
+    f.validate(def, f.isFunction)
+    f.validate(equal, f.isFunction)
     super()
     this.def = def
     this.equal = equal
@@ -406,9 +404,9 @@ function computationUpdate(computation, reaction) {
 export class Query extends Observable {
   constructor(observableRef, query, equal) {
     super()
-    validate(observableRef, isObservableRef)
-    validate(query, isFunction)
-    validate(equal, isFunction)
+    f.validate(observableRef, isObservableRef)
+    f.validate(query, f.isFunction)
+    f.validate(equal, f.isFunction)
     this.observableRef = observableRef
     this.query = query
     this.equal = equal
@@ -442,13 +440,17 @@ function onTrigger(query, observableRef) {
 
 export class PathQuery extends Query {
   constructor(observableRef, path, equal) {
-    validate(path, isPath)
-    super(observableRef, pipe(deref, getAt.bind(null, path)), equal)
+    f.validate(path, isPath)
+    super(
+      observableRef,
+      function derefAtPath(ref) {return f.getIn(ref.deref(), path)},
+      equal
+    )
   }
 }
 
 function isPath(value) {
-  return isList(value) && every(value, isPrimitive)
+  return f.isList(value) && f.every(value, f.isPrimitive)
 }
 
 /**
@@ -481,17 +483,17 @@ export function deref(ref) {
 }
 
 export function derefIn(ref, path) {
-  return getIn(deref(ref), path)
+  return f.getIn(deref(ref), path)
 }
 
 export const global = typeof self !== 'undefined' && self || Function('return this')()  // eslint-disable-line
 
 export function isMutable(value) {
-  return isComplex(value) && !isFrozen(value)
+  return f.isComplex(value) && !isFrozen(value)
 }
 
 export function assign(object) {
-  validate(object, isMutable)
+  f.validate(object, isMutable)
   return reduce.call(arguments, assignOne)
 }
 
@@ -501,25 +503,25 @@ function assignOne(object, src) {
 }
 
 export function pull(array, value) {
-  validate(array, isArray)
-  const index = indexOf(array, value)
+  f.validate(array, f.isArray)
+  const index = f.indexOf(array, value)
   if (index !== -1) array.splice(index, 1)
   return array
 }
 
 export function each(coll, fun) {
-  if (isList(coll)) {
+  if (f.isList(coll)) {
     for (let i = -1; ++i < coll.length;) fun(coll[i], i)
   }
-  if (isComplex(coll)) {
+  if (f.isComplex(coll)) {
     for (const key in coll) fun(coll[key], key)
   }
 }
 
 // TODO finalise the API, then document
 export function forceEach(list, fun, a, b, c) {
-  validate(list, isList)
-  validate(fun, isFunction)
+  f.validate(list, f.isList)
+  f.validate(fun, f.isFunction)
 
   let error = null
   for (let i = -1; (i += 1) < list.length;) {
@@ -531,9 +533,9 @@ export function forceEach(list, fun, a, b, c) {
 
 // TODO finalise the API, then document
 export function flushBy(values, fun, a, b, c) {
-  validate(fun, isFunction)
-  validate(values, isArray)
-  validate(values, isMutable)
+  f.validate(fun, f.isFunction)
+  f.validate(values, f.isArray)
+  f.validate(values, isMutable)
   try {
     while (values.length) {
       fun.call(this, values.shift(), a, b, c)
@@ -550,19 +552,19 @@ export function flushBy(values, fun, a, b, c) {
  */
 
 function deinitDiffAcyclic(prev, next, visitedRefs) {
-  if (is(prev, next)) return
+  if (f.is(prev, next)) return
   if (isDeinitable(prev)) {
     prev.deinit()
     return
   }
 
-  if (isObject(prev)) {
-    // Don't bother traversing non-plain objects. This allows to safely include
-    // third party objects with unknown structure.
-    if (!isDict(prev) && !isArray(prev)) return
+  if (f.isObject(prev)) {
+    // Don't bother traversing non-plain structures.
+    // This allows to safely include third party refs with unknown structure.
+    if (!f.isDict(prev) && !f.isArray(prev)) return
 
     // This skips cyclic references
-    if (includes(visitedRefs, prev)) return
+    if (f.includes(visitedRefs, prev)) return
 
     visitedRefs.push(prev)
     traverseDiffBy(deinitDiffAcyclic, prev, next, visitedRefs)
@@ -571,14 +573,14 @@ function deinitDiffAcyclic(prev, next, visitedRefs) {
 
 // Ugly, TODO simplify
 function traverseDiffBy(fun, prev, next, visitedRefs) {
-  validate(fun, isFunction)
+  f.validate(fun, f.isFunction)
 
-  if (isList(prev)) {
+  if (f.isList(prev)) {
     let error = null
     for (let i = -1; (i += 1) < prev.length;) {
       const prevValue = prev[i]
-      if (includes(next, prevValue)) continue
-      const nextValue = isList(next) ? next[i] : undefined
+      if (f.includes(next, prevValue)) continue
+      const nextValue = f.isList(next) ? next[i] : undefined
       try {fun(prevValue, nextValue, visitedRefs)}
       catch (err) {error = err}
     }
@@ -586,11 +588,11 @@ function traverseDiffBy(fun, prev, next, visitedRefs) {
     return
   }
 
-  if (isObject(prev)) {
+  if (f.isObject(prev)) {
     let error = null
     for (const key in prev) {
       const prevValue = prev[key]
-      const nextValue = isObject(next) ? next[key] : undefined
+      const nextValue = f.isObject(next) ? next[key] : undefined
       try {fun(prevValue, nextValue, visitedRefs)}
       catch (err) {error = err}
     }
