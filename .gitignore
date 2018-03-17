@@ -1,8 +1,6 @@
-# Files
 .DS_Store
 *.log
-
-# Folders
+todo
 dist
 es
 gh-pages

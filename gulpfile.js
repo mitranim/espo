@@ -80,7 +80,7 @@ gulp.task('docs:server', () => (
   bs.init({
     startPath: '/espo/',
     server: {
-      baseDir: 'gh-pages',
+      baseDir: outDocRootDir,
       middleware: [
         (req, res, next) => {
           req.url = req.url.replace(/^\/espo\//, '').replace(/^[/]*/, '/')
@@ -89,7 +89,7 @@ gulp.task('docs:server', () => (
       ],
     },
     port: 6539,
-    files: 'gh-pages',
+    files: outDocRootDir,
     open: false,
     online: false,
     ui: false,

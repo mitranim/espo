@@ -15,3 +15,7 @@ const {someFunction} = require('espo')
 ```
 
 See the API reference: https://mitranim.com/espo/.
+
+## Misc
+
+I'm receptive to suggestions. If this library _almost_ satisfies you but needs changes, open an issue or chat me up. Contacts: https://mitranim.com/#contacts
