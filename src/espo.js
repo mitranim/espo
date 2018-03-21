@@ -1,7 +1,6 @@
 import * as f from 'fpx'
 
 const {isFrozen} = Object
-const {reduce} = Array.prototype
 
 /**
  * Interfaces
@@ -48,8 +47,8 @@ export class Que {
   constructor(deque) {
     f.validate(deque, f.isFunction)
     this.state = this.states.IDLE
-    this.pending = []
     this.deque = deque
+    this.pending = []
   }
 
   push(value) {
@@ -93,15 +92,22 @@ Que.prototype.states = {
 
 export class TaskQue extends Que {
   constructor() {
-    super(f.call)
+    super(runTask)
   }
 
   push(fun) {
     f.validate(fun, f.isFunction)
-    const task = fun.bind(this, ...f.slice(arguments, 1))
-    super.push(task)
-    return super.pull.bind(this, task)
+    super.push(arguments)
+    return super.pull.bind(this, arguments)
   }
+}
+
+// If args = `[fun, 10, 20, 30]`
+// Then result = `fun.call(this, 10, 20, 30)`
+function runTask(args) {
+  const fun = args[0]
+  args[0] = this
+  return fun.call.apply(fun, args)
 }
 
 export class MessageQue extends TaskQue {
@@ -226,7 +232,8 @@ export class Atom extends Observable {
 
   swap(mod) {
     f.validate(mod, f.isFunction)
-    this.reset(mod(this.value, ...f.slice(arguments, 1)))
+    arguments[0] = this.value  // relies on strict mode
+    this.reset(mod(...arguments))
   }
 
   reset(next) {
@@ -379,6 +386,7 @@ export class Computation extends Observable {
     this.equal = equal
     this.reaction = new Reaction()
     this.value = undefined
+    this.computationUpdate = computationUpdate.bind(null, this)
   }
 
   deref() {
@@ -387,7 +395,7 @@ export class Computation extends Observable {
   }
 
   onInit() {
-    this.reaction.loop(computationUpdate.bind(null, this))
+    this.reaction.loop(this.computationUpdate)
   }
 
   onDeinit() {
@@ -412,6 +420,7 @@ export class Query extends Observable {
     this.equal = equal
     this.value = undefined
     this.sub = null
+    this.onTrigger = onTrigger.bind(null, this)
   }
 
   deref() {
@@ -422,7 +431,7 @@ export class Query extends Observable {
   }
 
   onInit() {
-    this.sub = this.observableRef.subscribe(onTrigger.bind(null, this))
+    this.sub = this.observableRef.subscribe(this.onTrigger)
     this.value = this.query(this.observableRef.deref())
   }
 
@@ -443,7 +452,7 @@ export class PathQuery extends Query {
     f.validate(path, isPath)
     super(
       observableRef,
-      function derefAtPath(ref) {return f.getIn(ref.deref(), path)},
+      function getAtPath(value) {return f.getIn(value, path)},
       equal
     )
   }
@@ -494,11 +503,10 @@ export function isMutable(value) {
 
 export function assign(object) {
   f.validate(object, isMutable)
-  return reduce.call(arguments, assignOne)
-}
-
-function assignOne(object, src) {
-  if (src) for (const key in src) object[key] = src[key]
+  for (let i = 0; ++i < arguments.length;) {
+    const src = arguments[i]
+    if (f.isComplex(src)) for (const key in src) object[key] = src[key]
+  }
   return object
 }
 
@@ -513,7 +521,7 @@ export function each(coll, fun) {
   if (f.isList(coll)) {
     for (let i = -1; ++i < coll.length;) fun(coll[i], i)
   }
-  if (f.isComplex(coll)) {
+  else if (f.isComplex(coll)) {
     for (const key in coll) fun(coll[key], key)
   }
 }
@@ -535,7 +543,7 @@ export function forceEach(list, fun, a, b, c) {
 export function flushBy(values, fun, a, b, c) {
   f.validate(fun, f.isFunction)
   f.validate(values, f.isArray)
-  f.validate(values, isMutable)
+  f.validate(values, isNonFrozen)
   try {
     while (values.length) {
       fun.call(this, values.shift(), a, b, c)
@@ -547,10 +555,15 @@ export function flushBy(values, fun, a, b, c) {
   }
 }
 
+function isNonFrozen(value) {
+  return !isFrozen(value)
+}
+
 /**
  * Utils (internal)
  */
 
+// TODO: can this be made non-recursive for better stack traces?
 function deinitDiffAcyclic(prev, next, visitedRefs) {
   if (f.is(prev, next)) return
   if (isDeinitable(prev)) {

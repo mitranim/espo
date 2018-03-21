@@ -5,4 +5,6 @@ dist
 es
 gh-pages
 node_modules
-mocks
+/mock
+/todo
+/perf.js
