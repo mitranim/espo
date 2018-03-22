@@ -232,7 +232,8 @@ export class Atom extends Observable {
 
   swap(mod) {
     f.validate(mod, f.isFunction)
-    arguments[0] = this.value  // relies on strict mode
+    // relies on strict mode
+    arguments[0] = this.deref()
     this.reset(mod(...arguments))
   }
 
@@ -246,7 +247,7 @@ export class Atom extends Observable {
 // WTB better name
 export class Agent extends Atom {
   reset(next) {
-    const prev = this.value
+    const prev = this.deref()
     try {super.reset(next)}
     finally {deinitDiff(prev, next)}
   }
