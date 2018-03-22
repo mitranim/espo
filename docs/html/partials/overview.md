@@ -22,5 +22,3 @@ const {someFunction} = require('espo')
 ```
 
 On this page, all Espo words are exported into global scope. You can run the examples in the browser console.
-
----

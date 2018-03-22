@@ -23,10 +23,9 @@ isMutable(Object.freeze({}))   =   false
 
 ### `assign(object, ...sources)`
 
-Similar to
-[`Object.assign`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
-Mutates `object`, assigning enumerable properties (own and inherited) from each
-`source`. Returns the same `object`.
+Similar to [`Object.assign`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign). Mutates `object`, assigning enumerable properties (own and inherited) from each `source`. Returns the same `object`.
+
+Stricter than `Object.assign`: requires the input to be mutable, doesn't silently replace a primitive with an object.
 
 Be wary: mutation is often misused. When dealing with data, you should program
 in a functional style, treating your data structures as immutable. Use a library
@@ -42,18 +41,17 @@ assign({}, {one: 1}, {two: 2})  =  {one: 1, two: 2}
 
 ### `pull(array, value)`
 
-Mutates `array`, removing one occurrence of `value` from the start, comparing by
-[`fpx.is`](https://mitranim.com/fpx/#-is-one-other-). Returns `array`.
+Mutates `array`, removing one occurrence of `value` from the start, comparing by [`fpx.is`](https://mitranim.com/fpx/#-is-one-other-).
 
-Counterpart to the built-ins
-[`Array.prototype.push`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push)
-and
-[`Array.prototype.unshift`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift).
+Counterpart to the built-ins [`Array.prototype.push`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push) and [`Array.prototype.unshift`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift).
 
 ```js
 const array = [10, 20]
-pull(array, 10)  // returns `array`
-array  // [20]
+
+pull(array, 10)
+
+array
+// [20]
 ```
 
 ---
@@ -179,5 +177,3 @@ derefIn(new Atom({nested: new Atom('val')}), ['nested'])
 derefIn({one: {two: 2}}, ['one', 'two'])
 // 2
 ```
-
----

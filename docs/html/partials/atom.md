@@ -64,5 +64,3 @@ atom.reset(20)
 
 atom.deref()  // 20
 ```
-
----

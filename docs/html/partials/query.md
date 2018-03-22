@@ -70,5 +70,3 @@ atom.swap(value => ({outer: {inner: 20}}))
 // now the query is inert again
 sub.deinit()
 ```
-
----

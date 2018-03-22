@@ -302,7 +302,6 @@ export class Reaction {
     }
   }
 
-  // TODO document
   loop(fun) {
     f.validate(fun, f.isFunction)
     const loop = () => {

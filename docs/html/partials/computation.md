@@ -41,5 +41,3 @@ sub.deinit()
 // computation is now inert and safe to leave to GC
 // alternatively, call computation.deinit() to drop all subs
 ```
-
----

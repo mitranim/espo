@@ -202,5 +202,3 @@ Same as `subscription.deinit()`.
 #### `messageQue.push(...args)`
 
 Broadcasts `...args` to all current subscribers.
-
----

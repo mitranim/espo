@@ -141,5 +141,3 @@ sub
 atom.reset(30)
 // nothing
 ```
-
----

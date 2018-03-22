@@ -2,13 +2,9 @@
 
 `implements` [`isDeinitable`](#-isdeinitable-value-)
 
-Enables implicit reactivity driven by _procedural data access_. Write code that
-looks like a plain synchronous function, but is actually reactive. With
-`Reaction`, you should never again subscribe or unsubscribe manually. Simply
-pull data from [`observable refs`](#-isobservableref-value-). The subscriptions
-are updated on each run, and therefore may change over time.
+Enables implicit reactivity driven by _procedural data access_. Write code that looks like a plain imperative function, but is actually reactive. With `Reaction`, you don't subscribe or unsubscribe manually. Simply pull data from [`observable refs`](#-isobservableref-value-). The subscriptions are updated on each run, and therefore may change over time.
 
-See [`Computation`](#-computation-def-equal-) for an observable variant.
+See [`Computation`](#-computation-def-equal-) for a reaction that is itself observable.
 
 ```js
 const one = new Atom(10)
@@ -46,9 +42,9 @@ and deinited. They're also deinited on `.deinit()`. Overlapping the subscription
 lifetimes allows to avoid premature deinitialisation of lazy observables.
 
 ```js
-const atom = new Atom(10)
-
 const reaction = new Reaction()
+
+const atom = new Atom(10)
 
 reaction.run(
   function effect ({deref}) {
@@ -73,11 +69,31 @@ Outside a `.run()`, equivalent to [`deref(ref)`](#-deref-ref-). During a
 `.run()`, and if `ref` implements [`isObservable `](#-isobservable-value-),
 implicitly subscribes to `ref`. See the examples above.
 
-`.deref()` is instance-bound for compatibility with destructuring.
+`.deref()` is instance-bound for convenient destructuring.
+
+#### `reaction.loop(fun)`
+
+where `fun: ƒ(Reaction)`
+
+Runs `fun` immediately, then reruns it on every change in the watched observables. See the first usage example.
+
+```js
+// Doesn't do anything
+const reaction = new Reaction()
+
+const atom = new Atom(10)
+
+reaction.loop(({deref}) => {
+  console.info(deref(atom))
+})
+// prints '10'
+
+atom.reset(20)
+// prints '20'
+
+reaction.deinit()
+```
 
 #### static `Reaction.loop(fun)`
 
-Creates and starts a reaction that reruns `fun` on every change. See the examples
-above.
-
----
+Creates and starts a reaction using its `loop` method. If the first run produces an exception, automatically deinits the reaction to prevent subscription leaks. See the first usage example above.

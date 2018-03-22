@@ -55,5 +55,3 @@ Called when removing the last subscription.
 
 Deinits all current subscriptions. This incidentally triggers `.onDeinit()` if
 the observable is active.
-
----

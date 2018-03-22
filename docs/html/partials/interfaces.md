@@ -153,5 +153,3 @@ Interface for subscription objects returned by
 method is called by the observable that created the subscription. Calling
 `.deinit()` should stop the subscription _immediately_, even if the observable
 has a pending notification.
-
----
