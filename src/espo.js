@@ -102,22 +102,22 @@ export class TaskQue extends Que {
   }
 }
 
-// If args = `[fun, 10, 20, 30]`
-// Then result = `fun.call(this, 10, 20, 30)`
+// if args = `[fun, 10, 20, 30]`
+// then result = `fun.call(this, 10, 20, 30)`
 function runTask(args) {
   const fun = args[0]
   args[0] = this
   return fun.call.apply(fun, args)
 }
 
-export class MessageQue extends TaskQue {
+export class MessageQue extends Que {
   constructor() {
-    super()
+    super(triggerSubscriptions)
     this.subscriptions = []
   }
 
   push() {
-    super.push(triggerSubscriptions, arguments)
+    super.push(arguments)
   }
 
   subscribe(callback) {
@@ -244,7 +244,6 @@ export class Atom extends Observable {
   }
 }
 
-// WTB better name
 export class Agent extends Atom {
   reset(next) {
     const prev = this.deref()
@@ -273,8 +272,8 @@ export class Agent extends Atom {
 
 export class Reaction {
   constructor() {
-    this.nextContext = null
-    this.lastContext = null
+    this.nextContext = undefined
+    this.lastContext = undefined
     this.deref = this.deref.bind(this)
   }
 
@@ -298,7 +297,7 @@ export class Reaction {
     finally {
       const {nextContext, lastContext} = this
       this.lastContext = nextContext
-      this.nextContext = null
+      this.nextContext = undefined
       if (lastContext) lastContext.deinit()
     }
   }
@@ -321,8 +320,8 @@ export class Reaction {
         if (lastContext) lastContext.deinit()
       }
       finally {
-        this.nextContext = null
-        this.lastContext = null
+        this.nextContext = undefined
+        this.lastContext = undefined
       }
     }
   }
@@ -361,7 +360,7 @@ class ReactionContext {
   trigger() {
     if (this.state === this.states.PENDING) {
       this.state = this.states.TRIGGERED
-      this.onTrigger.call(null, this.reaction)
+      this.onTrigger.call(undefined, this.reaction)
     }
   }
 
@@ -386,7 +385,7 @@ export class Computation extends Observable {
     this.equal = equal
     this.reaction = new Reaction()
     this.value = undefined
-    this.computationUpdate = computationUpdate.bind(null, this)
+    this.computationUpdate = computationUpdate.bind(undefined, this)
   }
 
   deref() {
@@ -419,8 +418,8 @@ export class Query extends Observable {
     this.query = query
     this.equal = equal
     this.value = undefined
-    this.sub = null
-    this.onTrigger = onTrigger.bind(null, this)
+    this.sub = undefined
+    this.onTrigger = onTrigger.bind(undefined, this)
   }
 
   deref() {
@@ -437,7 +436,7 @@ export class Query extends Observable {
 
   onDeinit() {
     this.sub.deinit()
-    this.sub = null
+    this.sub = undefined
   }
 }
 
@@ -526,12 +525,12 @@ export function each(coll, fun) {
   }
 }
 
-// TODO finalise the API, then document
+// TODO finalize the API, then document
 export function forceEach(list, fun, a, b, c) {
   f.validate(list, f.isList)
   f.validate(fun, f.isFunction)
 
-  let error = null
+  let error = undefined
   for (let i = -1; (i += 1) < list.length;) {
     try {fun.call(this, list[i], a, b, c)}
     catch (err) {error = err}
@@ -539,11 +538,10 @@ export function forceEach(list, fun, a, b, c) {
   if (error) throw error
 }
 
-// TODO finalise the API, then document
+// TODO finalize the API, then document
 export function flushBy(values, fun, a, b, c) {
   f.validate(fun, f.isFunction)
   f.validate(values, f.isArray)
-  f.validate(values, isNonFrozen)
   try {
     while (values.length) {
       fun.call(this, values.shift(), a, b, c)
@@ -553,10 +551,6 @@ export function flushBy(values, fun, a, b, c) {
     flushBy.call(this, values, fun, a, b, c)
     throw err
   }
-}
-
-function isNonFrozen(value) {
-  return !isFrozen(value)
 }
 
 /**
@@ -589,7 +583,7 @@ function traverseDiffBy(fun, prev, next, visitedRefs) {
   f.validate(fun, f.isFunction)
 
   if (f.isList(prev)) {
-    let error = null
+    let error = undefined
     for (let i = -1; (i += 1) < prev.length;) {
       const prevValue = prev[i]
       if (f.includes(next, prevValue)) continue
@@ -602,7 +596,7 @@ function traverseDiffBy(fun, prev, next, visitedRefs) {
   }
 
   if (f.isObject(prev)) {
-    let error = null
+    let error = undefined
     for (const key in prev) {
       const prevValue = prev[key]
       const nextValue = f.isObject(next) ? next[key] : undefined
