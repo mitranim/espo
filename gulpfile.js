@@ -6,9 +6,13 @@
 
 const $ = require('gulp-load-plugins')()
 const bs = require('browser-sync').create()
+const cp = require('child_process')
 const del = require('del')
 const gulp = require('gulp')
+const log = require('fancy-log')
+const rollup = require('rollup')
 const statilConfig = require('./statil')
+const rollupConfig = require('./rollup.config')
 
 /**
  * Globals
@@ -23,6 +27,8 @@ const srcDocStyleMain = 'docs/styles/docs.scss'
 const outDocRootDir = 'gh-pages'
 const outDocStyleDir = 'gh-pages/styles'
 
+process.env.VERSION = cp.execSync('git rev-parse --short HEAD').toString().trim()
+
 /**
  * Tasks
  */
@@ -33,6 +39,34 @@ gulp.task('clear', () => (
   // Skips dotfiles like `.git` and `.gitignore`
   del(`${outDocRootDir}/*`).catch(console.error.bind(console))
 ))
+
+/* -------------------------------- Rollup --------------------------------- */
+
+gulp.task('rollup:build', async () => {
+  for (const config of rollupConfig) {
+    const bundle = await rollup.rollup(config)
+    await bundle.write(config.output)
+  }
+})
+
+gulp.task('rollup:watch', () => {
+  const watcher = rollup.watch(rollupConfig)
+
+  watcher.on('event', event => {
+    const {code, input, duration} = event
+
+    if (code === 'START' || code === 'BUNDLE_START' || code === 'END') {
+      return
+    }
+
+    if (code === 'BUNDLE_END') {
+      log('[rollup]', code, input, duration, 'ms')
+      return
+    }
+
+    log('[rollup]', event)
+  })
+})
 
 /* --------------------------------- HTML -----------------------------------*/
 
@@ -106,11 +140,12 @@ gulp.task('buildup', gulp.parallel(
 ))
 
 gulp.task('watch', gulp.parallel(
+  'rollup:watch',
   'docs:html:watch',
   'docs:styles:watch',
   'docs:server'
 ))
 
-gulp.task('build', gulp.series('clear', 'buildup', 'lint'))
+gulp.task('build', gulp.series('clear', 'buildup', 'lint', 'rollup:build'))
 
 gulp.task('default', gulp.series('build', 'watch'))

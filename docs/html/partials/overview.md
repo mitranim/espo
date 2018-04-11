@@ -4,6 +4,8 @@
 
 Library for reactive and stateful programming: observables, implicit reactivity, automatic resource cleanup.
 
+Relatively small: 10 KB minified. Written with ES2015 imports/exports. A module bundler such as Rollup or (properly configured) Webpack 4+ should be able to pick only the parts you actually use.
+
 See sibling libraries:
 
   * Emerge: <a href="https://github.com/Mitranim/emerge" target="_blank">https://github.com/Mitranim/emerge</a>. Efficient patching and merging of plain JS data.

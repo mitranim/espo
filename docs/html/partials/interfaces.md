@@ -12,7 +12,7 @@ interface isDeinitable {
 }
 ```
 
-Interface for objects that have a _lifetime_ and must be deinitialised before
+Interface for objects that have a _lifetime_ and must be deinitialized before
 you can leave them to the GC. `.deinit()` should make the object inert,
 releasing any resources it owns, tearing down any subscriptions, etc.
 

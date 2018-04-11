@@ -39,7 +39,7 @@ the next `.run()`, which is typically [immediate](#static-reaction-loop-fun-),
 no further triggers will occur, but subscriptions remain "active" until the end
 of the next `.run()`, at which point they're replaced with the new subscriptions
 and deinited. They're also deinited on `.deinit()`. Overlapping the subscription
-lifetimes allows to avoid premature deinitialisation of lazy observables.
+lifetimes allows to avoid premature deinitialization of lazy observables.
 
 ```js
 const reaction = new Reaction()

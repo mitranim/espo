@@ -7,9 +7,9 @@ Abstract class for implementing [`observables`](#-isobservable-value-) and
 See [`Atom`](#-atom-value-) and [`Computation`](#-computation-def-equal-), which are based
 on this.
 
-Uses subscription counting to lazily initialise and deinitialise. Calls
+Uses subscription counting to lazily initialize and deinitialize. Calls
 `.onInit()` when adding the first subscription, and `.onDeinit()` when removing
-the last. May initialise and deinitialise repeatedly over the course of its
+the last. May initialize and deinitialize repeatedly over the course of its
 lifetime. A subclass may override `.onInit()` and `.onDeinit()` to setup and
 teardown any external resources it needs, such as HTTP requests or websockets.
 
