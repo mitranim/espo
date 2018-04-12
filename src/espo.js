@@ -1,7 +1,5 @@
 import * as f from 'fpx'
 
-const {isFrozen} = Object
-
 /**
  * Interfaces
  */
@@ -46,6 +44,7 @@ export function isAgent(value) {
 export class Que {
   constructor(deque) {
     f.validate(deque, f.isFunction)
+    this.states = queStates
     this.state = this.states.IDLE
     this.deque = deque
     this.pending = []
@@ -84,7 +83,7 @@ export class Que {
   }
 }
 
-Que.prototype.states = {
+const queStates = {
   IDLE: 'IDLE',
   DAMMED: 'DAMMED',
   FLUSHING: 'FLUSHING',
@@ -142,6 +141,7 @@ export class Subscription {
     f.validate(callback, f.isFunction)
     this.observable = observable
     this.callback = callback
+    this.states = subscriptionStates
     this.state = this.states.ACTIVE
   }
 
@@ -159,13 +159,14 @@ export class Subscription {
   }
 }
 
-Subscription.prototype.states = {
+const subscriptionStates = {
   ACTIVE: 'ACTIVE',
   IDLE: 'IDLE',
 }
 
 export class Observable {
   constructor() {
+    this.states = observableStates
     this.state = this.states.IDLE
     this.subscriptions = []
     this.que = new Que(triggerSubscriptions.bind(this))
@@ -207,7 +208,7 @@ export class Observable {
   }
 }
 
-Observable.prototype.states = {
+const observableStates = {
   IDLE: 'IDLE',
   ACTIVE: 'ACTIVE',
 }
@@ -342,6 +343,7 @@ export class Reaction {
 
 class ReactionContext {
   constructor(reaction, onTrigger) {
+    this.states = reactionContextStates
     this.state = this.states.PENDING
     this.reaction = reaction
     this.onTrigger = onTrigger
@@ -370,7 +372,7 @@ class ReactionContext {
   }
 }
 
-ReactionContext.prototype.states = {
+const reactionContextStates = {
   PENDING: 'PENDING',
   TRIGGERED: 'TRIGGERED',
   DEAD: 'DEAD',
@@ -494,10 +496,11 @@ export function derefIn(ref, path) {
   return f.getIn(deref(ref), path)
 }
 
-export const global = typeof self !== 'undefined' && self || Function('return this')()  // eslint-disable-line
+// The "pure" annotation is for UglifyJS.
+export const global = /* #__PURE__ */Function('return this')()  // eslint-disable-line
 
 export function isMutable(value) {
-  return f.isComplex(value) && !isFrozen(value)
+  return f.isComplex(value) && !Object.isFrozen(value)
 }
 
 export function assign(object) {

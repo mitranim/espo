@@ -21,8 +21,7 @@ module.exports = [
     external: ['fpx'],
     plugins: [
       require('rollup-plugin-uglify')({
-        mangle: true,
-        toplevel: true,
+        mangle: {toplevel: true},
         compress: true,
       }),
     ],

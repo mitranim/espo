@@ -4,7 +4,7 @@
 
 Library for reactive and stateful programming: observables, implicit reactivity, automatic resource cleanup.
 
-Relatively small: 10 KB minified. Written with ES2015 imports/exports. A module bundler such as Rollup or (properly configured) Webpack 4+ should be able to pick only the parts you actually use.
+Relatively small: 10 KB minified. Written with ES2015 imports/exports. Transpiled with annotations that allow UglifyJS to drop unused classes. Webpack 4+ or Rollup, in combination with UglifyJS, should strip out the unused parts, leaving only what you actually use.
 
 See sibling libraries:
 
