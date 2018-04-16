@@ -4,7 +4,6 @@ module.exports = [
   {
     input: 'src/espo.js',
     output: {file: 'es/espo.js', format: 'es'},
-    external: ['fpx'],
     plugins: [
       require('rollup-plugin-babel')({exclude: 'node_modules/**'}),
     ],
@@ -12,13 +11,11 @@ module.exports = [
   {
     input: 'es/espo.js',
     output: {file: 'dist/espo.js', format: 'cjs'},
-    external: ['fpx'],
   },
   // For evaluating minified size
   {
     input: 'dist/espo.js',
     output: {file: 'dist/espo.min.js', format: 'cjs'},
-    external: ['fpx'],
     plugins: [
       require('rollup-plugin-uglify')({
         mangle: {toplevel: true},

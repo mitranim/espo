@@ -30,10 +30,10 @@ const sub = computation.subscribe(({deref}) => {
 
 computation.deref()  // 30
 
-one.swap(value => 'hello')
+one.reset('hello')
 // 'hello20'
 
-other.swap(value => ({outer: {inner: ' world'}}))
+other.reset({outer: {inner: ' world'}})
 // 'hello world'
 
 sub.deinit()

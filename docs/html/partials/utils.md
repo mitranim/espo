@@ -41,7 +41,7 @@ assign({}, {one: 1}, {two: 2})  =  {one: 1, two: 2}
 
 ### `pull(array, value)`
 
-Mutates `array`, removing one occurrence of `value` from the start, comparing by [`fpx.is`](https://mitranim.com/fpx/#-is-one-other-).
+Mutates `array`, removing one occurrence of `value` from the start, comparing by an equivalent of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is" target="_blank">`Object.is`</a>.
 
 Counterpart to the built-ins [`Array.prototype.push`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push) and [`Array.prototype.unshift`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift).
 
@@ -84,13 +84,15 @@ Utility for automatic management of object lifetimes. See
 [`isDeinitable`](#-isdeinitable-value-), [`isOwner`](#-isowner-value-),
 [`Agent`](#-agent-value-) for more details and examples.
 
-Diffs `prev` and `next`, deiniting any objects that implement
-[`isDeinitable`](#-isdeinitable-value-) and are present in `prev` but not in
-`next`. The diff algorithm recursively traverses plain data structures
-([`fpx.isDict`](https://mitranim.com/fpx/#-isdict-value-) and
-[`fpx.isArray`](https://mitranim.com/fpx/#-isarray-value-)), but stops at
-non-plain objects, allowing you to safely include third party objects of unknown
-size and structure.
+Diffs `prev` and `next`, deiniting any objects that implement [`isDeinitable`](#-isdeinitable-value-) and are present in `prev` but not in `next`. The diff algorithm recursively traverses plain data structures, but stops at non-plain objects, allowing you to safely include third party objects of unknown size and structure.
+
+Definition of "plain data":
+
+  * primitive: number, string, boolean, symbol, `null`, `undefined`
+  * object based on `null` or `Object.prototype`
+  * array
+
+Everything else is considered non-data and is not traversed.
 
 Resilient to exceptions: if a deiniter or a property accessor produces an
 exception, `deinitDiff` will still traverse the rest of the tree, delaying
@@ -167,7 +169,7 @@ deref({deref () {return 'value'}})  // 'value'
 
 ### `derefIn(ref, path)`
 
-Derefs the ref and returns the value at `path` via [`fpx.getIn`](https://mitranim.com/fpx/#-getin-value-path-). When called on values that don't implement [`isRef`](#-isref-value-), this is equivalent to `fpx.getIn`.
+Derefs the ref and returns the value at `path`, similar to [`fpx.getIn`](https://mitranim.com/fpx/#-getin-value-path-). When called on values that don't implement [`isRef`](#-isref-value-), this is equivalent to `fpx.getIn`.
 
 ```js
 derefIn(new Atom({one: {two: 2}}), ['one', 'two'])

@@ -15,10 +15,10 @@ const reaction = Reaction.loop(({deref}) => {
 })
 // prints 10, 20
 
-one.swap(value => 'hello')
+one.reset('hello')
 // prints 'hello', 20
 
-other.swap(value => 'world')
+other.reset('world')
 // prints 'hello', 'world'
 
 reaction.deinit()
@@ -52,12 +52,12 @@ reaction.run(
   },
   function update () {
     console.info('notified')
-    // maybe rerun
+    // maybe rerun, maybe delay
   }
 )
 // 10
 
-atom.swap(value => 20)
+atom.reset(20)
 // 'notified'
 
 reaction.deinit()
@@ -69,7 +69,7 @@ Outside a `.run()`, equivalent to [`deref(ref)`](#-deref-ref-). During a
 `.run()`, and if `ref` implements [`isObservable `](#-isobservable-value-),
 implicitly subscribes to `ref`. See the examples above.
 
-`.deref()` is instance-bound for convenient destructuring.
+`.deref` is instance-bound for convenient destructuring.
 
 #### `reaction.loop(fun)`
 

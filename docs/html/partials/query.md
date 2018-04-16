@@ -23,7 +23,7 @@ const sub = query.subscribe(query => {
 
 query.deref()  // 20
 
-atom.swap(value => ({outer: {inner: 20}}))
+atom.reset({outer: {inner: 20}})
 // prints 40
 
 // now the query is inert again
@@ -64,7 +64,7 @@ const sub = query.subscribe(query => {
 
 query.deref()  // 10
 
-atom.swap(value => ({outer: {inner: 20}}))
+atom.reset({outer: {inner: 20}})
 // prints 20
 
 // now the query is inert again

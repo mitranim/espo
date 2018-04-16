@@ -143,9 +143,14 @@ delete exports.isFinite
 espo.assign(window, exports)
 
 if (window.DEV) {
-  ['log', 'info', 'warn', 'error', 'clear'].forEach(key => {
-    if (!/bound/.test(console[key].name)) {
-      window[key] = console[key] = console[key].bind(console)
-    }
-  })
+  bind(console, 'log')
+  bind(console, 'info')
+  bind(console, 'warn')
+  bind(console, 'info')
+}
+
+function bind(object, method) {
+  if (!/bound/.test(object[method].name)) {
+    object[method] = object[method].bind(object)
+  }
 }

@@ -4,7 +4,7 @@
 
 Library for reactive and stateful programming: observables, implicit reactivity, automatic resource cleanup.
 
-Relatively small: 10 KB minified. Written with ES2015 imports/exports. Transpiled with annotations that allow UglifyJS to drop unused classes. Webpack 4+ or Rollup, in combination with UglifyJS, should strip out the unused parts, leaving only what you actually use.
+Relatively small: 10 KB minified. Dependency-free. Written with ES2015 exports. Transpiled with annotations that allow UglifyJS to drop unused classes. When building a browser bundle, Webpack 4+ or Rollup, in combination with UglifyJS, should strip out the unused code, leaving only what you actually use. Node.js uses the CommonJS version.
 
 See sibling libraries:
 
