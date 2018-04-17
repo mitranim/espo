@@ -105,6 +105,7 @@ p, ul {
   width: 0.8em;
   height: 0.8em;
   // Feather icon: external-link.svg
+  // https://feathericons.com
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItZXh0ZXJuYWwtbGluayI+PHBhdGggZD0iTTE4IDEzdjZhMiAyIDAgMCAxLTIgMkg1YTIgMiAwIDAgMS0yLTJWOGEyIDIgMCAwIDEgMi0yaDYiPjwvcGF0aD48cG9seWxpbmUgcG9pbnRzPSIxNSAzIDIxIDMgMjEgOSI+PC9wb2x5bGluZT48bGluZSB4MT0iMTAiIHkxPSIxNCIgeDI9IjIxIiB5Mj0iMyI+PC9saW5lPjwvc3ZnPg==);
   background-position: center;
   background-size: cover;
@@ -116,11 +117,6 @@ p, ul {
 
 article a[target~=_blank] {
   @extend .external-link;
-}
-
-svg.feather {
-  width: 0.8em;
-  height: 0.8em;
 }
 
 /**
@@ -197,7 +193,8 @@ article .hljs {
 }
 
 a.heading-anchor {
+  font-size: 1rem;
   color: gray;
-  margin-left: 0.2rem;
+  margin-left: 0.4rem;
   &, &:focus:not(:hover) {border: none}
 }

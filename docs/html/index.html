@@ -3,7 +3,7 @@
 <base href="/espo/">
 <meta charset="utf-8">
 <title>Espo</title>
-<link rel="stylesheet" href="styles/docs.css?{{process.env.VERSION || ''}}">
+<link rel="stylesheet" href="styles/docs.css?{{process.env.COMMIT || ''}}">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,600,300italic,600italic&subset=latin" rel="stylesheet">
 <link rel="icon" href="data:;base64,=">
 
@@ -16,19 +16,60 @@
 
 <body>
   <div id="sidenav" class="side-column pad" data-nospill>
-    {{include('partials/sidenav.html')}}
+    <p>
+      <a href="https://github.com/Mitranim/espo" target="_blank" class="external-link">Source on GitHub</a>
+    </p>
+
+    <div class="list flex-col flex-stretch">
+      <a href="#" class="frb" onclick="main.scrollTop = 0"><span>Top</span></a>
+
+      <a href="#overview" class="frb active"><span>Overview</span></a>
+
+      <a href="#interfaces" class="frb"><span>Interfaces</span></a>
+      <div class="list flex-col flex-stretch">
+        <a href="#-isdeinitable-value-" class="frb"><code>isDeinitable</code></a>
+        <a href="#-isowner-value-" class="frb"><code>isOwner</code></a>
+        <a href="#-isref-value-" class="frb"><code>isRef</code></a>
+        <a href="#-isobservable-value-" class="frb"><code>isObservable</code></a>
+        <a href="#-isobservableref-value-" class="frb"><code>isObservableRef</code></a>
+        <a href="#-isatom-value-" class="frb"><code>isAtom</code></a>
+        <a href="#-isagent-value-" class="frb"><code>isAgent</code></a>
+        <a href="#-issubscription-value-" class="frb"><code>isSubscription</code></a>
+      </div>
+
+      <a href="#classes" class="frb"><span>Classes</span></a>
+      <div class="list flex-col flex-stretch">
+        <a href="#-que-deque-" class="frb"><code>Que</code></a>
+        <a href="#-taskque-" class="frb"><code>TaskQue</code></a>
+        <a href="#-messageque-" class="frb"><code>MessageQue</code></a>
+        <a href="#-observable-" class="frb"><code>Observable</code></a>
+        <a href="#-atom-value-" class="frb"><code>Atom</code></a>
+        <a href="#-agent-value-" class="frb"><code>Agent</code></a>
+        <a href="#-reaction-" class="frb"><code>Reaction</code></a>
+        <a href="#-computation-def-equal-" class="frb"><code>Computation</code></a>
+        <a href="#-query-observableref-query-equal-" class="frb"><code>Query</code></a>
+        <a href="#-pathquery-observableref-path-equal-" class="frb"><code>PathQuery</code></a>
+      </div>
+
+      <a href="#utils" class="frb"><span>Utils</span></a>
+      <div class="list flex-col flex-stretch">
+        <a href="#-global-" class="frb"><code>global</code></a>
+        <a href="#-ismutable-value-" class="frb"><code>isMutable</code></a>
+        <a href="#-assign-object-sources-" class="frb"><code>assign</code></a>
+        <a href="#-pull-array-value-" class="frb"><code>pull</code></a>
+        <a href="#-deinit-ref-" class="frb"><code>deinit</code></a>
+        <a href="#-deinitdiff-prev-next-" class="frb"><code>deinitDiff</code></a>
+        <a href="#-unown-ref-" class="frb"><code>unown</code></a>
+        <a href="#-deref-ref-" class="frb"><code>deref</code></a>
+        <a href="#-derefin-ref-path-" class="frb"><code>derefIn</code></a>
+      </div>
+
+      <a href="#author" class="frb"><span>Author</span></a>
+    </div>
   </div>
 
   <article id="main" class="main-column pad">
-    {{md(include('partials/overview.md'))}}
-    <hr />
-    {{md(include('partials/interfaces.md'))}}
-    <hr />
-    {{md(include('partials/classes.md'))}}
-    <hr />
-    {{md(include('partials/utils.md'))}}
-    <hr />
-    {{md(include('partials/author.md'))}}
+    {{md(include('partials/index.md'))}}
   </article>
 </body>
 
@@ -38,4 +79,4 @@
 </script>
 {% } %}
 
-<script src="scripts/docs.js?{{process.env.VERSION || ''}}"></script>
+<script src="scripts/docs.js?{{process.env.COMMIT || ''}}"></script>

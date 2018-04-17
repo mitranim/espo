@@ -18,6 +18,22 @@ See the API reference: https://mitranim.com/espo/.
 
 ## Changelog
 
+### 0.4.0
+
+Improved minification. Breaking.
+
+* Code is now written with ES5-style classes to avoid Babel garbage in the output. This significantly reduces the amount of transpiled code and makes it much nicer to read.
+
+* In the transpiled version, classes don't have IIFEs anymore, which means they're not stripped away by dead code elimination due to side-effectful prototype mutations. This turns out to be a benefit, since it further reduces the size, while DCE, realistically, tends to not work in real-world application bundles.
+
+* Mangle all properties in all classes, except `.state` and `.states`. This reduces the API surface and chances of confusion, and greatly reduces the minified size.
+
+* Aliased `.deref()` as `.$` (a getter) in all classes that implement `isObservableRef`. In addition, aliased `.deref` as `.$` (same method) in `Reaction`. This works with ES2015 destructuring, saves a lot of typing, and minifies a lot better, at the cost of lower readability.
+
+* Added `Que.prototype.has` (tentative).
+
+TLDR: Espo went from ≈10 KiB to ≈8 KiB, while slimming down the API surface and providing the nice `$` shortcuts.
+
 ### 0.3.3
 
 Better compatibility with minification.

@@ -3,11 +3,9 @@
 const hljs = require('highlight.js')
 const marked = require('marked')
 const pt = require('path')
-const fs = require('fs')
 
 const {version: VERSION} = require('./package.json')
 const PROD = process.env.NODE_ENV === 'production'
-const iconDir = pt.join(process.cwd(), 'node_modules/feather-icons/dist/icons')
 
 /**
  * Markdown
@@ -20,16 +18,13 @@ marked.setOptions({
   },
 })
 
-const linkSvg = fs.readFileSync(pt.join(iconDir, 'link-2.svg'))
-
-marked.Renderer.prototype.heading = function heading (text, level, raw) {
+marked.Renderer.prototype.heading = function heading(text, level, raw) {
   const id = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, '-')
   return (
-`<h${level}>
-  <span>${text}</span>
-  <a class="heading-anchor" href="#${id}" id="${id}">${linkSvg}</a>
-</h${level}>
-`
+    `<h${level}>` +
+      `<span>${text}</span>` +
+      `<a class="heading-anchor" href="#${id}" id="${id}">🔗</a>` +
+    `</h${level}>\n`
   )
 }
 
@@ -79,9 +74,6 @@ module.exports = {
     },
     url (path) {
       return pt.join(pt.dirname(path), pt.parse(path).name)
-    },
-    featherIcon (name) {
-      return fs.readFileSync(pt.join(iconDir, name))
     },
   },
   ignorePath: path => /^partials/.test(path),
