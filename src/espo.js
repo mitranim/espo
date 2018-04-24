@@ -1,9 +1,14 @@
+// Note: the code is written with ES5-style classes to avoid Babel garbage
+// in the transpiled code. In large methods, `this` is aliased to `self` for
+// better minification. Private properties are mangled for the same reason.
+
 // Minifiable aliases
-const Object_ = Object
-const NOP     = Object_.prototype
-const create  = Object_.create
-const Array_  = Array
-const NAP     = Array_.prototype
+const Object_     = Object
+const NOP         = Object_.prototype
+const create      = Object_.create
+const descriptors = Object_.getOwnPropertyDescriptors
+const Array_      = Array
+const NAP         = Array_.prototype
 
 /**
  * Interfaces
@@ -54,7 +59,6 @@ const IDLE = 'IDLE'
 const PENDING = 'PENDING'
 const TRIGGERED = 'TRIGGERED'
 
-const derefGetter = {$: {get() {return this.deref()}, configurable: true}}
 
 export function Que(deque) {
   validateInstance(this, Que)
@@ -64,64 +68,69 @@ export function Que(deque) {
   this.pending_ = []
 }
 
-const QP = Que.prototype
+const QP = Que.prototype = {
+  constructor: Que,
 
-QP.states = {
-  IDLE,
-  DAMMED,
-  FLUSHING,
+  states: {
+    IDLE,
+    DAMMED,
+    FLUSHING,
+  },
+
+  push(value) {
+    this.pending_.push(value)
+    if (this.state === IDLE) this.flush()
+  },
+
+  // Hazardous. Questionable.
+  pull(value) {
+    pull(this.pending_, value)
+  },
+
+  // Hazardous. Questionable.
+  has(value) {
+    return includes(this.pending_, value)
+  },
+
+  dam() {
+    if (this.state === IDLE) this.state = DAMMED
+  },
+
+  flush() {
+    if (this.state === FLUSHING) return
+    this.state = FLUSHING
+    try {flushBy.call(this, this.pending_, this.deque_)}
+    finally {this.state = IDLE}
+  },
+
+  isEmpty() {
+    return !this.pending_.length
+  },
+
+  isDammed() {
+    return this.state === DAMMED
+  },
+
+  deinit() {
+    this.pending_.length = 0
+  },
 }
 
-QP.push = function push(value) {
-  this.pending_.push(value)
-  if (this.state === IDLE) this.flush()
-}
-
-// Hazardous. Questionable.
-QP.pull = function pull_(value) {
-  pull(this.pending_, value)
-}
-
-// Hazardous. Questionable.
-QP.has = function has(value) {
-  return includes(this.pending_, value)
-}
-
-QP.dam = function dam() {
-  if (this.state === IDLE) this.state = DAMMED
-}
-
-QP.flush = function flush() {
-  if (this.state === FLUSHING) return
-  this.state = FLUSHING
-  try {flushBy.call(this, this.pending_, this.deque_)}
-  finally {this.state = IDLE}
-}
-
-QP.isEmpty = function isEmpty() {
-  return !this.pending_.length
-}
-
-QP.isDammed = function isDammed() {
-  return this.state === DAMMED
-}
-
-QP.deinit = function deinit_() {
-  this.pending_.length = 0
-}
 
 export function TaskQue() {
   validateInstance(this, TaskQue)
   Que.call(this, runTask)
 }
 
-const TQP = TaskQue.prototype = create(QP)
+TaskQue.prototype = create(QP, descriptors({
+  constructor: TaskQue,
 
-TQP.push = function push(fun) {
-  validate(fun, isFunction)
-  QP.push.call(this, arguments)
-  return QP.pull.bind(this, arguments)
-}
+  push(fun) {
+    validate(fun, isFunction)
+    QP.push.call(this, arguments)
+    return QP.pull.bind(this, arguments)
+  },
+}))
 
 // if args = `[fun, 10, 20, 30]`
 // then result = `fun.call(this, 10, 20, 30)`
@@ -131,32 +140,36 @@ function runTask(args) {
   return fun.call.apply(fun, args)
 }
 
+
 export function MessageQue() {
   validateInstance(this, MessageQue)
   Que.call(this, triggerSubscriptions)
   this.subscriptions_ = []
 }
 
-const MQP = MessageQue.prototype = create(QP)
+MessageQue.prototype = create(QP, descriptors({
+  constructor: MessageQue,
 
-MQP.push = function push() {
-  QP.push.call(this, arguments)
-}
+  push() {
+    QP.push.call(this, arguments)
+  },
 
-MQP.subscribe = function subscribe(callback) {
-  const sub = new Subscription(this, callback)
-  this.subscriptions_.push(sub)
-  return sub
-}
+  subscribe(callback) {
+    const sub = new Subscription(this, callback)
+    this.subscriptions_.push(sub)
+    return sub
+  },
 
-MQP.unsubscribe = function unsubscribe(sub) {
-  pull(this.subscriptions_, sub)
-}
+  unsubscribe(sub) {
+    pull(this.subscriptions_, sub)
+  },
 
-MQP.deinit = function deinit_() {
-  QP.deinit.call(this)
-  flushBy(this.subscriptions_, deinit)
-}
+  deinit() {
+    QP.deinit.call(this)
+    flushBy(this.subscriptions_, deinit)
+  },
+}))
+
 
 export function Subscription(observable, callback) {
   validateInstance(this, Subscription)
@@ -167,25 +180,28 @@ export function Subscription(observable, callback) {
   this.callback_ = callback
 }
 
-const SP = Subscription.prototype
+Subscription.prototype = {
+  constructor: Subscription,
 
-SP.states = {
-  ACTIVE,
-  IDLE,
+  states: {
+    ACTIVE,
+    IDLE,
+  },
+
+  trigger() {
+    if (this.state === ACTIVE) {
+      this.callback_.apply(this, arguments)
+    }
+  },
+
+  deinit() {
+    if (this.state === ACTIVE) {
+      this.state = IDLE
+      this.observable_.unsubscribe(this)
+    }
+  },
 }
 
-SP.trigger = function trigger() {
-  if (this.state === ACTIVE) {
-    this.callback_.apply(this, arguments)
-  }
-}
-
-SP.deinit = function deinit_() {
-  if (this.state === ACTIVE) {
-    this.state = IDLE
-    this.observable_.unsubscribe(this)
-  }
-}
 
 export function Observable() {
   this.state = IDLE
@@ -193,46 +209,48 @@ export function Observable() {
   this.que_ = new Que(triggerSubscriptions.bind(this))
 }
 
-const OP = Observable.prototype
+const OP = Observable.prototype = {
+  constructor: Observable,
 
-OP.states = {
-  IDLE,
-  ACTIVE,
-}
+  states: {
+    IDLE,
+    ACTIVE,
+  },
 
-// override in subclass
-OP.onInit = function onInit() {}
+  // override in subclass
+  onInit() {},
 
-// override in subclass
-OP.onDeinit = function onDeinit() {}
+  // override in subclass
+  onDeinit() {},
 
-OP.subscribe = function subscribe(callback) {
-  validate(callback, isFunction)
+  subscribe(callback) {
+    validate(callback, isFunction)
 
-  if (this.state === IDLE) {
-    this.state = ACTIVE
-    this.onInit()
-  }
+    if (this.state === IDLE) {
+      this.state = ACTIVE
+      this.onInit()
+    }
 
-  const sub = new Subscription(this, callback)
-  this.subscriptions_.push(sub)
-  return sub
-}
+    const sub = new Subscription(this, callback)
+    this.subscriptions_.push(sub)
+    return sub
+  },
 
-OP.unsubscribe = function unsubscribe(sub) {
-  pull(this.subscriptions_, sub)
-  if (this.state === ACTIVE && !this.subscriptions_.length) {
-    this.state = IDLE
-    this.onDeinit()
-  }
-}
+  unsubscribe(sub) {
+    pull(this.subscriptions_, sub)
+    if (this.state === ACTIVE && !this.subscriptions_.length) {
+      this.state = IDLE
+      this.onDeinit()
+    }
+  },
 
-OP.trigger = function trigger() {
-  this.que_.push(arguments)
-}
+  trigger() {
+    this.que_.push(arguments)
+  },
 
-OP.deinit = function deinit_() {
-  flushBy(this.subscriptions_, deinit)
+  deinit() {
+    flushBy(this.subscriptions_, deinit)
+  },
 }
 
 function triggerSubscriptions(args) {
@@ -243,61 +261,68 @@ function triggerSubscription(subscription, args) {
   subscription.trigger.apply(subscription, args)
 }
 
+
 export function Atom(value) {
   validateInstance(this, Atom)
   Observable.call(this)
   this.value_ = value
 }
 
-const AP = Atom.prototype = create(OP, derefGetter)
+const AP = Atom.prototype = create(OP, descriptors({
+  constructor: Atom,
 
-AP.deref = function deref_() {
-  return this.value_
-}
+  get $() {return this.deref()},
 
-AP.swap = function swap(mod) {
-  validate(mod, isFunction)
-  // relies on strict mode
-  arguments[0] = this.deref()
-  this.reset(mod.apply(undefined, arguments))
-}
+  deref() {return this.value_},
 
-AP.reset = function reset(next) {
-  const prev = this.value_
-  this.value_ = next
-  if (!is(prev, next)) this.trigger(this)
-}
+  swap(mod) {
+    validate(mod, isFunction)
+    // relies on strict mode
+    arguments[0] = this.deref()
+    this.reset(mod.apply(null, arguments))
+  },
+
+  reset(next) {
+    const prev = this.value_
+    this.value_ = next
+    if (!is(prev, next)) this.trigger(this)
+  },
+}))
+
 
 export function Agent(value) {
   validateInstance(this, Agent)
   Atom.call(this, value)
 }
 
-const AGP = Agent.prototype = create(AP)
+Agent.prototype = create(AP, descriptors({
+  constructor: Agent,
 
-AGP.reset = function reset(next) {
-  const prev = this.deref()
-  try {AP.reset.call(this, next)}
-  finally {deinitDiff(prev, next)}
-}
+  reset(next) {
+    const prev = this.deref()
+    try {AP.reset.call(this, next)}
+    finally {deinitDiff(prev, next)}
+  },
 
-AGP.unown = function unown_() {
-  const {value} = this
-  this.value_ = undefined
-  try {
-    this.trigger(this)
-    return value
-  }
-  catch (err) {
-    deinitDiff(value)
-    throw err
-  }
-}
+  unown() {
+    const {value} = this
+    this.value_ = undefined
+    try {
+      this.trigger(this)
+      return value
+    }
+    catch (err) {
+      deinitDiff(value)
+      throw err
+    }
+  },
 
-AGP.deinit = function deinit_() {
-  try {AP.deinit.call(this)}
-  finally {this.reset(undefined)}
-}
+  deinit() {
+    try {AP.deinit.call(this)}
+    finally {this.reset(undefined)}
+  },
+}))
+
 
 export function Reaction() {
   validateInstance(this, Reaction)
@@ -306,58 +331,60 @@ export function Reaction() {
   this.deref = this.$ = this.deref.bind(this)
 }
 
-const RP = Reaction.prototype
+Reaction.prototype = {
+  constructor: Reaction,
 
-RP.deref = function deref_(ref) {
-  validate(ref, isRef)
-  if (this.nextContext_ && isObservable(ref)) this.nextContext_.subscribeTo(ref)
-  return ref.deref()
-}
+  deref(ref) {
+    validate(ref, isRef)
+    if (this.nextContext_ && isObservable(ref)) this.nextContext_.subscribeTo(ref)
+    return ref.deref()
+  },
 
-RP.run = function run(fun, onTrigger) {
-  validate(fun, isFunction)
-  validate(onTrigger, isFunction)
+  run(fun, onTrigger) {
+    validate(fun, isFunction)
+    validate(onTrigger, isFunction)
 
-  if (this.nextContext_) throw Error(`Unexpected overlapping .run()`)
+    if (this.nextContext_) throw Error(`Unexpected overlapping .run()`)
 
-  this.nextContext_ = new ReactionContext(this, onTrigger)
+    this.nextContext_ = new ReactionContext(this, onTrigger)
 
-  try {
-    return fun(this)
-  }
-  finally {
-    const nextContext = this.nextContext_
-    const lastContext = this.lastContext_
-    this.lastContext_ = nextContext
-    this.nextContext_ = undefined
-    if (lastContext) lastContext.deinit()
-  }
-}
-
-RP.loop = function loop(fun) {
-  validate(fun, isFunction)
-  const self = this
-  function reactionLoop() {
-    self.run(fun, reactionLoop)
-  }
-  reactionLoop()
-}
-
-RP.deinit = function deinit_() {
-  const nextContext = this.nextContext_
-  const lastContext = this.lastContext_
-  try {
-    if (nextContext) nextContext.deinit()
-  }
-  finally {
     try {
-      if (lastContext) lastContext.deinit()
+      return fun(this)
     }
     finally {
+      const nextContext = this.nextContext_
+      const lastContext = this.lastContext_
+      this.lastContext_ = nextContext
       this.nextContext_ = undefined
-      this.lastContext_ = undefined
+      if (lastContext) lastContext.deinit()
     }
-  }
+  },
+
+  loop(fun) {
+    validate(fun, isFunction)
+    const self = this
+    function reactionLoop() {
+      self.run(fun, reactionLoop)
+    }
+    reactionLoop()
+  },
+
+  deinit() {
+    const nextContext = this.nextContext_
+    const lastContext = this.lastContext_
+    try {
+      if (nextContext) nextContext.deinit()
+    }
+    finally {
+      try {
+        if (lastContext) lastContext.deinit()
+      }
+      finally {
+        this.nextContext_ = undefined
+        this.lastContext_ = undefined
+      }
+    }
+  },
 }
 
 Reaction.loop = function loop(fun) {
@@ -373,6 +400,7 @@ Reaction.loop = function loop(fun) {
   }
 }
 
+
 function ReactionContext(reaction, onTrigger) {
   const self = this
   validateInstance(self, ReactionContext)
@@ -383,33 +411,36 @@ function ReactionContext(reaction, onTrigger) {
   self.subscriptions_ = []
 }
 
-const RCP = ReactionContext.prototype
+ReactionContext.prototype = {
+  constructor: ReactionContext,
 
-RCP.states = {
-  PENDING,
-  TRIGGERED,
-  DEAD,
+  states: {
+    PENDING,
+    TRIGGERED,
+    DEAD,
+  },
+
+  subscribeTo(observable) {
+    if (this.state === PENDING) {
+      const sub = observable.subscribe(this.trigger_)
+      validate(sub, isSubscription)
+      this.subscriptions_.push(sub)
+    }
+  },
+
+  trigger() {
+    if (this.state === PENDING) {
+      this.state = TRIGGERED
+      this.onTrigger_.call(undefined, this.reaction_)
+    }
+  },
+
+  deinit() {
+    this.state = DEAD
+    flushBy(this.subscriptions_, deinit)
+  },
 }
 
-RCP.subscribeTo = function subscribeTo(observable) {
-  if (this.state === PENDING) {
-    const sub = observable.subscribe(this.trigger_)
-    validate(sub, isSubscription)
-    this.subscriptions_.push(sub)
-  }
-}
-
-RCP.trigger = function trigger() {
-  if (this.state === PENDING) {
-    this.state = TRIGGERED
-    this.onTrigger_.call(undefined, this.reaction_)
-  }
-}
-
-RCP.deinit = function deinit_() {
-  this.state = DEAD
-  flushBy(this.subscriptions_, deinit)
-}
 
 export function Computation(def, equal) {
   const self = this
@@ -424,26 +455,36 @@ export function Computation(def, equal) {
   self.computationUpdate_ = computationUpdate.bind(undefined, self)
 }
 
-const CP = Computation.prototype = create(OP, derefGetter)
+Computation.prototype = create(OP, descriptors({
+  constructor: Computation,
 
-CP.deref = function deref_() {
-  if (this.state === IDLE) this.value_ = this.def_(this.reaction_)
-  return this.value_
-}
+  get $() {return this.deref()},
 
-CP.onInit = function onInit() {
-  this.reaction_.loop(this.computationUpdate_)
-}
+  deref() {
+    if (this.state === IDLE) {
+      const def = this.def_
+      this.value_ = def(this.reaction_)
+    }
+    return this.value_
+  },
 
-CP.onDeinit = function onDeinit() {
-  this.reaction_.deinit()
-}
+  onInit() {
+    this.reaction_.loop(this.computationUpdate_)
+  },
+
+  onDeinit() {
+    this.reaction_.deinit()
+  },
+}))
+
 
 function computationUpdate(computation, reaction) {
+  const def = computation.def_
   const prev = computation.value_
-  const next = computation.value_ = computation.def_(reaction)
+  const next = computation.value_ = def(reaction)
   if (!computation.equal_(prev, next)) computation.trigger(computation)
 }
+
 
 export function Query(observableRef, query, equal) {
   const self = this
@@ -460,30 +501,38 @@ export function Query(observableRef, query, equal) {
   self.onTrigger_ = onTrigger.bind(undefined, self)
 }
 
-const QRP = Query.prototype = create(OP, derefGetter)
+Query.prototype = create(OP, descriptors({
+  constructor: Query,
 
-QRP.deref = function deref_() {
-  if (this.state === IDLE) {
-    this.value_ = this.query_(this.observableRef_.deref())
-  }
-  return this.value_
-}
+  get $() {return this.deref()},
 
-QRP.onInit = function onInit() {
-  this.sub_ = this.observableRef_.subscribe(this.onTrigger_)
-  this.value_ = this.query_(this.observableRef_.deref())
-}
+  deref() {
+    if (this.state === IDLE) {
+      const fun = this.query_
+      this.value_ = fun(this.observableRef_.deref())
+    }
+    return this.value_
+  },
 
-QRP.onDeinit = function onDeinit() {
-  this.sub_.deinit()
-  this.sub_ = undefined
-}
+  onInit() {
+    const fun = this.query_
+    this.sub_ = this.observableRef_.subscribe(this.onTrigger_)
+    this.value_ = fun(this.observableRef_.deref())
+  },
+
+  onDeinit() {
+    this.sub_.deinit()
+    this.sub_ = undefined
+  },
+}))
 
 function onTrigger(query, observableRef) {
+  const fun = query.query_
   const prev = query.value_
-  const next = query.value_ = query.query_(observableRef.deref())
+  const next = query.value_ = fun(observableRef.deref())
   if (!query.equal_(prev, next)) query.trigger(query)
 }
+
 
 export function PathQuery(observableRef, path, equal) {
   validateInstance(this, PathQuery)
@@ -496,7 +545,7 @@ export function PathQuery(observableRef, path, equal) {
   )
 }
 
-PathQuery.prototype = create(Query.prototype)
+PathQuery.prototype = create(Query.prototype, descriptors({constructor: PathQuery}))
 
 /**
  * Utils (public)
@@ -592,8 +641,10 @@ export function flushBy(values, fun, a, b, c) {
 }
 
 // Undocumented
-export function validateInstance(instance, Class) {
-  if (!isInstance(instance, Class)) throw Error(`Cannot call a class as a function`)
+export function validateInstance(value, Class) {
+  if (!isInstance(value, Class)) {
+    throw Error(`Expected ${show(value)} to be an instance of ${show(Class)}`)
+  }
 }
 
 /**
@@ -701,24 +752,21 @@ function isObject(value) {
 }
 
 function isDict(value) {
-  return isObject(value) && isPlainPrototype(Object_.getPrototypeOf(value))
-}
-
-function isPlainPrototype(value) {
-  return value === null || value === NOP
+  if (!isObject(value)) return false
+  const proto = Object_.getPrototypeOf(value)
+  return proto === null || proto === NOP
 }
 
 function isArray(value) {
   return isInstance(value, Array_)
 }
 
-// Could be made much faster in V8 by retrieving the prototype before checking
-// any properties. Should check other engines before making such "weird"
-// optimizations.
 function isList(value) {
-  return isObject(value) && isNatural(value.length) && (
-    !isPlainPrototype(Object_.getPrototypeOf(value)) ||
-    NOP.hasOwnProperty.call(value, 'callee')
+  return isObject(value) && (
+    isArray(value) || (
+      isNatural(value.length) &&
+      (!isDict(value) || NOP.hasOwnProperty.call(value, 'callee'))
+    )
   )
 }
 
