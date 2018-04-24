@@ -18,6 +18,10 @@ See the API reference: https://mitranim.com/espo/.
 
 ## Changelog
 
+### 0.4.1
+
+Added missing "constructor" to a few prototypes.
+
 ### 0.4.0
 
 Improved minification. Breaking.
