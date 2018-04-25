@@ -305,7 +305,7 @@ Agent.prototype = create(AP, descriptors({
   },
 
   unown() {
-    const {value} = this
+    const value = this.value_
     this.value_ = undefined
     try {
       this.trigger(this)

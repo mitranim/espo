@@ -18,6 +18,10 @@ See the API reference: https://mitranim.com/espo/.
 
 ## Changelog
 
+### 0.4.2
+
+Bugfixed `Agent.prototype.unown` after recent changes.
+
 ### 0.4.1
 
 Added missing "constructor" to a few prototypes.
