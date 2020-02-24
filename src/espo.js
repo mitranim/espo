@@ -275,11 +275,13 @@ const AP = Atom.prototype = create(OP, descriptors({
 
   deref() {return this.value_},
 
-  swap(mod) {
-    validate(mod, isFunction)
-    // relies on strict mode
+  // The arguments trick relies on strict mode to be correct and on engine
+  // nuances to be fast. At the time of writing, this must use `.apply` rather
+  // than native spread to avoid a massive slowdown in V8.
+  swap(fun) {
+    validate(fun, isFunction)
     arguments[0] = this.deref()
-    this.reset(mod.apply(null, arguments))
+    this.reset(fun.apply(undefined, arguments))
   },
 
   reset(next) {
@@ -319,7 +321,7 @@ Agent.prototype = create(AP, descriptors({
 
   deinit() {
     try {AP.deinit.call(this)}
-    finally {this.reset(undefined)}
+    finally {deinitDeep(this.value_)}
   },
 }))
 

@@ -1,6 +1,6 @@
 ## Overview
 
-`Espo`: **e**xtensions for **s**tateful **p**r**o**gramming in JavaScript. Source: <a href="https://github.com/Mitranim/espo" target="_blank">https://github.com/Mitranim/espo</a>
+`Espo`: **e**xtensions for **s**tateful **p**r**o**gramming in JavaScript. Source: <a href="https://github.com/mitranim/espo" target="_blank">https://github.com/mitranim/espo</a>
 
 Library for reactive and stateful programming: observables, implicit reactivity, automatic resource cleanup.
 
@@ -8,7 +8,7 @@ Relatively small: ≈ 8 KiB minified. Dependency-free.
 
 See sibling libraries:
 
-  * Emerge: <a href="https://github.com/Mitranim/emerge" target="_blank">https://github.com/Mitranim/emerge</a>. Efficient patching and merging of plain JS data.
+  * Emerge: <a href="https://github.com/mitranim/emerge" target="_blank">https://github.com/mitranim/emerge</a>. Efficient patching and merging of plain JS data.
   * fpx: <a href="https://mitranim.com/fpx/" target="_blank">https://mitranim.com/fpx/</a>. Utils for functional programming.
 
 Install with `npm`. Current version: `{{VERSION}}`.
@@ -472,7 +472,7 @@ the observable is active.
 
 Basic observable reference. Inspired by
 [`clojure.core/atom`](https://clojuredocs.org/clojure.core/atom).
-Should be paired with [Emerge](https://github.com/Mitranim/emerge)
+Should be paired with [Emerge](https://github.com/mitranim/emerge)
 for efficient nested updates.
 
 ```js
@@ -959,7 +959,7 @@ Stricter than `Object.assign`: requires the input to be mutable, doesn't silentl
 
 Be wary: mutation is often misused. When dealing with data, you should program
 in a functional style, treating your data structures as immutable. Use a library
-like [Emerge](https://github.com/Mitranim/emerge) for data transformations.
+like [Emerge](https://github.com/mitranim/emerge) for data transformations.
 
 ```js
 assign()                        =  {}

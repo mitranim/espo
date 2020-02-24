@@ -1,6 +1,6 @@
 {
   "name": "espo",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Library for stateful and reactive programming: queues, observables, ownership and lifetimes, procedural reactivity. Lightweight alternative to RxJS.",
   "main": "dist/espo.js",
   "module": "es/espo.js",
@@ -25,11 +25,11 @@
   "authors": [
     "Mitranim <me@mitranim.com>"
   ],
-  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Mitranim/espo.git"
+    "url": "https://github.com/mitranim/espo.git"
   },
+  "license": "WTFPL",
   "devDependencies": {
     "babel-core": "6.26.0",
     "babel-eslint": "7.1.1",
