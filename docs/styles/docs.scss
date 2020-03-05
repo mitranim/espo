@@ -75,8 +75,7 @@ body > :not(.main-column):not(.side-column) {
   width: 20vw;
   // max-width: $column-max-width;
 
-  // Enables scroll
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: scroll;
 }
 
@@ -175,7 +174,7 @@ article .hljs {
   border-bottom: 1px solid;
 }
 
-.list .active::after, .list a:hover::after {
+.list [aria-current]::after, .list a:hover::after {
   content: '→';
 }
 
