@@ -31,6 +31,7 @@
   },
   "license": "WTFPL",
   "devDependencies": {
+    "afr": "0.1.1",
     "babel-core": "6.26.0",
     "babel-eslint": "7.1.1",
     "babel-loader": "7.1.4",
@@ -43,7 +44,6 @@
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.0",
     "babel-plugin-transform-es2015-shorthand-properties": "6.18.0",
     "babel-plugin-transform-es2015-template-literals": "6.8.0",
-    "browser-sync": "2.18.5",
     "del": "2.2.2",
     "emerge": "0.2.1",
     "eslint_d": "4.2.1",

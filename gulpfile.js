@@ -5,7 +5,7 @@
  */
 
 const $ = require('gulp-load-plugins')()
-const bs = require('browser-sync').create()
+const afr = require('afr')
 const cp = require('child_process')
 const del = require('del')
 const gulp = require('gulp')
@@ -193,27 +193,17 @@ gulp.task('lint', () => (
 
 /* -------------------------------- Server ----------------------------------*/
 
-gulp.task('docs:server', () => (
-  bs.init({
-    startPath: '/espo/',
-    server: {
-      baseDir: outDocRootDir,
-      middleware: [
-        (req, res, next) => {
-          req.url = req.url.replace(/^\/espo\//, '').replace(/^[/]*/, '/')
-          next()
-        },
-      ],
-    },
-    port: 6539,
-    files: outDocRootDir,
-    open: false,
-    online: false,
-    ui: false,
-    ghostMode: false,
-    notify: false,
-  })
-))
+gulp.task('docs:server', () => {
+  const ds = new class extends afr.Devserver {
+    onRequest(req, res) {
+      req.url = req.url.replace(/^\/espo\//, '').replace(/^[/]*/, '/')
+      super.onRequest(req, res)
+    }
+  }()
+  ds.watchFiles(outDocRootDir)
+  ds.serveFiles(outDocRootDir)
+  ds.listen(6539)
+})
 
 /* -------------------------------- Default ---------------------------------*/
 

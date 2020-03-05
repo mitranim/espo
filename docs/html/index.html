@@ -74,9 +74,10 @@
 </body>
 
 {% if (!PROD) { %}
-<script>
-  window.DEV = true
-</script>
+<script>window.DEV = true</script>
 {% } %}
 
 <script src="scripts/docs.js?{{process.env.COMMIT || ''}}"></script>
+{% if (!PROD) { %}
+<script>document.write('<script src="'+window.location.origin+'/afr/client.js"><'+'/script>')</script>
+{% } %}
