@@ -500,7 +500,7 @@ export function Query(observableRef, query, equal) {
   self.equal_ = equal
   self.value_ = undefined
   self.sub_ = undefined
-  self.onTrigger_ = onTrigger.bind(undefined, self)
+  self.onTrigger_ = onQueryTrigger.bind(undefined, self)
 }
 
 Query.prototype = create(OP, descriptors({
@@ -509,17 +509,13 @@ Query.prototype = create(OP, descriptors({
   get $() {return this.deref()},
 
   deref() {
-    if (this.state === IDLE) {
-      const fun = this.query_
-      this.value_ = fun(this.observableRef_.deref())
-    }
+    if (this.state === IDLE) this.value_ = queryDeref(this)
     return this.value_
   },
 
   onInit() {
-    const fun = this.query_
     this.sub_ = this.observableRef_.subscribe(this.onTrigger_)
-    this.value_ = fun(this.observableRef_.deref())
+    this.value_ = queryDeref(this)
   },
 
   onDeinit() {
@@ -528,23 +524,22 @@ Query.prototype = create(OP, descriptors({
   },
 }))
 
-function onTrigger(query, observableRef) {
-  const fun = query.query_
+function onQueryTrigger(query) {
   const prev = query.value_
-  const next = query.value_ = fun(observableRef.deref())
+  const next = query.value_ = queryDeref(query)
   if (!query.equal_(prev, next)) query.trigger(query)
 }
 
+function queryDeref(query) {
+  const fun = query.query_
+  return fun(query.observableRef_.deref())
+}
 
 export function PathQuery(observableRef, path, equal) {
   validateInstance(this, PathQuery)
   validate(path, isPath)
-  Query.call(
-    this,
-    observableRef,
-    function getAtPath(value) {return getIn(value, path)},
-    equal
-  )
+  function getAtPath(value) {return getIn(value, path)}
+  Query.call(this, observableRef, getAtPath, equal)
 }
 
 PathQuery.prototype = create(Query.prototype, descriptors({constructor: PathQuery}))
@@ -558,12 +553,12 @@ export function deinit(value) {
 }
 
 export function deinitDiff(prev, next) {
-  deinitDiffAcyclic(prev, next, [])
+  deinitDiffAcyclic(prev, next, setNew())
 }
 
 // TODO document
 export function deinitDeep(value) {
-  deinitDiffAcyclic(value, undefined, [])
+  deinitDiffAcyclic(value, undefined, setNew())
 }
 
 export function unown(value) {
@@ -663,13 +658,13 @@ function deinitDiffAcyclic(prev, next, visitedRefs) {
   }
 
   // Don't bother traversing non-plain structures.
-  // This allows to safely include third party refs with unknown structure.
+  // This allows to safely include third party objects with unknown structure.
   if (!isArray(prev) && !isDict(prev)) return
 
-  // This skips cyclic references
-  if (includes(visitedRefs, prev)) return
+  // This avoids cyclic references.
+  if (setHas(visitedRefs, prev)) return
 
-  visitedRefs.push(prev)
+  setAdd(visitedRefs, prev)
   diffAndDeinit(prev, next, visitedRefs)
 }
 
@@ -700,6 +695,24 @@ function diffAndDeinit(prev, next, visitedRefs) {
     catch (err) {error = err}
   }
   if (error) throw error
+}
+
+/*
+Store visited refs in a set where possible, falling back on a list. For large
+structures, a list becomes our bottleneck; a set is MUCH faster.
+*/
+let setNew = undefined
+let setAdd = undefined
+let setHas = undefined
+if (typeof Set === 'function') {
+  setNew = function setNew() {return new Set()} // eslint-disable-line no-undef
+  setAdd = function setAdd(set, val) {set.add(val)}
+  setHas = function setHas(set, val) {return set.has(val)}
+}
+else {
+  setNew = function setNew() {return []}
+  setAdd = function setAdd(set, val) {set.push(val)}
+  setHas = function setHas(set, val) {return includes(set, val)}
 }
 
 function get(value, key) {

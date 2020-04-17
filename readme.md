@@ -18,6 +18,14 @@ See the API reference: https://mitranim.com/espo/.
 
 ## Changelog
 
+### 0.4.4
+
+When possible, `deinitDiff` and `deinitDeep` now use `Set` instead of `[]` to keep track of visited objects. Performs much better when traversing large structures. In environments without `Set`, this falls back on `[]`.
+
+### 0.4.3
+
+Minor internal cosmetics.
+
 ### 0.4.2
 
 Bugfixed `Agent.prototype.unown` after recent changes.
