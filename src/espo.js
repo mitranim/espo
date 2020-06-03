@@ -286,8 +286,10 @@ const AP = Atom.prototype = create(OP, descriptors({
 
   reset(next) {
     const prev = this.value_
-    this.value_ = next
-    if (!is(prev, next)) this.trigger(this)
+    if (!is(prev, next)) {
+      this.value_ = next
+      this.trigger(this)
+    }
   },
 }))
 
@@ -346,7 +348,7 @@ Reaction.prototype = {
     validate(fun, isFunction)
     validate(onTrigger, isFunction)
 
-    if (this.nextContext_) throw Error(`Unexpected overlapping .run()`)
+    if (this.nextContext_) throw Error(`unexpected overlapping .run()`)
 
     this.nextContext_ = new ReactionContext(this, onTrigger)
 
@@ -464,8 +466,7 @@ Computation.prototype = create(OP, descriptors({
 
   deref() {
     if (this.state === IDLE) {
-      const def = this.def_
-      this.value_ = def(this.reaction_)
+      this.value_ = this.def_(this.reaction_)
     }
     return this.value_
   },
@@ -481,10 +482,12 @@ Computation.prototype = create(OP, descriptors({
 
 
 function computationUpdate(computation, reaction) {
-  const def = computation.def_
   const prev = computation.value_
-  const next = computation.value_ = def(reaction)
-  if (!computation.equal_(prev, next)) computation.trigger(computation)
+  const next = computation.def_(reaction)
+  if (!computation.equal_(prev, next)) {
+    computation.value_ = next
+    computation.trigger(computation)
+  }
 }
 
 
@@ -526,8 +529,11 @@ Query.prototype = create(OP, descriptors({
 
 function onQueryTrigger(query) {
   const prev = query.value_
-  const next = query.value_ = queryDeref(query)
-  if (!query.equal_(prev, next)) query.trigger(query)
+  const next = queryDeref(query)
+  if (!query.equal_(prev, next)) {
+    query.value_ = next
+    query.trigger(query)
+  }
 }
 
 function queryDeref(query) {
@@ -640,7 +646,7 @@ export function flushBy(values, fun, a, b, c) {
 // Undocumented
 export function validateInstance(value, Class) {
   if (!isInstance(value, Class)) {
-    throw Error(`Expected ${show(value)} to be an instance of ${show(Class)}`)
+    throw Error(`expected ${show(value)} to be an instance of ${show(Class)}`)
   }
 }
 
@@ -790,7 +796,7 @@ function isPath(value) {
 }
 
 function validate(value, test) {
-  if (!test(value)) throw Error(`Expected ${show(value)} to satisfy test ${show(test)}`)
+  if (!test(value)) throw Error(`expected ${show(value)} to satisfy test ${show(test)}`)
 }
 
 function show(value) {

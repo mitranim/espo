@@ -18,6 +18,14 @@ See the API reference: https://mitranim.com/espo/.
 
 ## Changelog
 
+### 0.4.5
+
+Improvements in `Computation` and `Query`:
+
+* After recomputing the value and performing the equality check, the new value is stored only when not equal to the previous value. If equal, the previous value is kept. This may slightly improve change detection performance and memory efficiency.
+
+* The function passed to `new Computation` is now called with the computation instance as `this`. This can be convenient when subclassing `Computation` and defining the computation function as a method.
+
 ### 0.4.4
 
 When possible, `deinitDiff` and `deinitDeep` now use `Set` instead of `[]` to keep track of visited objects. Performs much better when traversing large structures. In environments without `Set`, this falls back on `[]`.

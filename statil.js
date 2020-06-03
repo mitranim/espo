@@ -47,7 +47,7 @@ marked.Renderer.prototype.link = function link (href, title, text) {
   // typos. Links starting with // are a stupid idea anyway and need a protocol
   // prepended.
   if (/^\//.test(href)) {
-    throw Error(`Unexpected domain-relative href: ${href}`)
+    throw Error(`unexpected domain-relative href: ${href}`)
   }
 
   const attrs = [
