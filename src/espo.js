@@ -631,7 +631,7 @@ export function forceEach(list, fun, a, b, c) {
 // TODO finalize the API, then document
 export function flushBy(values, fun, a, b, c) {
   validate(fun, isFunction)
-  validate(values, isArray)
+  validate(values, isQue)
   try {
     while (values.length) {
       fun.call(this, values.shift(), a, b, c)
@@ -789,6 +789,13 @@ function isList(value) {
       (!isDict(value) || NOP.hasOwnProperty.call(value, 'callee'))
     )
   )
+}
+
+function isQue(value) {
+  return isObject(value) &&
+    isNatural(value.length) &&
+    isFunction(value.push) &&
+    isFunction(value.shift)
 }
 
 function isPath(value) {

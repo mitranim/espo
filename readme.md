@@ -18,6 +18,10 @@ See the API reference: https://mitranim.com/espo/.
 
 ## Changelog
 
+### 0.4.6
+
+Minor compatibility improvement: `flushBy` (which is undocumented) now accepts arbitrary array-like objects with `.push` and `.shift` methods. Can be handy for custom queues.
+
 ### 0.4.5
 
 Improvements in `Computation` and `Query`:
