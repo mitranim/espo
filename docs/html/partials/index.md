@@ -2,7 +2,7 @@
 
 `Espo`: **e**xtensions for **s**tateful **p**r**o**gramming in JavaScript. Enables reactive programming with automatic state cleanup. Source: <a href="https://github.com/mitranim/espo" target="_blank">https://github.com/mitranim/espo</a>.
 
-Relatively small: ≈ 7 KiB minified. The optional view adapters add tiny dependencies for around ≈ 4 KiB. One of them is Emerge, see below.
+Dependency-free and relatively small: ≈ 7 KiB minified. The optional view adapter is ≈ 0.3 KiB minified.
 
 See sibling libraries:
 
