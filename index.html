@@ -1,0 +1,817 @@
+<!doctype html>
+
+<base href="/espo/">
+<meta charset="utf-8">
+<title>Espo</title>
+<link rel="stylesheet" href="styles/docs.css?21a16e6">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,600,300italic,600italic&subset=latin" rel="stylesheet">
+<link rel="icon" href="data:;base64,=">
+
+<!-- Prevent caching -->
+<meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+
+<body>
+  <div id="sidenav" class="side-column pad" data-nospill>
+    <p>
+      <a href="https://github.com/mitranim/espo" target="_blank" class="external-link">Source on GitHub</a>
+    </p>
+
+    <div class="list flex-col flex-stretch">
+      <a href="#" class="frb" onclick="main.scrollTop = 0"><span>Top</span></a>
+
+      <a href="#overview" class="frb active"><span>Overview</span></a>
+
+      <a href="#table-of-contents" class="frb active"><span>Table of Contents</span></a>
+
+      <a href="#interfaces" class="frb"><span>Interfaces</span></a>
+      <div class="list flex-col flex-stretch">
+        <a href="#isdeinitable-value-" class="frb"><code>isDeinitable</code></a>
+        <a href="#isowner-value-" class="frb"><code>isOwner</code></a>
+        <a href="#isref-value-" class="frb"><code>isRef</code></a>
+        <a href="#isobservable-value-" class="frb"><code>isObservable</code></a>
+        <a href="#isobservableref-value-" class="frb"><code>isObservableRef</code></a>
+        <a href="#isatom-value-" class="frb"><code>isAtom</code></a>
+        <a href="#isagent-value-" class="frb"><code>isAgent</code></a>
+        <a href="#issubscription-value-" class="frb"><code>isSubscription</code></a>
+      </div>
+
+      <a href="#classes" class="frb"><span>Classes</span></a>
+      <div class="list flex-col flex-stretch">
+        <a href="#observable-" class="frb"><code>Observable</code></a>
+        <a href="#atom-value-" class="frb"><code>Atom</code></a>
+        <a href="#agent-value-" class="frb"><code>Agent</code></a>
+        <a href="#reaction-" class="frb"><code>Reaction</code></a>
+        <a href="#computation-def-equal-" class="frb"><code>Computation</code></a>
+        <a href="#computation-def-computation" class="frb"><code>computation</code></a>
+        <a href="#query-observableref-query-equal-" class="frb"><code>Query</code></a>
+        <a href="#query-observableref-query-query" class="frb"><code>query</code></a>
+        <a href="#pathquery-observableref-path-equal-" class="frb"><code>PathQuery</code></a>
+        <a href="#pathquery-observableref-path-pathquery" class="frb"><code>pathQuery</code></a>
+      </div>
+
+      <a href="#utils" class="frb"><span>Utils</span></a>
+      <div class="list flex-col flex-stretch">
+        <a href="#deinit-ref-" class="frb"><code>deinit</code></a>
+        <a href="#deinitdiff-prev-next-" class="frb"><code>deinitDiff</code></a>
+        <a href="#unown-ref-" class="frb"><code>unown</code></a>
+        <a href="#deref-ref-" class="frb"><code>deref</code></a>
+        <a href="#derefdeep-ref-" class="frb"><code>derefDeep</code></a>
+        <a href="#derefin-ref-path-" class="frb"><code>derefIn</code></a>
+        <a href="#scan-ref-path-" class="frb"><code>scan</code></a>
+        <a href="#contextsubscribe-obs-" class="frb"><code>contextSubscribe</code></a>
+        <a href="#replacecontextsubscribe-subscribe-" class="frb"><code>replaceContextSubscribe</code></a>
+      </div>
+
+      <a href="#utils" class="frb"><span>React Views</span></a>
+      <div class="list flex-col flex-stretch">
+        <a href="#initviewcomponent-view-" class="frb"><code>initViewComponent</code></a>
+      </div>
+
+      <a href="#author" class="frb"><span>Author</span></a>
+    </div>
+  </div>
+
+  <article id="main" class="main-column pad">
+    <h2><span>Overview</span><a class="heading-anchor" href="#overview" id="overview">🔗</a></h2>
+<p><code>Espo</code>: <strong>e</strong>xtensions for <strong>s</strong>tateful <strong>p</strong>r<strong>o</strong>gramming in JavaScript. Enables reactive programming with automatic state cleanup. Source: <a href="https://github.com/mitranim/espo" target="_blank">https://github.com/mitranim/espo</a>.</p>
+<p>Dependency-free and relatively small: ≈ 7 KiB minified. The optional view adapter is ≈ 0.3 KiB minified.</p>
+<p>See sibling libraries:</p>
+<ul>
+<li>Emerge: <a href="https://github.com/mitranim/emerge" target="_blank">https://github.com/mitranim/emerge</a>. Efficient patching and merging of plain JS data.</li>
+<li>fpx: <a href="https://mitranim.com/fpx/" target="_blank">https://mitranim.com/fpx/</a>. Utils for functional programming.</li>
+</ul>
+<p>Install with <code>npm</code>. Current version: <code>0.5.1</code>. The changelog is maintained in <a href="https://github.com/mitranim/espo#changelog" target="_blank"><code>readme.md</code></a>.</p>
+<pre><code class="hljs language-sh">npm i espo</code></pre>
+<p>All examples imply an import:</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> es <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;espo&#x27;</span></code></pre>
+<p>To allow running examples in the browser console, this page has the following imports in the global scope:</p>
+<ul>
+<li><code>es</code> or <code>espo</code>: this library.</li>
+<li><code>em</code> or <code>emerge</code>: Emerge (data manipulation).</li>
+<li><code>f</code> or <code>fpx</code>: fpx (general utilities).</li>
+</ul>
+<hr>
+<h2><span>Table of Contents</span><a class="heading-anchor" href="#table-of-contents" id="table-of-contents">🔗</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#interfaces">Interfaces</a></li>
+<li><a href="#classes">Classes</a></li>
+<li><a href="#utils">Utils</a></li>
+<li><a href="#react-views">React Views</a></li>
+</ul>
+<hr>
+<h2><span>Introduction</span><a class="heading-anchor" href="#introduction" id="introduction">🔗</a></h2>
+<p>Espo combines multiple ideas into one unique package:</p>
+<ul>
+<li>Using immutable data. (Haskell, Clojure, Erlang, Emerge, Redux, etc.)</li>
+<li>Storing immutable data in observable references. (Clojure, RxJS, MobX, Redux, etc.)</li>
+<li>Subscribing to observables implicitly, just by pulling data from them. (Reagent.)</li>
+<li>Automatically calling deinitializers when dropping stateful objects. (Rust, Swift, C++.)</li>
+<li>Observables that initialize data fetching when someone’s pulling data from them. (RxJS.)</li>
+</ul>
+<p>Espo provides primitives; with some assembly, you can do astounding things.</p>
+<details class="details">
+  <summary>Example: an observable that automatically fetches data when used.</summary>
+
+<pre><code class="hljs language-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DataSource</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">es</span>.<span class="hljs-title">Agent</span> </span>{
+  <span class="hljs-keyword">constructor</span>(params) {
+    <span class="hljs-built_in">super</span>({<span class="hljs-attr">value</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">error</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">req</span>: <span class="hljs-literal">undefined</span>})
+    <span class="hljs-built_in">this</span>.params = params
+  }
+
+  onInit() {
+    <span class="hljs-comment">// Suppose this returns an `XMLHttpRequest` instance.</span>
+    <span class="hljs-keyword">const</span> req = httpRequest(<span class="hljs-built_in">this</span>.params, <span class="hljs-function">(<span class="hljs-params">error, value</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (error) <span class="hljs-built_in">this</span>.$ = {...this.$, error, <span class="hljs-attr">req</span>: <span class="hljs-literal">undefined</span>}
+      <span class="hljs-keyword">else</span> <span class="hljs-built_in">this</span>.$ = {...this.$, value, <span class="hljs-attr">error</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">req</span>: <span class="hljs-literal">undefined</span>}
+    })
+
+    <span class="hljs-comment">// Enables automatic deinitialization when `req` is replaced.</span>
+    req.deinit = req.abort
+
+    <span class="hljs-built_in">this</span>.$ = {...this.$, req}
+  }
+
+  onDeinit() {
+    <span class="hljs-built_in">this</span>.$ = {...this.$, <span class="hljs-attr">req</span>: <span class="hljs-literal">undefined</span>}
+  }
+}
+
+<span class="hljs-comment">// Minor note: consider using Emerge instead of `{...}` for added efficiency.</span></code></pre>
+</details>
+
+<details class="details">
+  <summary>Example: using that observable in a view component. Attempting to read its value automatically subscribes the view component to updates, and automatically triggers data fetching. The first read from the observable will contain the request, so we can display loading indicators and errors as needed.</summary>
+
+<pre><code class="hljs language-js"><span class="hljs-comment">// Some assembly required.</span>
+
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> es <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;espo&#x27;</span>
+<span class="hljs-keyword">import</span> {Component} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;react&#x27;</span>
+<span class="hljs-keyword">import</span> {initViewComponent} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;espo/react&#x27;</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ViewComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  <span class="hljs-keyword">constructor</span>() {
+    <span class="hljs-built_in">super</span>(...arguments)
+    initViewComponent(<span class="hljs-built_in">this</span>)
+  }
+}
+
+<span class="hljs-comment">// Actual usage.</span>
+
+<span class="hljs-keyword">const</span> userSrc = <span class="hljs-keyword">new</span> DataSource({<span class="hljs-attr">url</span>: <span class="hljs-string">&#x27;/api/user&#x27;</span>})
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">View</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ViewComponent</span> </span>{
+  render() {
+    <span class="hljs-keyword">const</span> {<span class="hljs-attr">value</span>: user, error, req} = userSrc.$
+    <span class="hljs-keyword">return</span> <span class="hljs-comment">// ...</span>
+  }
+}</code></pre>
+</details>
+
+<details class="details">
+  <summary>Example: an observable that recomputes data from multiple sources. (See <code>ViewComponent</code> setup above.)</summary>
+
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> one = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+<span class="hljs-keyword">const</span> two = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">20</span>)
+<span class="hljs-keyword">const</span> sum = es.computation(<span class="hljs-function">() =&gt;</span> one.$ + two.$)
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">View</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ViewComponent</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> sum.$ <span class="hljs-comment">// Start at 30; always up to date</span>
+  }
+}</code></pre>
+</details>
+
+<hr>
+<h2><span>Interfaces</span><a class="heading-anchor" href="#interfaces" id="interfaces">🔗</a></h2>
+<p>Espo defines a few “interfaces” which are simultaneously abstract definitions <em>and</em> runtime boolean tests. Espo checks its inputs with these interfaces rather than with <code>instanceof</code>.</p>
+<h3><span><code>isDeinitable(value)</code></span><a class="heading-anchor" href="#isdeinitable-value-" id="isdeinitable-value-">🔗</a></h3>
+<pre><code class="hljs language-js">interface isDeinitable {
+  deinit(): <span class="hljs-keyword">void</span>
+}</code></pre>
+<p>Interface for objects that have a <em>lifetime</em> and must be deinitialized before
+you can leave them to the GC. <code>.deinit()</code> must make the object inert,
+releasing any resources it owns, tearing down any subscriptions, etc.</p>
+<p><code>.deinit()</code> must be idempotent and reentrant: redundant calls to <code>.deinit()</code>,
+even when accidentally overlapping with an ongoing <code>.deinit()</code> call, should have
+no adverse effects.</p>
+<pre><code class="hljs language-js">es.isDeinitable(<span class="hljs-literal">null</span>)           <span class="hljs-comment">// false</span>
+es.isDeinitable(<span class="hljs-keyword">new</span> es.Que())   <span class="hljs-comment">// true</span>
+es.isDeinitable({deinit() {}})  <span class="hljs-comment">// true</span></code></pre>
+<p>See complementary functions <a href="#deinit-ref-"><code>deinit</code></a> and
+<a href="#deinitdiff-prev-next-"><code>deinitDiff</code></a>.</p>
+<hr>
+<h3><span><code>isOwner(value)</code></span><a class="heading-anchor" href="#isowner-value-" id="isowner-value-">🔗</a></h3>
+<pre><code class="hljs language-js">interface isOwner <span class="hljs-keyword">extends</span> isDeinitable {
+  unown(): any
+}</code></pre>
+<p>Interface for objects that wrap a <a href="#isdeinitable-value-">deinitable</a> value and manage its lifetime. Deiniting an owner should also deinit its inner value. See <a href="https://doc.rust-lang.org/book/ownership.html#ownership" target="_blank">ownership</a> in Rust.</p>
+<p><code>.unown()</code> should remove the inner value from the owner without deiniting it, and return it to the caller. See <a href="https://doc.rust-lang.org/book/ownership.html#move-semantics" target="_blank">move</a> in Rust.</p>
+<p>See <a href="#agent-value-"><code>Agent</code></a> and <a href="#agent-unown-"><code>agent.unown()</code></a> for practical examples.</p>
+<p>See the complementary function <a href="#unown-ref-"><code>unown</code></a>.</p>
+<pre><code class="hljs language-js">es.isOwner(<span class="hljs-keyword">new</span> es.Atom())   <span class="hljs-comment">// false</span>
+es.isOwner(<span class="hljs-keyword">new</span> es.Agent())  <span class="hljs-comment">// true</span></code></pre>
+<hr>
+<h3><span><code>isRef(value)</code></span><a class="heading-anchor" href="#isref-value-" id="isref-value-">🔗</a></h3>
+<pre><code class="hljs language-js">interface isRef {
+  deref(): any
+}</code></pre>
+<p>Interface for objects that wrap a value, such as <a href="#atom-value-"><code>Atom</code></a> or any other <a href="#isobservableref-value-">observable ref</a>. The method <code>.deref()</code> must return the underlying value.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">100</span>)
+es.isRef(atom) <span class="hljs-comment">// true</span>
+atom.deref()   <span class="hljs-comment">// 100</span>
+atom.$         <span class="hljs-comment">// 100</span></code></pre>
+<p>All Espo refs provide the <code>.$</code> shortcut mandated by <a href="#isobservableref-value-"><code>isObservableRef</code></a>; see below.</p>
+<hr>
+<h3><span><code>isObservable(value)</code></span><a class="heading-anchor" href="#isobservable-value-" id="isobservable-value-">🔗</a></h3>
+<pre><code class="hljs language-js">interface isObservable <span class="hljs-keyword">extends</span> isDeinitable {
+  subscribe(subscriber: ƒ(...any))          : isSubscription
+  unsubscribe(subscription: isSubscription) : <span class="hljs-keyword">void</span>
+  trigger(...any)                           : <span class="hljs-keyword">void</span>
+}</code></pre>
+<p>Interface for objects that let you subscribe to notifications, such as <a href="#atom-value-"><code>Atom</code></a> or <a href="#computation-def-equal-"><code>Computation</code></a>. An “observable” can be considered a stream of arbitrary values. The callback provided to <code>.subscribe()</code> receives the arguments passed to <code>.trigger()</code>.</p>
+<p>See <a href="#issubscription-value-"><code>isSubscription</code></a> below.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">100</span>)
+es.isObservable(atom) <span class="hljs-comment">// true</span></code></pre>
+<hr>
+<h3><span><code>isObservableRef(value)</code></span><a class="heading-anchor" href="#isobservableref-value-" id="isobservableref-value-">🔗</a></h3>
+<pre><code class="hljs language-js">interface isObservableRef <span class="hljs-keyword">extends</span> isRef, isObservable {
+  get $                                     : any
+  subscribe(subscriber: ƒ(isObservableRef)) : isSubscription <span class="hljs-comment">// Override.</span>
+  trigger()                                 : <span class="hljs-keyword">void</span>           <span class="hljs-comment">// Override.</span>
+}</code></pre>
+<p>Combination of “observable” and “reference”. This is something that encapsulates a value and can notify about changes to that value.</p>
+<p>Unlike <a href="#isobservable-value-"><code>isObservable</code></a>, by convention, the callback passed to <code>.subscribe()</code> receives the observable itself as its only argument, and <code>.trigger()</code> doesn’t take any parameters.</p>
+<p>In addition to being able to take the value by <code>.deref()</code>, this interface mandates the presence of the <code>.$</code> getter. In reactive contexts such as <a href="#reaction-loop-fun-"><code>Reaction.loop</code></a>, <code>.$</code> must implicitly establish subscriptions, while <code>.deref()</code> must <em>not</em> implicitly establish subscriptions. This important convention is followed by Espo’s own observable refs such as <a href="#atom-value-"><code>Atom</code></a> and <a href="#computation-def-equal-"><code>Computation</code></a>.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">100</span>)
+es.isObservableRef(atom) <span class="hljs-comment">// true</span>
+atom.$                   <span class="hljs-comment">// 100</span></code></pre>
+<hr>
+<h3><span><code>isAtom(value)</code></span><a class="heading-anchor" href="#isatom-value-" id="isatom-value-">🔗</a></h3>
+<pre><code class="hljs language-js">interface isAtom <span class="hljs-keyword">extends</span> isObservableRef {
+  set $                        : <span class="hljs-keyword">void</span>
+  swap(ƒ(any, ...any), ...any) : <span class="hljs-keyword">void</span>
+  reset(any)                   : <span class="hljs-keyword">void</span>
+}</code></pre>
+<p>Interface for observable references which encourage the “functional” style of modifying their state. Lifted from <a href="https://clojuredocs.org/clojure.core/atom" target="_blank"><code>clojure.core/atom</code></a>.</p>
+<p>The <code>.$</code> setter must be equivalent to calling <code>.reset()</code> with the provided value.</p>
+<p>See <a href="#atom-value-"><code>Atom</code></a> for usage examples.</p>
+<hr>
+<h3><span><code>isAgent(value)</code></span><a class="heading-anchor" href="#isagent-value-" id="isagent-value-">🔗</a></h3>
+<pre><code class="hljs language-js">interface isAgent <span class="hljs-keyword">extends</span> isAtom, isOwner {}</code></pre>
+<p>Interface for observable references with “functional” state transitions that automatically manage the lifetimes of owned resources.</p>
+<p>See <a href="#agent-value-"><code>Agent</code></a> for explanation and usage.</p>
+<hr>
+<h3><span><code>isSubscription(value)</code></span><a class="heading-anchor" href="#issubscription-value-" id="issubscription-value-">🔗</a></h3>
+<pre><code class="hljs language-js">interface isSubscription <span class="hljs-keyword">extends</span> isDeinitable {
+  trigger(...any): <span class="hljs-keyword">void</span>
+}</code></pre>
+<p>Interface for subscription objects returned by <a href="#observable-subscribe-subscriber-"><code>Observable.prototype.subscribe()</code></a>. The <code>.trigger()</code> method is called by the observable that created the subscription. Calling <code>.deinit()</code> should stop the subscription <em>immediately</em>, even if the observable is in the process of notifying its subscribers.</p>
+<hr>
+<h2><span>Classes</span><a class="heading-anchor" href="#classes" id="classes">🔗</a></h2>
+<p>Espo provides several utility classes. Some of them are intended for direct
+use, some should be subclassed.</p>
+<h3><span><code>Observable()</code></span><a class="heading-anchor" href="#observable-" id="observable-">🔗</a></h3>
+<p><code>implements</code> <a href="#isdeinitable-value-"><code>isDeinitable</code></a>, <a href="#isobservable-value-"><code>isObservable</code></a></p>
+<p>Abstract class for implementing <a href="#isobservable-value-"><code>observables</code></a> and <a href="#isobservableref-value-"><code>observable refs</code></a>. Should be subclassed. See <a href="#atom-value-"><code>Atom</code></a> and <a href="#computation-def-equal-"><code>Computation</code></a>, which are based on this.</p>
+<p>Espo’s observables have an extremely powerful feature: they call <code>.onInit()</code> when adding the first subscription, and <code>.onDeinit()</code> when removing the last one. A subclass may override <code>.onInit()</code> and <code>.onDeinit()</code> to setup and teardown any external resources it needs, such as HTTP requests or websockets.</p>
+<p>The following example implements an observable that automatically fetches a resource when a consumer subscribes to it:</p>
+<pre><code class="hljs language-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">es</span>.<span class="hljs-title">Agent</span> </span>{
+  <span class="hljs-keyword">constructor</span>(params) {
+    <span class="hljs-built_in">super</span>({<span class="hljs-attr">value</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">error</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">req</span>: <span class="hljs-literal">undefined</span>})
+    <span class="hljs-built_in">this</span>.params = params
+  }
+
+  onInit() {
+    <span class="hljs-keyword">const</span> req = httpRequest(<span class="hljs-built_in">this</span>.params, <span class="hljs-function">(<span class="hljs-params">error, value</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (error) <span class="hljs-built_in">this</span>.$ = {...this.$, error, <span class="hljs-attr">req</span>: <span class="hljs-literal">undefined</span>}
+      <span class="hljs-keyword">else</span> <span class="hljs-built_in">this</span>.$ = {...this.$, value, <span class="hljs-attr">error</span>: <span class="hljs-literal">undefined</span>, <span class="hljs-attr">req</span>: <span class="hljs-literal">undefined</span>}
+    })
+
+    <span class="hljs-comment">// Enables automatic deinitialization when `req` is replaced.</span>
+    req.deinit = req.abort
+
+    <span class="hljs-built_in">this</span>.$ = {...this.$, req}
+  }
+
+  onDeinit() {
+    <span class="hljs-built_in">this</span>.$ = {...this.$, <span class="hljs-attr">req</span>: <span class="hljs-literal">undefined</span>}
+  }
+}</code></pre>
+<h4><span><code>observable.subscribe(subscriber)</code></span><a class="heading-anchor" href="#observable-subscribe-subscriber-" id="observable-subscribe-subscriber-">🔗</a></h4>
+<p>where <code>subscriber: ƒ(...any)</code></p>
+<p>Conscripts the <code>subscriber</code> function to be called every time the observable is
+<a href="#observable-trigger-args-">triggered</a>. Returns a <a href="#issubscription-value-">subscription object</a> that you can <code>.deinit()</code>. Deiniting a subscription is immediate, even during an ongoing trigger.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> sub = someObservable.subscribe(<span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> {
+  <span class="hljs-comment">// ...</span>
+})
+
+<span class="hljs-comment">// Prevents further notifications.</span>
+sub.deinit()</code></pre>
+<h4><span><code>observable.unsubscribe(subscription)</code></span><a class="heading-anchor" href="#observable-unsubscribe-subscription-" id="observable-unsubscribe-subscription-">🔗</a></h4>
+<p>Same as <code>subscription.deinit()</code>.</p>
+<h4><span><code>observable.trigger(...args)</code></span><a class="heading-anchor" href="#observable-trigger-args-" id="observable-trigger-args-">🔗</a></h4>
+<p>Call to notify subscribers, passing <code>...args</code> to each. Triggers never overlap:
+if <code>.trigger()</code> is called during <em>another ongoing trigger</em>, the redundant call
+is put on an internal <a href="#que-deque-"><code>Que</code></a> to be executed later.</p>
+<h4><span><code>observable.onInit()</code></span><a class="heading-anchor" href="#observable-oninit-" id="observable-oninit-">🔗</a></h4>
+<p>Called when adding the first subscription.</p>
+<h4><span><code>observable.onDeinit()</code></span><a class="heading-anchor" href="#observable-ondeinit-" id="observable-ondeinit-">🔗</a></h4>
+<p>Called when removing the last subscription.</p>
+<h4><span><code>observable.deinit()</code></span><a class="heading-anchor" href="#observable-deinit-" id="observable-deinit-">🔗</a></h4>
+<p>Deinits all current subscriptions. This incidentally triggers <code>.onDeinit()</code> if
+the observable is active.</p>
+<hr>
+<h3><span><code>Atom(value)</code></span><a class="heading-anchor" href="#atom-value-" id="atom-value-">🔗</a></h3>
+<p><code>extends</code> <a href="#observable-"><code>Observable</code></a></p>
+<p><code>implements</code> <a href="#isatom-value-"><code>isAtom</code></a></p>
+<p>Basic observable reference. Inspired by <a href="https://clojuredocs.org/clojure.core/atom" target="_blank"><code>clojure.core/atom</code></a>. Should be paired with <a href="https://github.com/mitranim/emerge" target="_blank">Emerge</a> for efficient nested updates.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+
+atom.$  <span class="hljs-comment">// 10</span>
+
+<span class="hljs-keyword">const</span> sub = atom.subscribe(<span class="hljs-function"><span class="hljs-params">atom</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.info(atom.$)
+})
+
+atom.swap(<span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> value + <span class="hljs-number">1</span>)
+<span class="hljs-comment">// Prints 11</span>
+
+atom.swap(<span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> value + <span class="hljs-number">100</span>)
+<span class="hljs-comment">// Prints 111</span>
+
+sub.deinit()</code></pre>
+<h4><span><code>atom.deref()</code> or <code>atom.$</code></span><a class="heading-anchor" href="#atom-deref-or-atom-" id="atom-deref-or-atom-">🔗</a></h4>
+<p>Returns the underlying value:</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">num</span>: <span class="hljs-number">100</span>})
+
+<span class="hljs-built_in">console</span>.info(atom.deref())
+<span class="hljs-comment">// {num: 100}</span>
+
+<span class="hljs-built_in">console</span>.info(atom.$)
+<span class="hljs-comment">// {num: 100}</span></code></pre>
+<p>In a reactive context such as <a href="#reaction-run-fun-ontrigger-"><code>Reaction.run</code></a> or <a href="#reaction-loop-fun-"><code>Reaction.loop</code></a>, <code>atom.$</code> will implicitly establish subscriptions. See those methods for examples.</p>
+<h4><span><code>atom.swap(fun, ...args)</code></span><a class="heading-anchor" href="#atom-swap-fun-args-" id="atom-swap-fun-args-">🔗</a></h4>
+<p>where <code>fun: ƒ(currentValue, ...args)</code></p>
+<p>Sets the value of <code>atom</code> to the result of calling <code>fun</code> with the current value and the optional args. Triggers subscriptions if the value has changed at all.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+
+atom.$ <span class="hljs-comment">// 10</span>
+
+<span class="hljs-comment">// Usage without additional args.</span>
+atom.swap(<span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> value * <span class="hljs-number">2</span>)
+
+atom.$ <span class="hljs-comment">// 20</span>
+
+<span class="hljs-comment">// Additional args are useful with predefined functions.</span>
+atom.swap(add, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+
+atom.$ <span class="hljs-comment">// add(20, 1, 2) = 23</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params">a, b, c</span>) </span>{<span class="hljs-keyword">return</span> a + b + c}</code></pre>
+<h4><span><code>atom.reset(value)</code> or <code>atom.$ = X</code></span><a class="heading-anchor" href="#atom-reset-value-or-atom-x" id="atom-reset-value-or-atom-x">🔗</a></h4>
+<p>Resets <code>atom</code>‘s value to the provided <code>value</code> and triggers subscriptions if the value has changed at all.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+
+atom.reset(<span class="hljs-number">20</span>)
+
+atom.$ <span class="hljs-comment">// 20</span>
+
+<span class="hljs-comment">// Equivalent to .reset(), also triggers subscribers.</span>
+atom.$ = <span class="hljs-number">30</span>
+
+atom.$ <span class="hljs-comment">// 30</span></code></pre>
+<hr>
+<h3><span><code>Agent(value)</code></span><a class="heading-anchor" href="#agent-value-" id="agent-value-">🔗</a></h3>
+<p><code>extends</code> <a href="#atom-value-"><code>Atom</code></a></p>
+<p><code>implements</code> <a href="#isagent-value-"><code>isAgent</code></a></p>
+<p>Combines three big ideas:</p>
+<ul>
+<li>A tool for building a hierarchy of objects with explicit <a href="https://doc.rust-lang.org/book/ownership.html#ownership" target="_blank">ownership</a>.</li>
+<li>That automatically manages object lifetimes via <a href="#isdeinitable-value-"><code>.deinit()</code></a>.</li>
+<li>And is fully <a href="#isobservableref-value-">observable</a>.</li>
+</ul>
+<p>In addition to its <code>Atom</code> qualities, an agent automatically manages the lifetimes of the objects it contains, directly or indirectly. Modifying an agent’s value via <code>agent.$</code>, <code>agent.swap()</code> or <code>agent.reset()</code> invokes <a href="#deinitdiff-prev-next-"><code>deinitDiff</code></a> on the previous and next value, automatically deiniting any removed objects that implement <a href="#isdeinitable-value-"><code>isDeinitable</code></a>.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> es <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;espo&#x27;</span>
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> em <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;emerge&#x27;</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Resource</span> </span>{
+  <span class="hljs-keyword">constructor</span>(name) {<span class="hljs-built_in">this</span>.name = name}
+  deinit() {<span class="hljs-built_in">console</span>.info(<span class="hljs-string">&#x27;deiniting:&#x27;</span>, <span class="hljs-built_in">this</span>.name)}
+}
+
+<span class="hljs-keyword">const</span> agent = <span class="hljs-keyword">new</span> es.Agent({<span class="hljs-attr">first</span>: <span class="hljs-keyword">new</span> Resource(<span class="hljs-string">&#x27;first&#x27;</span>)})
+
+agent.swap(em.patch, {<span class="hljs-attr">second</span>: <span class="hljs-keyword">new</span> Resource(<span class="hljs-string">&#x27;second&#x27;</span>)})
+
+agent.$
+<span class="hljs-comment">// {inner: {first: Resource{name: &#x27;first&#x27;}, second: Resource{name: &#x27;second&#x27;}}}</span>
+
+<span class="hljs-comment">// Any replaced or removed object is automatically deinited:</span>
+
+agent.swap(em.patch, {<span class="hljs-attr">first</span>: <span class="hljs-keyword">new</span> Resource(<span class="hljs-string">&#x27;third&#x27;</span>)})
+<span class="hljs-comment">// &#x27;deiniting: first&#x27;</span>
+
+agent.swap(em.patch, {<span class="hljs-attr">second</span>: <span class="hljs-literal">null</span>})
+<span class="hljs-comment">// &#x27;deiniting: second&#x27;</span>
+
+agent.$
+<span class="hljs-comment">// {inner: {first: Resource{name: &#x27;third&#x27;}}}</span>
+
+agent.deinit()
+<span class="hljs-comment">// &#x27;deiniting: third&#x27;</span>
+
+agent.$
+<span class="hljs-comment">// undefined</span></code></pre>
+<h4><span><code>agent.swap(fun, ...args)</code></span><a class="heading-anchor" href="#agent-swap-fun-args-" id="agent-swap-fun-args-">🔗</a></h4>
+<p>In addition to modifying the agent’s value (see <a href="#atom-swap-fun-args-"><code>atom.swap()</code></a>), diffs the previous and the next value, deiniting any removed objects.</p>
+<p>See the example above.</p>
+<h4><span><code>agent.reset(value)</code> or <code>agent.$ = X</code></span><a class="heading-anchor" href="#agent-reset-value-or-agent-x" id="agent-reset-value-or-agent-x">🔗</a></h4>
+<p>In addition to modifying the agent’s value (see <a href="#atom-reset-value-or-atom-x"><code>atom.reset()</code></a>), diffs the previous and the next value, deiniting any removed objects.</p>
+<p>See the example above.</p>
+<h4><span><code>agent.deinit()</code></span><a class="heading-anchor" href="#agent-deinit-" id="agent-deinit-">🔗</a></h4>
+<p>In addition to deiniting subscriptions (see <a href="#observable-deinit-"><code>observable.deinit()</code></a>), resets the agent to <code>undefined</code>, deiniting the previous value.</p>
+<p>See the example above.</p>
+<h4><span><code>agent.unown()</code></span><a class="heading-anchor" href="#agent-unown-" id="agent-unown-">🔗</a></h4>
+<p>Resets <code>agent</code> to <code>undefined</code>, returning the previous value as-is, without deiniting it. If one of the subscriptions triggered by <code>.unown()</code> produces an exception before <code>.unown()</code> returns, the value is automatically deinited to avoid leaks.</p>
+<p>In Rust terms, <code>.unown()</code> implies <a href="https://doc.rust-lang.org/book/ownership.html#move-semantics" target="_blank">moving</a> the value out of the agent. The caller <em>must take responsibility</em> for the lifetime of the returned value.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+
+<span class="hljs-keyword">const</span> sub = atom.subscribe(<span class="hljs-function"><span class="hljs-params">atom</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.info(<span class="hljs-string">&#x27;updated:&#x27;</span>, atom.$)
+})
+
+<span class="hljs-comment">// This will manage the subscription created by `atom`.</span>
+<span class="hljs-keyword">const</span> agent = <span class="hljs-keyword">new</span> es.Agent({sub})
+
+agent.$
+<span class="hljs-comment">// {sub: Subscription{state: &#x27;ACTIVE&#x27;, ...}}</span>
+
+<span class="hljs-comment">// The subscription is active:</span>
+atom.$ = <span class="hljs-number">20</span>
+<span class="hljs-comment">// &#x27;updated: 20&#x27;</span>
+
+<span class="hljs-keyword">const</span> {sub} = agent.unown()
+<span class="hljs-comment">// Subscription{state: &#x27;ACTIVE&#x27;, ...}</span>
+
+<span class="hljs-comment">// The value has been moved out of the agent:</span>
+agent.$
+<span class="hljs-comment">// undefined</span>
+
+<span class="hljs-comment">// The subscription is still active:</span>
+atom.$ = <span class="hljs-number">30</span>
+<span class="hljs-comment">// &#x27;updated: 30&#x27;</span>
+
+<span class="hljs-comment">// We must take responsibility for its lifetime:</span>
+sub.deinit()</code></pre>
+<p>For comparison, <code>.reset()</code> or <code>.$ = X</code> will diff and deinit the previous value:</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+
+<span class="hljs-keyword">const</span> sub = atom.subscribe(<span class="hljs-function"><span class="hljs-params">atom</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.info(<span class="hljs-string">&#x27;updated:&#x27;</span>, atom.$)
+})
+
+<span class="hljs-keyword">const</span> agent = <span class="hljs-keyword">new</span> es.Agent({sub})
+
+agent.$
+<span class="hljs-comment">// {sub: Subscription{state: &#x27;ACTIVE&#x27;, ...}}</span>
+
+atom.$ = <span class="hljs-number">20</span>
+<span class="hljs-comment">// &#x27;updated: 20&#x27;</span>
+
+agent.$ = <span class="hljs-literal">undefined</span>
+
+sub
+<span class="hljs-comment">// Subscription{state: &#x27;IDLE&#x27;, ...}</span>
+
+atom.$ = <span class="hljs-number">30</span>
+<span class="hljs-comment">// nothing</span></code></pre>
+<hr>
+<h3><span><code>Reaction()</code></span><a class="heading-anchor" href="#reaction-" id="reaction-">🔗</a></h3>
+<p><code>implements</code> <a href="#isdeinitable-value-"><code>isDeinitable</code></a></p>
+<p>Enables implicit reactivity driven by <em>procedural data access</em>. Write code that looks like a plain imperative function, but is actually reactive. With <code>Reaction</code>, you don’t subscribe or unsubscribe manually. Simply pull data from <a href="#isobservableref-value-"><code>observable refs</code></a>. The subscriptions are updated on each run, and therefore may change over time.</p>
+<p>See <a href="#computation-def-equal-"><code>Computation</code></a> for a reaction that is itself observable.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> one = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+<span class="hljs-keyword">const</span> other = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">20</span>)
+
+<span class="hljs-keyword">const</span> reaction = es.Reaction.loop(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-built_in">console</span>.info(one.$, other.$)
+})
+<span class="hljs-comment">// Prints 10, 20</span>
+
+one.$ = <span class="hljs-string">&#x27;hello&#x27;</span>
+<span class="hljs-comment">// Prints &#x27;hello&#x27;, 20</span>
+
+other.$ = <span class="hljs-string">&#x27;world&#x27;</span>
+<span class="hljs-comment">// Prints &#x27;hello&#x27;, &#x27;world&#x27;</span>
+
+reaction.deinit()</code></pre>
+<h4><span><code>reaction.run(fun, onTrigger): any</code></span><a class="heading-anchor" href="#reaction-run-fun-ontrigger-any" id="reaction-run-fun-ontrigger-any">🔗</a></h4>
+<p>where <code>fun: ƒ(): any</code>, <code>onTrigger: ƒ(): void</code></p>
+<p>Runs <code>fun</code> in the context of the reaction, subscribing to any <a href="#isobservableref-value-"><code>observable refs</code></a> whose value is taken via <code>.$</code> during the run. Returns the result of <code>fun</code>. <code>onTrigger</code> will be called when any of those observable refs is triggered.</p>
+<p>The subscriptions created during a <code>.run()</code> race with each other. As soon as one is triggered, all subscriptions are invalidated and <code>onTrigger</code> is called. Until the next <code>.run()</code>, which is typically <a href="#static-reaction-loop-fun-">immediate</a>, no further triggers will occur, but subscriptions remain “active” until the end of the next <code>.run()</code>, at which point they’re replaced with the new subscriptions and deinited. They’re also deinited on <code>.deinit()</code>. Overlapping the subscription lifetimes avoids premature deinitialization of observables.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+
+<span class="hljs-keyword">const</span> reaction = <span class="hljs-keyword">new</span> es.Reaction()
+
+<span class="hljs-keyword">const</span> value = reaction.run(
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">effect</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> atom.$
+  },
+  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-built_in">console</span>.info(<span class="hljs-string">&#x27;notified&#x27;</span>)
+    <span class="hljs-comment">// maybe rerun, maybe delay</span>
+  }
+)
+<span class="hljs-comment">// Returns 10.</span>
+
+atom.$ = <span class="hljs-number">20</span>
+<span class="hljs-comment">// Prints &quot;notified&quot;.</span>
+
+reaction.deinit()</code></pre>
+<h4><span><code>reaction.loop(fun)</code></span><a class="heading-anchor" href="#reaction-loop-fun-" id="reaction-loop-fun-">🔗</a></h4>
+<p>where <code>fun: ƒ(): void</code></p>
+<p>Runs <code>fun</code> immediately, then reruns it on every change in the watched observables. See the first usage example.</p>
+<pre><code class="hljs language-js"><span class="hljs-comment">// Doesn&#x27;t do anything</span>
+<span class="hljs-keyword">const</span> reaction = <span class="hljs-keyword">new</span> es.Reaction()
+
+<span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+
+reaction.loop(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-built_in">console</span>.info(atom.$)
+})
+<span class="hljs-comment">// Prints 10</span>
+
+atom.$ = <span class="hljs-number">20</span>
+<span class="hljs-comment">// Prints 20</span>
+
+reaction.deinit()</code></pre>
+<h4><span>static <code>Reaction.loop(fun)</code></span><a class="heading-anchor" href="#static-reaction-loop-fun-" id="static-reaction-loop-fun-">🔗</a></h4>
+<p>Creates and starts a reaction using its <code>loop</code> method. If the first run produces an exception, automatically deinits the reaction to prevent subscription leaks. See the first usage example above.</p>
+<hr>
+<h3><span><code>Computation(def, equal)</code></span><a class="heading-anchor" href="#computation-def-equal-" id="computation-def-equal-">🔗</a></h3>
+<p>where <code>def: ƒ(): any</code>, <code>equal: ƒ(any, any): bool</code></p>
+<p><code>extends</code> <a href="#observable-"><code>Observable</code></a></p>
+<p><code>implements</code> <a href="#isobservableref-value-"><code>isObservableRef</code></a></p>
+<p>Defines a reactive computation that pulls data from multiple observable refs. Filters redundant updates using the <code>equal</code> function. Internally uses a <a href="#reaction-"><code>Reaction</code></a>. Lazy: doesn’t update when it has no subscribers.</p>
+<p>Inspired by <a href="https://github.com/Day8/re-frame/blob/master/docs/SubscriptionFlow.md#how-flow-happens-in-reagent" target="_blank">Reagent’s <code>reaction</code></a>.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> one = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+<span class="hljs-keyword">const</span> other = <span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">20</span>}})
+<span class="hljs-keyword">const</span> inOther = <span class="hljs-keyword">new</span> es.PathQuery(other, [<span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>], <span class="hljs-built_in">Object</span>.is)
+
+<span class="hljs-keyword">const</span> comp = <span class="hljs-keyword">new</span> es.Computation(<span class="hljs-function">() =&gt;</span> one.$ + inOther.$, <span class="hljs-built_in">Object</span>.is)
+
+comp.$ <span class="hljs-comment">// 30</span>
+
+<span class="hljs-keyword">const</span> sub = comp.subscribe(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-built_in">console</span>.info(comp.$)
+})
+
+one.$ = <span class="hljs-string">&#x27;hello &#x27;</span>
+<span class="hljs-comment">// &#x27;hello 20&#x27;</span>
+
+other.$ = {<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-string">&#x27;world&#x27;</span>}}
+<span class="hljs-comment">// &#x27;hello world&#x27;</span>
+
+sub.deinit()
+
+<span class="hljs-comment">// Computation is now inert and safe to leave to GC.</span>
+<span class="hljs-comment">// Alternatively, call `comp.deinit()` to drop all subs.</span></code></pre>
+<hr>
+<h3><span><code>computation(def): Computation</code></span><a class="heading-anchor" href="#computation-def-computation" id="computation-def-computation">🔗</a></h3>
+<p>where <code>def: ƒ(): any</code></p>
+<p>Shortcut to <code>new Computation</code> where the equality function is <a href="https://www.ecma-international.org/ecma-262/6.0/#sec-samevaluezero" target="_blank">SameValueZero</a> as defined by the language spec (basically <code>===</code> that work on <code>NaN</code>).</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> one = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+<span class="hljs-keyword">const</span> two = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">20</span>)
+<span class="hljs-keyword">const</span> comp = es.computation(<span class="hljs-function">() =&gt;</span> one.$ + two.$)
+
+comp.$ <span class="hljs-comment">// 30</span></code></pre>
+<hr>
+<h3><span><code>Query(observableRef, query, equal)</code></span><a class="heading-anchor" href="#query-observableref-query-equal-" id="query-observableref-query-equal-">🔗</a></h3>
+<p>where <code>query: ƒ(any): any</code>, <code>equal: ƒ(any, any): bool</code></p>
+<p><code>extends</code> <a href="#observable-"><code>Observable</code></a></p>
+<p><code>implements</code> <a href="#isobservableref-value-"><code>isObservableRef</code></a></p>
+<p>Creates an observable that derives its value from <code>observableRef</code> by calling <code>query</code> and filters redundant updates by calling <code>equal</code>. Lazy: doesn’t update when it has no subscribers.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">10</span>}})
+<span class="hljs-keyword">const</span> query = <span class="hljs-keyword">new</span> es.Query(atom, (<span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> value.one.two * <span class="hljs-number">2</span>), <span class="hljs-built_in">Object</span>.is)
+
+query.$ <span class="hljs-comment">// 20</span>
+
+<span class="hljs-keyword">const</span> sub = query.subscribe(<span class="hljs-function"><span class="hljs-params">query</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.info(query.$)
+})
+
+atom.$ = {<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">20</span>}}
+<span class="hljs-comment">// Prints 40</span>
+
+<span class="hljs-comment">// Now the query is inert again.</span>
+sub.deinit()</code></pre>
+<p>In RxJS terms, <code>new es.Query(observableRef, query, equal)</code> is equivalent to <code>observable.map(query).distinctUntilChanged(equal)</code>.</p>
+<hr>
+<h3><span><code>query(observableRef, query): Query</code></span><a class="heading-anchor" href="#query-observableref-query-query" id="query-observableref-query-query">🔗</a></h3>
+<p>where <code>query: ƒ(any): any</code></p>
+<p>Shortcut to <code>new Query</code> where the equality function is <a href="https://www.ecma-international.org/ecma-262/6.0/#sec-samevaluezero" target="_blank">SameValueZero</a> as defined by the language spec (basically <code>===</code> that work on <code>NaN</code>).</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">10</span>}})
+<span class="hljs-keyword">const</span> query = es.query(atom, <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> val.one.two)
+
+query.$ <span class="hljs-comment">// 10</span></code></pre>
+<hr>
+<h3><span><code>PathQuery(observableRef, path, equal)</code></span><a class="heading-anchor" href="#pathquery-observableref-path-equal-" id="pathquery-observableref-path-equal-">🔗</a></h3>
+<p>where <code>path: [string|number]</code>, <code>equal: ƒ(any, any): bool</code></p>
+<p><code>extends</code> <a href="#query-observableref-query-equal-"><code>Query</code></a></p>
+<p><code>implements</code> <a href="#isobservableref-value-"><code>isObservableRef</code></a></p>
+<p>Special case of <code>Query</code>. Shortcut to accessing the value by the property path in a way that’s safe against <code>null</code> and <code>undefined</code>.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">new</span> es.PathQuery(observableRef, [<span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>], equal)
+<span class="hljs-comment">// Equivalent to (but safer):</span>
+<span class="hljs-keyword">new</span> es.Query(observableRef, <span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> value.one.two, equal)</code></pre>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">10</span>}})
+<span class="hljs-keyword">const</span> query = <span class="hljs-keyword">new</span> es.PathQuery(atom, [<span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>], <span class="hljs-built_in">Object</span>.is)
+
+query.$ <span class="hljs-comment">// 10</span>
+
+<span class="hljs-keyword">const</span> sub = query.subscribe(<span class="hljs-function"><span class="hljs-params">query</span> =&gt;</span> {
+  <span class="hljs-built_in">console</span>.info(query.$)
+})
+
+atom.$ = {<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">20</span>}}
+<span class="hljs-comment">// Prints 20</span>
+
+<span class="hljs-comment">// Now the query is inert again.</span>
+sub.deinit()</code></pre>
+<hr>
+<h3><span><code>pathQuery(observableRef, path): PathQuery</code></span><a class="heading-anchor" href="#pathquery-observableref-path-pathquery" id="pathquery-observableref-path-pathquery">🔗</a></h3>
+<p>where <code>path: [string|number]</code></p>
+<p>Shortcut to <code>new PathQuery</code> where the equality function is <a href="https://www.ecma-international.org/ecma-262/6.0/#sec-samevaluezero" target="_blank">SameValueZero</a> as defined by the language spec (basically <code>===</code> that work on <code>NaN</code>).</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">10</span>}})
+<span class="hljs-keyword">const</span> pathQuery = es.pathQuery(atom, [<span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>])
+
+pathQuery.$ <span class="hljs-comment">// 10</span></code></pre>
+<hr>
+<h2><span>Utils</span><a class="heading-anchor" href="#utils" id="utils">🔗</a></h2>
+<p>Complementary utility functions.</p>
+<h3><span><code>deinit(ref)</code></span><a class="heading-anchor" href="#deinit-ref-" id="deinit-ref-">🔗</a></h3>
+<p>Complementary function for <a href="#isdeinitable-value-"><code>isDeinitable</code></a>. Calls <code>ref.deinit()</code> if available. Safe to call on values that don’t implement <a href="#isdeinitable-value-"><code>isDeinitable</code></a>.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> ref = {
+  deinit() {
+    <span class="hljs-built_in">console</span>.info(<span class="hljs-string">&#x27;deiniting&#x27;</span>)
+  }
+}
+
+deinit(ref)
+<span class="hljs-comment">// &#x27;deiniting&#x27;</span>
+
+<span class="hljs-comment">// calling with a non-deinitable does nothing</span>
+deinit(<span class="hljs-string">&#x27;non-deinitable&#x27;</span>)</code></pre>
+<hr>
+<h3><span><code>deinitDiff(prev, next)</code></span><a class="heading-anchor" href="#deinitdiff-prev-next-" id="deinitdiff-prev-next-">🔗</a></h3>
+<p>Utility for automatic management of object lifetimes. See <a href="#isdeinitable-value-"><code>isDeinitable</code></a>, <a href="#isowner-value-"><code>isOwner</code></a>, <a href="#agent-value-"><code>Agent</code></a> for more details and examples.</p>
+<p>Diffs <code>prev</code> and <code>next</code>, deiniting any objects that implement <a href="#isdeinitable-value-"><code>isDeinitable</code></a> and are present in <code>prev</code> but not in <code>next</code>. The diff algorithm recursively traverses plain data structures, but stops at non-plain objects, allowing you to safely include third party objects of unknown size and structure.</p>
+<p>Definition of “plain data”:</p>
+<ul>
+<li>primitive: number, string, boolean, symbol, <code>null</code>, <code>undefined</code></li>
+<li>object based on <code>null</code> or <code>Object.prototype</code></li>
+<li>array</li>
+</ul>
+<p>Everything else is considered non-data and is not traversed.</p>
+<p>Resilient to exceptions: if a deiniter or a property accessor produces an exception, <code>deinitDiff</code> will still traverse the rest of the tree, delaying exceptions until the end.</p>
+<p>Detects and avoids circular references.</p>
+<pre><code class="hljs language-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Resource</span> </span>{
+  <span class="hljs-keyword">constructor</span>(name) {<span class="hljs-built_in">this</span>.name = name}
+  deinit() {<span class="hljs-built_in">console</span>.info(<span class="hljs-string">&#x27;deiniting:&#x27;</span>, <span class="hljs-built_in">this</span>.name)}
+}
+
+<span class="hljs-comment">// Prevents auto-deinitialization of what it contains.</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlackBox</span> </span>{
+  <span class="hljs-keyword">constructor</span>(inner) {<span class="hljs-built_in">this</span>.inner = inner}
+}
+
+<span class="hljs-keyword">const</span> prev = {
+  <span class="hljs-attr">root</span>: <span class="hljs-keyword">new</span> Resource(<span class="hljs-string">&#x27;Sirius&#x27;</span>),
+  <span class="hljs-attr">dict</span>: {
+    <span class="hljs-attr">inner</span>: <span class="hljs-keyword">new</span> Resource(<span class="hljs-string">&#x27;Arcturus&#x27;</span>),
+  },
+  <span class="hljs-attr">list</span>: [<span class="hljs-keyword">new</span> Resource(<span class="hljs-string">&#x27;Rigel&#x27;</span>)],
+  <span class="hljs-comment">// Sol is untouchable to `deinitDiff` because it&#x27;s wrapped</span>
+  <span class="hljs-comment">// into a non-plain object that doesn&#x27;t implement `isDeinitable`.</span>
+  <span class="hljs-attr">blackBox</span>: <span class="hljs-keyword">new</span> BlackBox(<span class="hljs-keyword">new</span> Resource(<span class="hljs-string">&#x27;Sol&#x27;</span>)),
+}
+
+<span class="hljs-keyword">const</span> next = {
+  <span class="hljs-attr">root</span>: prev.root,
+  <span class="hljs-attr">dict</span>: {
+    <span class="hljs-attr">inner</span>: <span class="hljs-keyword">new</span> Resource(<span class="hljs-string">&#x27;Bellatrix&#x27;</span>),
+  },
+  <span class="hljs-attr">list</span>: <span class="hljs-literal">null</span>,
+}
+
+deinitDiff(prev, next)
+
+<span class="hljs-comment">// &#x27;deiniting: Arcturus&#x27;</span>
+<span class="hljs-comment">// &#x27;deiniting: Rigel&#x27;</span>
+
+deinitDiff(next, <span class="hljs-literal">null</span>)
+
+<span class="hljs-comment">// &#x27;deiniting: Sirius&#x27;</span>
+<span class="hljs-comment">// &#x27;deiniting: Bellatrix&#x27;</span></code></pre>
+<hr>
+<h3><span><code>unown(ref)</code></span><a class="heading-anchor" href="#unown-ref-" id="unown-ref-">🔗</a></h3>
+<p>Complementary function for <a href="#isowner-value-"><code>isOwner</code></a>. Calls <code>ref.unown()</code>, returning the inner value. Safe to call on values that don’t implement <a href="#isowner-value-"><code>isOwner</code></a>.</p>
+<p>See <a href="#agent-unown-"><code>agent.unown()</code></a> for examples.</p>
+<hr>
+<h3><span><code>deref(ref)</code></span><a class="heading-anchor" href="#deref-ref-" id="deref-ref-">🔗</a></h3>
+<p>Complementary function for <a href="#isref-value-"><code>isRef</code></a>. Calls <code>ref.deref()</code> once, if possible. Safe to call on values that don’t implement <a href="#isref-value-"><code>isRef</code></a>.</p>
+<pre><code class="hljs language-js">deref(<span class="hljs-string">&#x27;value&#x27;</span>)                           <span class="hljs-comment">// &#x27;value&#x27;</span>
+deref(<span class="hljs-keyword">new</span> es.Atom(<span class="hljs-string">&#x27;value&#x27;</span>))              <span class="hljs-comment">// &#x27;value&#x27;</span>
+deref(<span class="hljs-keyword">new</span> es.Atom(<span class="hljs-keyword">new</span> es.Atom(<span class="hljs-string">&#x27;value&#x27;</span>))) <span class="hljs-comment">// new es.Atom(&#x27;value&#x27;)</span>
+deref({deref() {<span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;value&#x27;</span>}})        <span class="hljs-comment">// &#x27;value&#x27;</span></code></pre>
+<hr>
+<h3><span><code>derefDeep(ref)</code></span><a class="heading-anchor" href="#derefdeep-ref-" id="derefdeep-ref-">🔗</a></h3>
+<p>Complementary function for <a href="#isref-value-"><code>isRef</code></a>. Calls <code>ref.deref()</code> and continues recursively, eventually returning a non-ref. Safe to call on values that don’t implement <a href="#isref-value-"><code>isRef</code></a>.</p>
+<p>This function is <em>non-reactive</em>. To deref by path reactively, use <code>scan</code>.</p>
+<pre><code class="hljs language-js">deref(<span class="hljs-string">&#x27;value&#x27;</span>)                           <span class="hljs-comment">// &#x27;value&#x27;</span>
+deref(<span class="hljs-keyword">new</span> es.Atom(<span class="hljs-string">&#x27;value&#x27;</span>))              <span class="hljs-comment">// &#x27;value&#x27;</span>
+deref(<span class="hljs-keyword">new</span> es.Atom(<span class="hljs-keyword">new</span> es.Atom(<span class="hljs-string">&#x27;value&#x27;</span>))) <span class="hljs-comment">// &#x27;value&#x27;</span>
+deref({deref() {<span class="hljs-keyword">return</span> <span class="hljs-string">&#x27;value&#x27;</span>}})        <span class="hljs-comment">// &#x27;value&#x27;</span></code></pre>
+<hr>
+<h3><span><code>derefIn(ref, path)</code></span><a class="heading-anchor" href="#derefin-ref-path-" id="derefin-ref-path-">🔗</a></h3>
+<p>Derefs the ref and returns the value at <code>path</code>, similar to <a href="https://mitranim.com/fpx/#-getin-value-path-" target="_blank"><code>fpx.getIn</code></a>. When called on values that don’t implement <a href="#isref-value-"><code>isRef</code></a>, this is equivalent to <code>fpx.getIn</code>.</p>
+<p>This function is <em>non-reactive</em>. To deref by path reactively, use <code>scan</code>.</p>
+<pre><code class="hljs language-js">derefIn(<span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">2</span>}}), [<span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>])
+<span class="hljs-comment">// 2</span>
+derefIn(<span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">nested</span>: <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-string">&#x27;val&#x27;</span>)}), [<span class="hljs-string">&#x27;nested&#x27;</span>])
+<span class="hljs-comment">// Atom(&#x27;val&#x27;)</span>
+derefIn({<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">2</span>}}, [<span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>])
+<span class="hljs-comment">// 2</span></code></pre>
+<hr>
+<h3><span><code>scan(ref, ...path)</code></span><a class="heading-anchor" href="#scan-ref-path-" id="scan-ref-path-">🔗</a></h3>
+<p>Derefs the ref and returns the value at <code>path</code>. Similar to <code>derefIn(ref, path)</code>, but reactive. If this happens in a reactive context, such as <a href="#reaction-run-fun-ontrigger-"><code>Reaction.run</code></a> or a view component render, this will implicitly subscribe to that path via <a href="#pathquery-observableref-path-pathquery"><code>pathQuery</code></a>.</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom({<span class="hljs-attr">one</span>: {<span class="hljs-attr">two</span>: <span class="hljs-number">10</span>}})
+
+Reaction.loop(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-built_in">console</span>.log(es.scan(atom, <span class="hljs-string">&#x27;one&#x27;</span>, <span class="hljs-string">&#x27;two&#x27;</span>)) <span class="hljs-comment">// Initially 10, always up to date.</span>
+})</code></pre>
+<hr>
+<h3><span><code>contextSubscribe(obs)</code></span><a class="heading-anchor" href="#contextsubscribe-obs-" id="contextsubscribe-obs-">🔗</a></h3>
+<p>where <code>obs: isObservable</code></p>
+<p>Enables implicit reactivity when implementing observable refs. Must be called in <code>get $</code>, but not in <code>deref()</code>.</p>
+<pre><code class="hljs language-js"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyAtom</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">es</span>.<span class="hljs-title">Observable</span> </span>{
+  <span class="hljs-keyword">constructor</span>(value) {
+    <span class="hljs-built_in">this</span>.value = value
+  }
+
+  <span class="hljs-keyword">get</span> <span class="hljs-title">$</span>() {
+    es.contextSubscribe(<span class="hljs-built_in">this</span>)
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">this</span>.deref()
+  }
+
+  <span class="hljs-keyword">set</span> <span class="hljs-title">$</span>(<span class="hljs-params">value</span>) {
+    <span class="hljs-built_in">this</span>.reset(value)
+  }
+
+  deref() {
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">this</span>.value
+  }
+}</code></pre>
+<hr>
+<h3><span><code>replaceContextSubscribe(subscribe)</code></span><a class="heading-anchor" href="#replacecontextsubscribe-subscribe-" id="replacecontextsubscribe-subscribe-">🔗</a></h3>
+<p>where <code>subscribe: ƒ(isObservable)</code></p>
+<p>Tool for creating a context in which observable refs are implicitly reactive. Used internally by <a href="#reaction-"><code>Reaction</code></a>. Usage is tricky; see the source of <a href="#reaction-run-fun-ontrigger-"><code>Reaction.run</code></a> to get an idea.</p>
+<hr>
+<h2><span>React Views</span><a class="heading-anchor" href="#react-views" id="react-views">🔗</a></h2>
+<p>Espo comes with an optional React adapter that allows views to automatically subscribe to observable refs just by using them. Unsubscription is also automatic. As a bonus, this can automatically trigger data fetching via <code>.onInit</code> and <code>.onDeinit</code>; see <a href="#observable-"><code>Observable</code></a> for an example.</p>
+<h3><span><code>initViewComponent(view)</code></span><a class="heading-anchor" href="#initviewcomponent-view-" id="initviewcomponent-view-">🔗</a></h3>
+<p>Setup:</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> es <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;espo&#x27;</span>
+<span class="hljs-keyword">import</span> {Component} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;react&#x27;</span>
+<span class="hljs-keyword">import</span> {initViewComponent} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;espo/react&#x27;</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ViewComponent</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> </span>{
+  <span class="hljs-keyword">constructor</span>() {
+    <span class="hljs-built_in">super</span>(...arguments)
+    initViewComponent(<span class="hljs-built_in">this</span>)
+  }
+}</code></pre>
+<p>Usage:</p>
+<pre><code class="hljs language-js"><span class="hljs-keyword">const</span> atom = <span class="hljs-keyword">new</span> es.Atom(<span class="hljs-number">10</span>)
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">View</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ViewComponent</span> </span>{
+  render() {
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>{atom.$}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span> <span class="hljs-comment">// Always up to date.</span>
+  }
+}</code></pre>
+<hr>
+<h2><span>Author</span><a class="heading-anchor" href="#author" id="author">🔗</a></h2>
+<p>Nelo Mitranim: <a href="https://mitranim.com" target="_blank">https://mitranim.com</a></p>
+
+  </article>
+</body>
+
+
+
+<script src="scripts/docs.js?21a16e6"></script>
+
