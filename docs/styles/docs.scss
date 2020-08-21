@@ -23,6 +23,8 @@ $content-max-width: 1440px;
 // mintcream
 $color-code-bg: floralwhite;
 
+$color-code-header-bg: cornsilk;
+
 /**
  * Code Theme
  */
@@ -86,7 +88,7 @@ body > :not(.main-column):not(.side-column) {
   max-width: $content-max-width;
 }
 
-p, ul {
+p, ul, pre, details {
   margin-top: 0;
   &:not(:last-child) {
     margin-bottom: 1rem;
@@ -195,5 +197,14 @@ a.heading-anchor {
   font-size: 1rem;
   color: gray;
   margin-left: 0.4rem;
+  // For hash navigation. TODO better solution.
+  padding-top: 0.5rem;
   &, &:focus:not(:hover) {border: none}
+}
+
+.details summary {
+  cursor: pointer;
+  padding: 1rem;
+  background-color: $color-code-header-bg;
+  pre {margin-top: 0;}
 }

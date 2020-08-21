@@ -179,22 +179,6 @@ import * as fpx from 'fpx'
 import * as espo from 'espo'
 import * as emerge from 'emerge'
 
-const exports = espo.assign({}, {fpx, emerge, espo, scroller}, fpx, emerge, espo)
-
-delete exports.isNaN
-delete exports.isFinite
-
-espo.assign(window, exports)
-
-if (window.DEV) {
-  bind(console, 'log')
-  bind(console, 'info')
-  bind(console, 'warn')
-  bind(console, 'info')
-}
-
-function bind(object, method) {
-  if (!/bound/.test(object[method].name)) {
-    object[method] = object[method].bind(object)
-  }
-}
+window.f = window.fpx = fpx
+window.es = window.espo = espo
+window.em = window.emerge = emerge

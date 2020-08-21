@@ -1,29 +1,28 @@
-'use strict'
-
-/**
- * Dependencies
- */
-
-const $ = require('gulp-load-plugins')()
-const afr = require('afr')
-const cp = require('child_process')
-const del = require('del')
-const gulp = require('gulp')
-// Peer dependency
-const File = require('vinyl')
-const log = require('fancy-log')
-const uglifyEs = require('uglify-es')
-const uglifyJs = require('uglify-js')
-const webpack = require('webpack')
-const {Transform} = require('stream')
-const statilConfig = require('./statil')
-const webpackConfig = require('./webpack.config')
+import afr from 'afr'
+import cp from 'child_process'
+import del from 'del'
+import gulp from 'gulp'
+import gulpAutoprefixer from 'gulp-autoprefixer'
+import gulpBabel from 'gulp-babel'
+import gulpCleanCss from 'gulp-clean-css'
+import gulpEslint from 'gulp-eslint'
+import gulpSass from 'gulp-sass'
+import gulpStatil from 'gulp-statil'
+import gulpWatch from 'gulp-watch'
+import File from 'vinyl'
+import log from 'fancy-log'
+import uglifyEs from 'uglify-es'
+import uglifyJs from 'uglify-js'
+import webpack from 'webpack'
+import {Transform} from 'stream'
+import statilConfig from './statil.mjs'
+import webpackConfig from './webpack.config.mjs'
 
 /**
  * Globals
  */
 
-const srcScriptFiles = 'src/**/*.js'
+const srcScriptFiles = 'src/**/*.mjs'
 const srcDocScriptFiles = 'docs/scripts/**/*.js'
 const srcDocHtmlFiles = 'docs/html/**/*'
 const srcDocStyleFiles = 'docs/styles/**/*.scss'
@@ -77,6 +76,7 @@ function uglifyStream(uglify, options) {
 
 /* --------------------------------- Clear ---------------------------------- */
 
+// TODO clear the contents of all output folders.
 gulp.task('clear', () => (
   // Skips dotfiles like `.git` and `.gitignore`
   del(`${outDocRootDir}/*`).catch(console.error.bind(console))
@@ -86,7 +86,7 @@ gulp.task('clear', () => (
 
 gulp.task('lib:build', () => (
   gulp.src(srcScriptFiles)
-    .pipe($.babel())
+    .pipe(gulpBabel())
     // Mangles "private" properties to reduce API surface and potential confusion
     .pipe(uglifyStream(uglifyEs, {
       mangle: {keep_fnames: true, properties: {regex: /_$/}},
@@ -94,9 +94,9 @@ gulp.task('lib:build', () => (
       output: {beautify: true},
     }))
     .pipe(gulp.dest(outEsDir))
-    .pipe($.babel({
+    .pipe(gulpBabel({
       plugins: [
-        ['transform-es2015-modules-commonjs', {strict: true}],
+        ['@babel/plugin-transform-modules-commonjs', {strict: true}],
       ],
     }))
     .pipe(gulp.dest(outDistDir))
@@ -115,28 +115,28 @@ gulp.task('lib:build', () => (
 ))
 
 gulp.task('lib:watch', () => {
-  $.watch(srcScriptFiles, gulp.series('lib:build'))
+  gulpWatch(srcScriptFiles, gulp.series('lib:build'))
 })
 
 /* --------------------------------- HTML -----------------------------------*/
 
 gulp.task('docs:html:build', () => (
   gulp.src(srcDocHtmlFiles)
-    .pipe($.statil(statilConfig))
+    .pipe(gulpStatil(statilConfig))
     .pipe(gulp.dest(outDocRootDir))
 ))
 
 gulp.task('docs:html:watch', () => {
-  $.watch(srcDocHtmlFiles, gulp.series('docs:html:build'))
+  gulpWatch(srcDocHtmlFiles, gulp.series('docs:html:build'))
 })
 
 /* -------------------------------- Styles ----------------------------------*/
 
 gulp.task('docs:styles:build', () => (
   gulp.src(srcDocStyleMain)
-    .pipe($.sass())
-    .pipe($.autoprefixer())
-    .pipe($.cleanCss({
+    .pipe(gulpSass())
+    .pipe(gulpAutoprefixer())
+    .pipe(gulpCleanCss({
       keepSpecialComments: 0,
       aggressiveMerging: false,
       advanced: false,
@@ -146,7 +146,7 @@ gulp.task('docs:styles:build', () => (
 ))
 
 gulp.task('docs:styles:watch', () => {
-  $.watch(srcDocStyleFiles, gulp.series('docs:styles:build'))
+  gulpWatch(srcDocStyleFiles, gulp.series('docs:styles:build'))
 })
 
 /* -------------------------------- Scripts ---------------------------------*/
@@ -186,9 +186,9 @@ function watchWithWebpack(config) {
 
 gulp.task('lint', () => (
   gulp.src([srcScriptFiles, srcDocScriptFiles])
-    .pipe($.eslint())
-    .pipe($.eslint.format())
-    .pipe($.eslint.failAfterError())
+    .pipe(gulpEslint())
+    .pipe(gulpEslint.format())
+    .pipe(gulpEslint.failAfterError())
 ))
 
 /* -------------------------------- Server ----------------------------------*/

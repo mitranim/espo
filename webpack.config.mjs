@@ -1,13 +1,12 @@
-'use strict'
-
-const pt = require('path')
-const webpack = require('webpack')
+import pt from 'path'
+import webpack from 'webpack'
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin'
 
 const PROD = process.env.NODE_ENV === 'production'
 const SRC_DIR = pt.resolve('docs/scripts')
 const OUT_DIR = pt.resolve('gh-pages/scripts')
 
-module.exports = {
+export default {
   mode: process.env.NODE_ENV || 'development',
 
   entry: {
@@ -46,13 +45,13 @@ module.exports = {
   optimization: !PROD ? undefined : {
     minimize: true,
     minimizer: [
-      new (require('uglifyjs-webpack-plugin'))({
+      new UglifyJsPlugin({
         cache: true,
         parallel: true,
         sourceMap: true,
         uglifyOptions: {
           mangle: {toplevel: true},
-          compress: {warnings: false},
+          compress: true,
           output: {comments: false},
         },
       }),

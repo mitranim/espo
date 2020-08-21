@@ -1,13 +1,13 @@
 /*
+!/*.js
+!/*.mjs
 !/docs
 !/src
+!/react
 !/.babelrc
 !/.eslintrc
 !/.gitignore
 !/.npmignore
 !/.travis.yml
-!/gulpfile.js
-!/md.js
 !/package.json
 !/readme.md
-!/webpack.config.js

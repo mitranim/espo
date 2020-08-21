@@ -3,8 +3,5 @@
     "browser": true,
     "node": true,
     "es6": false
-  },
-  "parserOptions": {
-    "sourceType": "module"
   }
 }

@@ -1,10 +1,10 @@
-'use strict'
+import hljs from 'highlight.js'
+import marked from 'marked'
+import pt from 'path'
+import fs from 'fs'
 
-const hljs = require('highlight.js')
-const marked = require('marked')
-const pt = require('path')
-
-const {version: VERSION} = require('./package.json')
+const pkg = JSON.parse(fs.readFileSync('./package.json'))
+const {version: VERSION} = pkg
 const PROD = process.env.NODE_ENV === 'production'
 
 /**
@@ -13,7 +13,7 @@ const PROD = process.env.NODE_ENV === 'production'
 
 marked.setOptions({
   smartypants: true,
-  highlight (code, lang) {
+  highlight(code, lang) {
     return (lang ? hljs.highlight(lang, code) : hljs.highlightAuto(code)).value
   },
 })
@@ -29,7 +29,7 @@ marked.Renderer.prototype.heading = function heading(text, level, raw) {
 }
 
 // Adds target="_blank" to external links.
-marked.Renderer.prototype.link = function link (href, title, text) {
+marked.Renderer.prototype.link = function link(href, title, text) {
   if (this.options.sanitize) {
     try {
       const protocol = decodeURIComponent(unescape(href))
@@ -63,16 +63,16 @@ marked.Renderer.prototype.link = function link (href, title, text) {
  * Statil
  */
 
-module.exports = {
+export default {
   imports: {
     VERSION,
     PROD,
-    md (content) {
+    md(content) {
       return marked(content)
         .replace(/<pre><code class="(.*)">|<pre><code>/g, '<pre><code class="hljs $1">')
         .replace(/<!--\s*:((?:[^:]|:(?!\s*-->))*):\s*-->/g, '$1')
     },
-    url (path) {
+    url(path) {
       return pt.join(pt.dirname(path), pt.parse(path).name)
     },
   },

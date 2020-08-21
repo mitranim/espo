@@ -1,0 +1,4 @@
+{
+  "main": "../dist/react.js",
+  "module": "../es/react.js"
+}
