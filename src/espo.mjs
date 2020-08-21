@@ -68,88 +68,9 @@ export function isAgent(value) {
  */
 
 const ACTIVE = 'ACTIVE'
-// const DAMMED = 'DAMMED'
-// const DEAD = 'DEAD'
-// const FLUSHING = 'FLUSHING'
 const IDLE = 'IDLE'
 const PENDING = 'PENDING'
 const TRIGGERED = 'TRIGGERED'
-
-// export function Que(deque) {
-//   validateInstance(this, Que)
-//   validate(deque, isFunction)
-
-//   this.state = IDLE
-//   this.deque_ = deque
-//   this.pending_ = []
-// }
-
-// const QP = Que.prototype = {
-//   constructor: Que,
-
-//   states: {IDLE, DAMMED, FLUSHING},
-
-//   push(value) {
-//     this.pending_.push(value)
-//     if (this.state === IDLE) this.flush()
-//   },
-
-//   // Hazardous. Questionable.
-//   pull(value) {
-//     pull(this.pending_, value)
-//   },
-
-//   // Hazardous. Questionable.
-//   has(value) {
-//     return includes(this.pending_, value)
-//   },
-
-//   dam() {
-//     if (this.state === IDLE) this.state = DAMMED
-//   },
-
-//   flush() {
-//     if (this.state === FLUSHING) return
-//     this.state = FLUSHING
-//     try {flushBy.call(this, this.pending_, this.deque_)}
-//     finally {this.state = IDLE}
-//   },
-
-//   isEmpty() {
-//     return !this.pending_.length
-//   },
-
-//   isDammed() {
-//     return this.state === DAMMED
-//   },
-
-//   deinit() {
-//     this.pending_.length = 0
-//   },
-// }
-
-// export function TaskQue() {
-//   validateInstance(this, TaskQue)
-//   Que.call(this, dequeFun)
-// }
-
-// TaskQue.prototype = create(QP, getOwnPropertyDescriptors({
-//   constructor: TaskQue,
-
-//   push(fun) {
-//     validate(fun, isFunction)
-//     QP.push.call(this, arguments)
-//     return QP.pull.bind(this, arguments)
-//   },
-// }))
-
-// // if args ≈ `[fun, 10, 20, 30]`
-// // then result = `fun.call(this, 10, 20, 30)`
-// function dequeFun(args) {
-//   const fun = args[0]
-//   args[0] = this
-//   return fun.call.apply(fun, args)
-// }
 
 export function Subscription(obs, fun) {
   validateInstance(this, Subscription)
@@ -183,9 +104,6 @@ Subscription.prototype = {
 export function Observable() {
   this.state = IDLE
   this.subs_ = []
-
-  // this.que_ = new Que(triggerSubscriptions.bind(this))
-
   this.que_ = []
   this.triggering_ = false
 }
@@ -232,8 +150,6 @@ const OP = Observable.prototype = {
   an overlapping trigger.
   */
   trigger() {
-    // this.que_.push(arguments)
-
     const self = this
     self.que_.push(arguments)
     if (self.triggering_) return
@@ -269,14 +185,6 @@ const OP = Observable.prototype = {
     flushBy(this.subs_, deinit)
   },
 }
-
-// function triggerSubscriptions(args) {
-//   forceEach(this.subs_.slice(), triggerSubscription, args)
-// }
-
-// function triggerSubscription(sub, args) {
-//   sub.trigger.apply(sub, args)
-// }
 
 export function Atom(value) {
   validateInstance(this, Atom)
@@ -355,11 +263,6 @@ Agent.prototype = create(AP, getOwnPropertyDescriptors({
 export function Reaction() {
   const self = this
   validateInstance(self, Reaction)
-
-  // self.nextContext_ = undefined
-  // self.lastContext_ = undefined
-  // self.subscribe_ = reactionSubscribe.bind(self)
-
   self.state = IDLE
   self.subsPrev_ = undefined
   self.subsNext_ = undefined
@@ -374,10 +277,6 @@ Reaction.prototype = {
     validate(fun, isFunction)
     validate(onTrigger, isFunction)
     const self = this
-
-    // if (self.nextContext_) throw Error(`unexpected overlapping .run()`)
-    // self.nextContext_ = new ReactionContext(onTrigger)
-    // const subscribePrev = replaceContextSubscribe(self.subscribe_)
 
     rejectState(self.state, ACTIVE)
     self.state = ACTIVE
@@ -642,19 +541,6 @@ export function scan(value) {
 
   return derefIn(value, path)
 }
-
-// // TODO document.
-// export function forceEach(list, fun, a, b, c) {
-//   validate(list, isList)
-//   validate(fun, isFunction)
-
-//   let error = undefined
-//   for (let i = 0; i < list.length; i += 1) {
-//     try {fun.call(this, list[i], a, b, c)}
-//     catch (err) {error = err}
-//   }
-//   if (error) throw error
-// }
 
 // TODO document.
 export function flushBy(values, fun, a, b, c) {
