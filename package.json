@@ -11,7 +11,8 @@
   },
   "scripts": {
     "start": "gulp",
-    "prepublishOnly": "NODE_ENV=production gulp build"
+    "compile": "NODE_ENV=production gulp build",
+    "prepublishOnly": "npm run -s compile"
   },
   "keywords": [
     "reactive",
