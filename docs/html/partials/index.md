@@ -154,7 +154,7 @@ no adverse effects.
 
 ```js
 es.isDeinitable(null)           // false
-es.isDeinitable(new es.Que())   // true
+es.isDeinitable(new es.Atom())  // true
 es.isDeinitable({deinit() {}})  // true
 ```
 
@@ -338,8 +338,7 @@ class extends es.Agent {
 
 where `subscriber: ƒ(...any)`
 
-Conscripts the `subscriber` function to be called every time the observable is
-[triggered](#observable-trigger-args-). Returns a [subscription object](#issubscription-value-) that you can `.deinit()`. Deiniting a subscription is immediate, even during an ongoing trigger.
+Conscripts the `subscriber` function to be called every time the observable is [triggered](#observable-trigger-args-). Returns a [subscription object](#issubscription-value-) that you can `.deinit()`. Deiniting a subscription is immediate, even during an ongoing trigger.
 
 ```js
 const sub = someObservable.subscribe((...args) => {
@@ -356,9 +355,7 @@ Same as `subscription.deinit()`.
 
 #### `observable.trigger(...args)`
 
-Call to notify subscribers, passing `...args` to each. Triggers never overlap:
-if `.trigger()` is called during _another ongoing trigger_, the redundant call
-is put on an internal [`Que`](#que-deque-) to be executed later.
+Call to notify subscribers, passing `...args` to each. Triggers never overlap: if `.trigger()` is called during _another ongoing trigger_, the redundant call is put on an internal queue to be executed later.
 
 #### `observable.onInit()`
 
@@ -370,8 +367,7 @@ Called when removing the last subscription.
 
 #### `observable.deinit()`
 
-Deinits all current subscriptions. This incidentally triggers `.onDeinit()` if
-the observable is active.
+Deinits all current subscriptions. This incidentally triggers `.onDeinit()` if the observable is active.
 
 ---
 
