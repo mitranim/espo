@@ -1,13 +1,18 @@
 {
   "name": "espo",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Library for stateful and reactive programming: queues, observables, ownership and lifetimes, procedural reactivity. Lightweight alternative to RxJS.",
   "main": "dist/espo.js",
   "module": "es/espo.js",
   "exports": {
-    "import": "./src/espo.mjs",
-    "require": "./dist/espo.js",
-    "react": "./es/react.js"
+    ".": {
+      "import": "./src/espo.mjs",
+      "require": "./dist/espo.js"
+    },
+    "./react": {
+      "import": "./src/react.mjs",
+      "require": "./dist/react.js"
+    }
   },
   "scripts": {
     "start": "gulp",

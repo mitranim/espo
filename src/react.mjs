@@ -1,4 +1,4 @@
-import {Reaction} from './espo'
+import {Reaction} from './espo.mjs'
 
 export function initViewComponent(view) {
   if (!view.render) return

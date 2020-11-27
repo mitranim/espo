@@ -14,6 +14,10 @@ npm i espo
 
 ## Changelog
 
+### 0.5.2
+
+Corrected the definition of `"exports"` in `package.json`.
+
 ### 0.5.1
 
 Minor breaking change: removed the `react-change` dependency and the `shouldComponentUpdate` override. This is unrelated to Espo's functionality and was included by inertia when porting from a different repo. User code is free to use it manually.
