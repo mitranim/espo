@@ -384,14 +384,15 @@ Computation.prototype = create(OP, getOwnPropertyDescriptors({
   constructor: Computation,
 
   get $() {
-    if (this.state === IDLE) {
-      this.value_ = this.def_(this.reaction_)
-    }
+    const value = this.deref()
     contextSubscribe(this)
-    return this.value_
+    return value
   },
 
   deref() {
+    if (this.state === IDLE) {
+      this.value_ = this.def_(this.reaction_)
+    }
     return this.value_
   },
 
@@ -576,6 +577,14 @@ export function replaceContextSubscribe(subscribe) {
   const prev = ESPO_CONTEXT.subscribe
   ESPO_CONTEXT.subscribe = subscribe
   return prev
+}
+
+export function withContextSubscribe(subscribe, fun) {
+  if (subscribe) validate(subscribe, isFunction)
+  validate(fun, isFunction)
+  const prev = ESPO_CONTEXT.subscribe
+  try {return fun()}
+  finally {ESPO_CONTEXT.subscribe = prev}
 }
 
 /**

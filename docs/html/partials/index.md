@@ -411,7 +411,7 @@ console.info(atom.$)
 // {num: 100}
 ```
 
-In a reactive context such as [`Reaction.run`](#reaction-run-fun-ontrigger-) or [`Reaction.loop`](#reaction-loop-fun-), `atom.$` will implicitly establish subscriptions. See those methods for examples.
+In a reactive context such as [`Reaction.run`](#reaction-run-fun-ontrigger-any) or [`Reaction.loop`](#reaction-loop-fun-), `atom.$` will implicitly establish subscriptions. See those methods for examples.
 
 #### `atom.swap(fun, ...args)`
 
@@ -964,7 +964,7 @@ derefIn({one: {two: 2}}, ['one', 'two'])
 
 ### `scan(ref, ...path)`
 
-Derefs the ref and returns the value at `path`. Similar to `derefIn(ref, path)`, but reactive. If this happens in a reactive context, such as [`Reaction.run`](#reaction-run-fun-ontrigger-) or a view component render, this will implicitly subscribe to that path via [`pathQuery`](#pathquery-observableref-path-pathquery).
+Derefs the ref and returns the value at `path`. Similar to `derefIn(ref, path)`, but reactive. If this happens in a reactive context, such as [`Reaction.run`](#reaction-run-fun-ontrigger-any) or a view component render, this will implicitly subscribe to that path via [`pathQuery`](#pathquery-observableref-path-pathquery).
 
 ```js
 const atom = new es.Atom({one: {two: 10}})
@@ -1005,11 +1005,37 @@ class MyAtom extends es.Observable {
 
 ---
 
+### `withContextSubscribe(subscribe, fun): any`
+
+where `subscribe: ƒ(isObservable)`, `fun: ƒ(): any`
+
+Temporarily replaces the contextual subscription function with `subscribe` and runs `fun` in that context. Affects calls to [`contextSubscribe`](#contextsubscribe-obs-). Returns the result of `fun`.
+
+Can be useful for suppressing implicit subscriptions for the duration of a call:
+
+```js
+const subscribe = undefined
+
+es.withContextSubscribe(subscribe, () => {
+  // Will not cause accidental subscriptions because the contextual subscribe
+  // function has been temporarily nullified.
+  const _ = someAtom.$
+})
+
+// May cause an implicit subscription, the contextual subscribe function has
+// been restored.
+someAtom.$
+```
+
+---
+
 ### `replaceContextSubscribe(subscribe)`
 
 where `subscribe: ƒ(isObservable)`
 
-Tool for creating a context in which observable refs are implicitly reactive. Used internally by [`Reaction`](#reaction-). Usage is tricky; see the source of [`Reaction.run`](#reaction-run-fun-ontrigger-) to get an idea.
+Replaces the contextual subscription function, returning the previous value. You must restore that value using `finally{}`. Affects calls to [`contextSubscribe`](#contextsubscribe-obs-). Used internally for setup/teardown of implicit reactivity. See the source of [`Reaction.run`](#reaction-run-fun-ontrigger-any) to understand usage.
+
+Prefer [`withContextSubscribe`](#withcontextsubscribe-subscribe-fun-any), which is simpler to use.
 
 ---
 

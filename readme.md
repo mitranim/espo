@@ -14,6 +14,10 @@ npm i espo
 
 ## Changelog
 
+### 0.5.3
+
+Added `withContextSubscribe`.
+
 ### 0.5.2
 
 Corrected the definition of `"exports"` in `package.json`.
