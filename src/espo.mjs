@@ -583,6 +583,7 @@ export function withContextSubscribe(subscribe, fun) {
   if (subscribe) validate(subscribe, isFunction)
   validate(fun, isFunction)
   const prev = ESPO_CONTEXT.subscribe
+  ESPO_CONTEXT.subscribe = subscribe
   try {return fun()}
   finally {ESPO_CONTEXT.subscribe = prev}
 }

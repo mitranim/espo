@@ -14,6 +14,10 @@ npm i espo
 
 ## Changelog
 
+### 0.5.4
+
+Corrected `withContextSubscribe` so it _actually_ works.
+
 ### 0.5.3
 
 Added `withContextSubscribe`.
