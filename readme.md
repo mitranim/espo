@@ -1,128 +1,99 @@
 ## Overview
 
-Library for reactive and stateful programming: observables, implicit reactivity, automatic resource cleanup.
+## TOC
 
-Has an optional React adapter that allows views to implicitly subscribe to observables just by pulling data.
+* [Why]()
+* [Usage]()
+* [API]()
+* [Changelog]()
 
-Documentation: https://mitranim.com/espo/.
+## Why
 
-## Installation
+## Usage
 
-```sh
-npm i espo
+Manual sub-unsub:
+
+```js
+import * as es from 'espo'
+
+const obs = es.obs({one: 10, two: 20})
+
+const key = obs.sub(function onUpdate(key) {
+  const obs = this
+  console.log('current state:', obs)
+})
+
+// Prints "current state: Obs {one: 30, two: 20}".
+obs.one = 30
+
+// Drop one subscription:
+obs.unsub(key)
+
+// Drop all subscriptions:
+obs.deinit()
 ```
 
+Automatic sub-resub:
+
+```js
+const one = es.obs({one: 10})
+const two = es.obs({two: 20})
+
+const rec = new es.Rec(onUpdate)
+
+function onUpdate() {
+  rec.run(onRun)
+}
+
+function onRun() {
+  console.log(one.one + two.two)
+}
+
+// Prints "30".
+onUpdate()
+
+// Prints "50".
+one.one = 30
+
+// Prints "70".
+two.two = 40
+
+// Stops further reruns.
+rec.deinit()
+```
+
+Subclassing:
+
+```js
+class Dat extends es.Obs {
+  constructor() {
+    super()
+    this.fut = undefined
+    this.val = undefined
+    this.err = undefined
+  }
+
+  onInit() {
+    if (!this.fut) {
+      this.fut = fetch((err, val) => {
+        this.fut = undefined
+        this.err = err
+        this.val = val
+      })
+    }
+  }
+
+  onDeinit() {
+    this.fut = undefined
+  }
+}
+
+function fetch(fun) {
+  const timer = setTimeout(fun, 0, 'val', Error('err'))
+  return {deinit: clearTimeout.bind(undefined, timer)}
+}
+```
+
+## API
+
 ## Changelog
-
-### 0.5.4
-
-Corrected `withContextSubscribe` so it _actually_ works.
-
-### 0.5.3
-
-Added `withContextSubscribe`.
-
-### 0.5.2
-
-Corrected the definition of `"exports"` in `package.json`.
-
-### 0.5.1
-
-Minor breaking change: removed the `react-change` dependency and the `shouldComponentUpdate` override. This is unrelated to Espo's functionality and was included by inertia when porting from a different repo. User code is free to use it manually.
-
-### 0.5.0
-
-Big breaking changes:
-
-* Reactivity in `Reaction` and view components is now truly implicit. Instead of accepting `$` as a parameter and calling `$(observable)`, you simply dereference observables with `observable.$` everywhere in the code. External implementations of observables must opt into reactivity by calling `contextSubscribe(this)` in the `get $` getter.
-
-* The React/Preact adapter has been moved from [Prax](https://github.com/mitranim/prax) to this repository and drastically simplified. See `initViewComponent`.
-
-* Observables no longer internally use `Que`, and the subscription-triggering code has been inlined into `Observable.prototype.trigger` to create fewer stackframes. This makes debugging much easier.
-
-* As a consequence of ↑, removed `Que`.
-
-* As a consequence of removing `Que`, removed `TaskQue`.
-
-* As a consequence of removing `Que`, removed `MessageQue`.
-
-Small breaking changes:
-
-* `deref` is no longer recursive and only derefs once. Added `derefDeep` to deref deeply.
-
-* Removed `derefIn`.
-
-* Removed the following utilities which shouldn't be part of Espo's API: `global`, `isMutable`, `assign`, `pull`, `each`. Some of them are available in the general utility library [fpx](https://github.com/mitranim/fpx).
-
-Minor improvements:
-
-* `Atom.prototype.$` also has a setter that calls `Atom.prototype.reset`. (Also affects `Agent`.)
-
-* `Agent.prototype.reset` now performs diff and deinit of the previous state before triggering subscriptions. This solves some edge case deinitialization races.
-
-* Removed the auxiliary class `ReactionContext`. `Reaction` now stores subscription arrays and cycles them between runs. This approach is simpler and should result in fewer allocations.
-
-* Added some new utils such as `scan`.
-
-### 0.4.6
-
-Minor compatibility improvement: `flushBy` (which is undocumented) now accepts arbitrary array-like objects with `.push` and `.shift` methods. Can be handy for custom queues.
-
-### 0.4.5
-
-Improvements in `Computation` and `Query`:
-
-* After recomputing the value and performing the equality check, the new value is stored only when not equal to the previous value. If equal, the previous value is kept. This may slightly improve change detection performance and memory efficiency.
-
-* The function passed to `new Computation` is now called with the computation instance as `this`. This can be convenient when subclassing `Computation` and defining the computation function as a method.
-
-### 0.4.4
-
-When possible, `deinitDiff` and `deinitDeep` now use `Set` instead of `[]` to keep track of visited objects. Performs much better when traversing large structures. In environments without `Set`, this falls back on `[]`.
-
-### 0.4.3
-
-Minor internal cosmetics.
-
-### 0.4.2
-
-Bugfixed `Agent.prototype.unown` after recent changes.
-
-### 0.4.1
-
-Added missing "constructor" to a few prototypes.
-
-### 0.4.0
-
-Improved minification. Breaking.
-
-* Code is now written with ES5-style classes to avoid Babel garbage in the output. This significantly reduces the amount of transpiled code and makes it much nicer to read.
-
-* In the transpiled version, classes don't have IIFEs anymore, which means they're not stripped away by dead code elimination due to side-effectful prototype mutations. This turns out to be a benefit, since it further reduces the size, while DCE, realistically, tends to not work in real-world application bundles.
-
-* Mangle all properties in all classes, except `.state` and `.states`. This reduces the API surface and chances of confusion, and greatly reduces the minified size.
-
-* Aliased `.deref()` as `.$` (a getter) in all classes that implement `isObservableRef`. In addition, aliased `.deref` as `.$` (same method) in `Reaction`. This works with ES2015 destructuring, saves a lot of typing, and minifies a lot better, at the cost of lower readability.
-
-* Added `Que.prototype.has` (tentative).
-
-TLDR: Espo went from ≈10 KiB to ≈8 KiB, while slimming down the API surface and providing the nice `$` shortcuts.
-
-### 0.3.3
-
-Better compatibility with minification.
-
-  * in the transpiled version, annotate class IIFEs with `#__PURE__`
-
-  * don't assign to prototypes outside the autogenerated IIFEs
-
-  * in combination with tree shaking, this finally allows UglifyJS to remove unused classes
-
-## Known Issues and TODOs
-
-* Espo queues currently use plain arrays and call `.shift` and `.splice`, which involve shifting array elements. This can become a bottleneck with large amounts of elements. If anyone comes complaining, we can switch to proper FIFO queues, at the cost of added code.
-* Consider depending on [`definit`](https://github.com/mitranim/definit), which duplicates minor parts of Espo's functionality.
-
-## Misc
-
-I'm receptive to suggestions. If this library _almost_ satisfies you but needs changes, open an issue or chat me up. Contacts: https://mitranim.com/#contacts

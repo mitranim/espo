@@ -1,9 +1,9 @@
 {
-  "parser": "babel-eslint",
+  "parserOptions": {"sourceType": "module"},
   "env": {
-    "browser": false,
-    "node": true,
-    "es6": true
+    "es2020": true,
+    "browser": true,
+    "node": true
   },
   "rules": {
     // Logic

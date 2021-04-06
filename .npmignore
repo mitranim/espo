@@ -1,6 +1,3 @@
 /*
-!/dist
-!/es
-!/src
-!/react
-!/readme.md
+!/espo.mjs
+!/react.mjs

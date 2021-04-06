@@ -1,23 +1,12 @@
 {
   "name": "espo",
-  "version": "0.5.4",
-  "description": "Library for stateful and reactive programming: queues, observables, ownership and lifetimes, procedural reactivity. Lightweight alternative to RxJS.",
-  "main": "dist/espo.js",
-  "module": "es/espo.js",
-  "exports": {
-    ".": {
-      "import": "./src/espo.mjs",
-      "require": "./dist/espo.js"
-    },
-    "./react": {
-      "import": "./src/react.mjs",
-      "require": "./dist/react.js"
-    }
-  },
+  "version": "0.6.0",
+  "description": "Library for stateful and reactive programming: queues, observables, ownership and lifetimes, procedural reactivity. Lightweight alternative to MobX.",
+  "type": "module",
+  "main": "./espo.mjs",
   "scripts": {
-    "start": "gulp",
-    "compile": "NODE_ENV=production gulp build",
-    "prepublishOnly": "npm run -s compile"
+    "test": "node test/test.mjs",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "reactive",
@@ -30,7 +19,8 @@
     "atom",
     "agent",
     "rx",
-    "rxjs"
+    "rxjs",
+    "mobx"
   ],
   "authors": [
     "Mitranim <me@mitranim.com>"
@@ -39,41 +29,8 @@
     "type": "git",
     "url": "https://github.com/mitranim/espo.git"
   },
-  "license": "WTFPL",
+  "license": "Unlicense",
   "devDependencies": {
-    "@babel/core": "7.12.10",
-    "@babel/plugin-check-constants": "7.0.0-beta.38",
-    "@babel/plugin-transform-block-scoped-functions": "7.12.1",
-    "@babel/plugin-transform-block-scoping": "7.12.12",
-    "@babel/plugin-transform-destructuring": "7.12.1",
-    "@babel/plugin-transform-function-name": "7.12.1",
-    "@babel/plugin-transform-literals": "7.12.1",
-    "@babel/plugin-transform-modules-commonjs": "7.12.1",
-    "@babel/plugin-transform-shorthand-properties": "7.12.1",
-    "@babel/plugin-transform-template-literals": "7.12.1",
-    "afr": "0.1.1",
-    "babel-eslint": "10.1.0",
-    "babel-loader": "8.2.2",
-    "del": "5.1.0",
-    "emerge": "0.4.0",
-    "eslint_d": "9.1.1",
-    "fancy-log": "1.3.3",
-    "fpx": "0.7.3",
-    "gulp": "4.0.2",
-    "gulp-autoprefixer": "7.0.1",
-    "gulp-babel": "8.0.0",
-    "gulp-clean-css": "4.3.0",
-    "gulp-eslint": "6.0.0",
-    "gulp-sass": "4.1.0",
-    "gulp-statil": "0.5.0",
-    "gulp-watch": "5.0.1",
-    "highlight.js": "10.1.2",
-    "marked": "1.1.1",
-    "stylific-lite": "0.0.1",
-    "uglify-es": "3.3.9",
-    "uglify-js": "3.3.21",
-    "uglifyjs-webpack-plugin": "2.2.0",
-    "webpack": "4.44.1",
-    "webpack-cli": "3.3.12"
+    "eslint": "7.23.0"
   }
 }
