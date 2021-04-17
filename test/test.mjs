@@ -6,7 +6,7 @@ work in progress after the rework.
 import {is, eq, nop, Tracker} from './utils.mjs'
 import * as es from '../espo.mjs'
 
-/* eslint-disable no-empty-function, no-self-assign */
+/* eslint-disable no-self-assign */
 
 void function testUtilityFuns() {
   void function testIsDe() {
@@ -29,14 +29,6 @@ void function testUtilityFuns() {
       trigger() {},
       deinit() {},
     }), true)
-  }()
-
-  void function testIsAtom() {
-    is(es.isAtom(),                              false)
-    is(es.isAtom({}),                            false)
-    is(es.isAtom(new Tracker()),                 false)
-    is(es.isAtom({$: undefined}),                true)
-    is(es.isAtom(Object.create({$: undefined})), true)
   }()
 
   void function testIsTrig() {
@@ -100,13 +92,6 @@ void function testUtilityFuns() {
     const ref = {}
     Object.defineProperty(ref, 'key', {enumerable: false, value: 'val'})
     is(es.hasOwnEnum(ref, 'key'), false)
-  }()
-
-  void function test$() {
-    eq(es.$(),          undefined)
-    eq(es.$(10),        10)
-    eq(es.$({val: 10}), {val: 10})
-    eq(es.$({$: 10}),   10)
   }()
 
   void function testDeinit() {

@@ -4,27 +4,23 @@ export const ctx = {subber: undefined}
 
 export function isDe(val)      {return isComplex(val) && 'deinit' in val}
 export function isObs(val)     {return isDe(val) && isTrig(val) && 'sub' in val && 'unsub' in val}
-export function isAtom(val)    {return isComplex(val) && '$' in val}
 export function isTrig(val)    {return isComplex(val) && 'trigger' in val}
 export function isSub(val)     {return isFun(val) || isTrig(val)}
 export function isSubber(val)  {return isFun(val) || (isComplex(val) && 'subTo' in val)}
 export function isRunTrig(val) {return isComplex(val) && 'run' in val && isTrig(val)}
-export function $(val)         {return isAtom(val) ? val.$ : val}
 export function deinit(val)    {if (isDe(val)) val.deinit()}
 
 export function deinitAll(ref) {
   valid(ref, isComplex)
-  for (const key in ref) {
-    if (ownEnum(ref, key)) deinit(ref[key])
-  }
+  for (const key in ref) if (ownEnum(ref, key)) deinit(ref[key])
 }
 
 export function de(src) {return mut(new Deinit(), src)}
 
 export class Deinit {
   constructor()   {return new Proxy(this, this.constructor.ph)}
+  deinit()        {deinitAll(this.self)}
   get self()      {return this}
-  deinit()        {deinitAll(this)}
   static get ph() {return deinitPh}
 }
 
@@ -200,11 +196,8 @@ export class LazyCompState extends ObsState {
 
   // Invoked by `CompRec`.
   trigger() {this.out = true}
-
   act() {return ctx.subber === this.cre}
-
   init() {this.cre.init()}
-
   deinit() {this.cre.deinit()}
 }
 
@@ -233,51 +226,6 @@ export class CompRec extends Moebius {
 
   init() {
     this.new.forEach(compRecSub, this)
-  }
-}
-
-export function atom(val) {return new Atom(val)}
-
-export class Atom extends Obs {
-  constructor(val) {
-    super()
-    this.$ = val
-  }
-}
-
-export function fomp(fun) {
-  const obs = atoc(fun)
-  return function fomp() {return obs.$}
-}
-
-export function atoc(fun) {return new AtomComp(fun)}
-
-export class AtomComp extends Comp {
-  constructor(fun) {
-    valid(fun, isFun)
-    super(atomRec)
-    priv(this, 'f', fun)
-  }
-}
-
-function atomRec(self) {
-  self.$ = self.f(self)
-}
-
-export class Sub {
-  constructor(obs, key) {
-    valid(obs, isObs)
-    this.obs = obs
-    this.key = key
-  }
-
-  deinit() {
-    const {obs, key} = this
-    if (obs) {
-      this.obs = undefined
-      this.key = undefined
-      obs.unsub(key)
-    }
   }
 }
 

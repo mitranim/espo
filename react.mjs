@@ -1,7 +1,8 @@
 /*
 Optional React/Preact adapter that enables implicit reactivity. Any Espo
 observables accessed during the `render` call are implicitly subscribed to.
-Unsubscription is automatic via `componentWillUnmount`.
+Triggers in those observables cause a re-render. Unsubscription is automatic
+via `componentWillUnmount`.
 
 Usage:
 
