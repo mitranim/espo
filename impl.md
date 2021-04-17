@@ -2,7 +2,7 @@
 
 ## State Storage
 
-Observables have hidden state, associated via a `WeakMap`. This adds minor complexity and inefficiency, but avoids pollution and collisions.
+Observables have hidden state, associated via a `WeakMap`. This avoids pollution and collisions.
 
 ## Automatic Deinit
 

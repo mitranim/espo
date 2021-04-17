@@ -2,41 +2,15 @@
 
 export const ctx = {subber: undefined}
 
-export function isDe(val) {
-  return isComplex(val) && 'deinit' in val
-}
-
-export function isObs(val) {
-  return isDe(val) && isTrig(val) && 'sub' in val && 'unsub' in val
-}
-
-export function isAtom(val) {
-  return isComplex(val) && '$' in val
-}
-
-export function isTrig(val) {
-  return isComplex(val) && 'trigger' in val
-}
-
-export function isSub(val) {
-  return isFun(val) || isTrig(val)
-}
-
-export function isSubber(val) {
-  return isFun(val) || (isComplex(val) && 'subTo' in val)
-}
-
-export function isRunTrig(val) {
-  return isComplex(val) && 'run' in val && isTrig(val)
-}
-
-export function $(val) {
-  return isAtom(val) ? val.$ : val
-}
-
-export function deinit(val) {
-  if (isDe(val)) val.deinit()
-}
+export function isDe(val)      {return isComplex(val) && 'deinit' in val}
+export function isObs(val)     {return isDe(val) && isTrig(val) && 'sub' in val && 'unsub' in val}
+export function isAtom(val)    {return isComplex(val) && '$' in val}
+export function isTrig(val)    {return isComplex(val) && 'trigger' in val}
+export function isSub(val)     {return isFun(val) || isTrig(val)}
+export function isSubber(val)  {return isFun(val) || (isComplex(val) && 'subTo' in val)}
+export function isRunTrig(val) {return isComplex(val) && 'run' in val && isTrig(val)}
+export function $(val)         {return isAtom(val) ? val.$ : val}
+export function deinit(val)    {if (isDe(val)) val.deinit()}
 
 export function deinitAll(ref) {
   valid(ref, isComplex)
@@ -45,34 +19,25 @@ export function deinitAll(ref) {
   }
 }
 
-export function de(src) {
-  return mut(new Deinit(), src)
-}
+export function de(src) {return mut(new Deinit(), src)}
 
 export class Deinit {
-  constructor() {
-    return new Proxy(this, new.target.ph())
-  }
-
-  get self() {return this}
-
-  deinit() {deinitAll(this)}
-
-  static ph() {return deinitPh}
+  constructor()   {return new Proxy(this, this.constructor.ph)}
+  get self()      {return this}
+  deinit()        {deinitAll(this)}
+  static get ph() {return deinitPh}
 }
 
-export function obs(src) {
-  return mut(new Obs(), src)
-}
+export function asObs(val) {return new Proxy(val, fakeObsPh)}
+export function obs(src) {return mut(new Obs(), src)}
 
 export class Obs extends Deinit {
   onInit() {}
-
   onDeinit() {}
 
   sub(val) {
     valid(val, isSub)
-    const state = stateGoc(this, ObsState)
+    const state = stateGoc(this, this.constructor.st || Obs.st)
     if (state.has(val)) return
 
     const {size} = state
@@ -108,7 +73,8 @@ export class Obs extends Deinit {
   // Provided for debugging.
   get state() {return stateGet(this)}
 
-  static ph() {return obsPh}
+  static get st() {return ObsState}
+  static get ph() {return obsPh}
 }
 
 export class ObsState extends Set {}
@@ -194,30 +160,23 @@ export class Loop extends Rec {
   }
 }
 
-export function comp(fun) {return new Comp(fun)}
+export function lazyComp(fun) {return new LazyComp(fun)}
 
-export class Comp extends Obs {
+export class LazyComp extends Obs {
   constructor(fun) {
     valid(fun, isFun)
     super()
-    stateSet(this, new CompState(this, fun))
+    stateSet(this, new this.constructor.st(this, fun))
   }
 
-  onInit() {
-    stateGet(this).init()
-  }
+  onInit() {stateGet(this).init()}
+  onDeinit() {stateGet(this).deinit()}
 
-  onDeinit() {
-    stateGet(this).deinit()
-  }
-
-  // Provided for debugging.
-  get state() {return stateGet(this)}
-
-  static ph() {return compPh}
+  static get st() {return LazyCompState}
+  static get ph() {return compPh}
 }
 
-export class CompState extends ObsState {
+export class LazyCompState extends ObsState {
   constructor(obs, fun) {
     super()
     this.cre = new CompRec(this)
@@ -240,20 +199,25 @@ export class CompState extends ObsState {
   }
 
   // Invoked by `CompRec`.
+  trigger() {this.out = true}
+
+  act() {return ctx.subber === this.cre}
+
+  init() {this.cre.init()}
+
+  deinit() {this.cre.deinit()}
+}
+
+export function comp(fun) {return new Comp(fun)}
+
+export class Comp extends LazyComp {
+  static get st() {return CompState}
+}
+
+export class CompState extends LazyCompState {
   trigger() {
-    this.out = true
-  }
-
-  act() {
-    return ctx.subber === this.cre
-  }
-
-  init() {
-    this.cre.init()
-  }
-
-  deinit() {
-    this.cre.deinit()
+    super.trigger()
+    this.rec()
   }
 }
 
@@ -281,10 +245,16 @@ export class Atom extends Obs {
   }
 }
 
+export function fomp(fun) {
+  const obs = atoc(fun)
+  return function fomp() {return obs.$}
+}
+
 export function atoc(fun) {return new AtomComp(fun)}
 
 export class AtomComp extends Comp {
   constructor(fun) {
+    valid(fun, isFun)
     super(atomRec)
     priv(this, 'f', fun)
   }
@@ -347,6 +317,11 @@ export function stateSet(obs, state) {
 }
 
 export class DeinitPh {
+  get(tar, key) {
+    if (key === 'self') return tar
+    return tar[key]
+  }
+
   set(tar, key, val) {
     set(tar, key, val)
     return true
@@ -398,6 +373,22 @@ export class CompPh extends ObsPh {
 
 export const compPh = new CompPh()
 
+export class FakeObsPh extends ObsPh {
+  get(tar, key, proxy) {
+    if (key === 'self') return tar
+    if (!hidden(tar, key)) ctxSub(proxy)
+    if (key in tar) return tar[key]
+    if (hasOwn(Obs.prototype, key)) return Obs.prototype[key]
+    return undefined
+  }
+
+  has(tar, key) {
+    return key in tar || hasOwn(Obs.prototype, key)
+  }
+}
+
+export const fakeObsPh = new FakeObsPh()
+
 function set(ref, key, next) {
   const de = ownEnum(ref, key)
   const prev = ref[key]
@@ -428,7 +419,10 @@ export function mut(tar, src) {
   valid(src, isStruct)
 
   sch.pause()
-  try {return Object.assign(tar, src)}
+  try {
+    for (const key in src) tar[key] = src[key]
+    return tar
+  }
   finally {sch.resume()}
 }
 
@@ -444,10 +438,10 @@ export function privs(ref, vals) {
 
 export function bind(ref, ...names) {
   valid(ref, isComplex)
-  names.forEach(bindMethodAt, ref)
+  names.forEach(bindMethod, ref)
 }
 
-function bindMethodAt(key, _i) {
+function bindMethod(key) {
   const val = this[key]
   if (!isFun(val)) throw Error(`expected method at key ${key}, found ${val}`)
   priv(this, key, val.bind(this))
@@ -511,33 +505,13 @@ export function ownEnum(val, key) {
   return Object.prototype.propertyIsEnumerable.call(val, key)
 }
 
-function isFun(val) {
-  return typeof val === 'function'
-}
-
-function isComplex(val) {
-  return isObj(val) || isFun(val)
-}
-
-function isObj(val) {
-  return val !== null && typeof val === 'object'
-}
-
-function isStruct(val) {
-  return isObj(val) && !Array.isArray(val)
-}
-
-function isKey(val) {
-  return isStr(val) || isSym(val)
-}
-
-function isStr(val) {
-  return typeof val === 'string'
-}
-
-function isSym(val) {
-  return typeof val === 'symbol'
-}
+function isFun(val) {return typeof val === 'function'}
+function isComplex(val) {return isObj(val) || isFun(val) }
+function isObj(val) {return val !== null && typeof val === 'object'}
+function isStruct(val) {return isObj(val) && !Array.isArray(val) }
+function isKey(val) {return isStr(val) || isSym(val) }
+function isStr(val) {return typeof val === 'string'}
+function isSym(val) {return typeof val === 'symbol'}
 
 function valid(val, test) {
   if (!test(val)) throw Error(`expected ${val} to satisfy test ${test}`)

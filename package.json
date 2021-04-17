@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./espo.mjs",
   "scripts": {
+    "w": "watchexec -c -r -d=0 'node test/test.mjs'",
     "test": "node test/test.mjs",
     "prepublishOnly": "npm test"
   },
@@ -29,8 +30,5 @@
     "type": "git",
     "url": "https://github.com/mitranim/espo.git"
   },
-  "license": "Unlicense",
-  "devDependencies": {
-    "eslint": "7.23.0"
-  }
+  "license": "Unlicense"
 }

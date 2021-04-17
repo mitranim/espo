@@ -1,3 +1,8 @@
+/*
+This test is WILDLY incomplete. Just like the documentation. Everything is a
+work in progress after the rework.
+*/
+
 import {is, eq, nop, Tracker} from './utils.mjs'
 import * as es from '../espo.mjs'
 

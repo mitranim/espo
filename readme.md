@@ -2,10 +2,11 @@
 
 ## TOC
 
-* [Why]()
-* [Usage]()
-* [API]()
-* [Changelog]()
+* [Why](#why)
+* [Usage](#usage)
+* [API](#api)
+* [Changelog](#changelog)
+* [Misc](#misc)
 
 ## Why
 
