@@ -26,25 +26,25 @@ void function testUtilityFuns() {
     is(es.isObs({
       sub() {},
       unsub() {},
-      trigger() {},
+      trig() {},
       deinit() {},
     }), true)
   }()
 
   void function testIsTrig() {
-    is(es.isTrig(),                              false)
-    is(es.isTrig({}),                            false)
-    is(es.isTrig({trigger() {}}),                true)
-    is(es.isTrig(Object.create({trigger() {}})), true)
-    is(es.isTrig(nop),                           false)
+    is(es.isTrig(),                           false)
+    is(es.isTrig({}),                         false)
+    is(es.isTrig({trig() {}}),                true)
+    is(es.isTrig(Object.create({trig() {}})), true)
+    is(es.isTrig(nop),                        false)
   }()
 
   void function testIsSub() {
-    is(es.isSub(),                              false)
-    is(es.isSub({}),                            false)
-    is(es.isSub({trigger() {}}),                true)
-    is(es.isSub(Object.create({trigger() {}})), true)
-    is(es.isSub(nop),                           true)
+    is(es.isSub(),                           false)
+    is(es.isSub({}),                         false)
+    is(es.isSub({trig() {}}),                true)
+    is(es.isSub(Object.create({trig() {}})), true)
+    is(es.isSub(nop),                        true)
   }()
 
   void function testHasHidden() {
@@ -129,10 +129,10 @@ void function testUtilityFuns() {
     is(ref.one, 10)
     is(ref.two, 20)
     is(ref.three, 30)
-    is(es.hasOwn(ref, 'one'),     true)
-    is(es.hasOwnEnum(ref, 'one'), true)
-    is(es.hasOwn(ref, 'two'),     true)
-    is(es.hasOwnEnum(ref, 'two'), false)
+    is(es.hasOwn(ref, 'one'),       true)
+    is(es.hasOwnEnum(ref, 'one'),   true)
+    is(es.hasOwn(ref, 'two'),       true)
+    is(es.hasOwnEnum(ref, 'two'),   false)
     is(es.hasOwn(ref, 'three'),     true)
     is(es.hasOwnEnum(ref, 'three'), false)
   }()
@@ -199,26 +199,26 @@ void function testClassObs() {
     const first = new Tracker()
     const second = new Tracker()
 
-    ref.sub(first.trigger)
-    ref.sub(second.trigger)
+    ref.sub(first.trig)
+    ref.sub(second.trig)
     eq(first, {de: 0, tr: 0})
     eq(second, {de: 0, tr: 0})
 
-    ref.trigger()
+    ref.trig()
     eq(first, {de: 0, tr: 1})
     eq(second, {de: 0, tr: 1})
 
-    // Implicit trigger.
+    // Implicit trig.
     ref.val = 10
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 2})
 
-    // Rudimentary change detection prevents another trigger.
+    // Rudimentary change detection prevents another trig.
     ref.val = 10
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 2})
 
-    ref.unsub(first.trigger)
+    ref.unsub(first.trig)
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 2})
 
@@ -230,7 +230,7 @@ void function testClassObs() {
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 3})
 
-    ref.trigger()
+    ref.trig()
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 3})
   }()

@@ -73,11 +73,11 @@ export class Tracker {
   constructor() {
     this.tr = 0
     this.de = 0
-    Object.defineProperty(this, 'trigger', {value: this.trigger.bind(this)})
+    Object.defineProperty(this, 'trig', {value: this.trig.bind(this)})
     Object.defineProperty(this, 'deinit', {value: this.deinit.bind(this)})
   }
 
-  trigger() {this.tr++}
+  trig() {this.tr++}
 
   deinit() {this.de++}
 }

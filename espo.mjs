@@ -4,7 +4,7 @@ export const ctx = {subber: undefined}
 
 export function isDe(val)      {return isComplex(val) && 'deinit' in val}
 export function isObs(val)     {return isDe(val) && isTrig(val) && 'sub' in val && 'unsub' in val}
-export function isTrig(val)    {return isComplex(val) && 'trigger' in val}
+export function isTrig(val)    {return isComplex(val) && 'trig' in val}
 export function isSub(val)     {return isFun(val) || isTrig(val)}
 export function isSubber(val)  {return isFun(val) || (isComplex(val) && 'subTo' in val)}
 export function isRunTrig(val) {return isComplex(val) && 'run' in val && isTrig(val)}
@@ -50,14 +50,14 @@ export class Obs extends Deinit {
     if (size && !state.size) this.onDeinit()
   }
 
-  trigger() {
+  trig() {
     if (sch.paused) {
       sch.add(this)
       return
     }
 
     const state = stateGet(this)
-    if (state) state.forEach(subTrigger, this)
+    if (state) state.forEach(subTrig, this)
   }
 
   deinit() {
@@ -105,7 +105,7 @@ export class Rec extends Set {
     }
   }
 
-  trigger() {}
+  trig() {}
 
   subTo(obs) {
     valid(obs, isObs)
@@ -131,9 +131,8 @@ export class Moebius extends Rec {
     return this.ref.run(...args)
   }
 
-  trigger(obs) {
-    if (this.act) return
-    this.ref.trigger(obs)
+  trig() {
+    if (!this.act) this.ref.trig(...arguments)
   }
 }
 
@@ -147,12 +146,11 @@ export class Loop extends Rec {
   onRun() {
     const {ref} = this
     if (isFun(ref)) ref()
-    else ref.trigger()
+    else ref.trig()
   }
 
-  trigger() {
-    if (this.act) return
-    this.run()
+  trig() {
+    if (!this.act) this.run()
   }
 }
 
@@ -195,7 +193,7 @@ export class LazyCompState extends ObsState {
   }
 
   // Invoked by `CompRec`.
-  trigger() {this.out = true}
+  trig() {this.out = true}
   act() {return ctx.subber === this.cre}
   init() {this.cre.init()}
   deinit() {this.cre.deinit()}
@@ -208,8 +206,8 @@ export class Comp extends LazyComp {
 }
 
 export class CompState extends LazyCompState {
-  trigger() {
-    super.trigger()
+  trig() {
+    super.trig()
     this.rec()
   }
 }
@@ -291,12 +289,12 @@ export class ObsPh {
   }
 
   set(tar, key, val, proxy) {
-    if (set(tar, key, val)) proxy.trigger()
+    if (set(tar, key, val)) proxy.trig()
     return true
   }
 
   deleteProperty(tar, key) {
-    if (del(tar, key)) tar.trigger()
+    if (del(tar, key)) tar.trig()
     return true
   }
 }
@@ -402,9 +400,9 @@ export function paused(fun, ...args) {
   finally {sch.resume()}
 }
 
-function subTrigger(val) {
+function subTrig(val) {
   if (isFun(val)) val(this)
-  else val.trigger(this)
+  else val.trig(this)
 }
 
 function recDelOld(obs) {
@@ -423,7 +421,7 @@ function compRecSub(obs) {
 
 function schFlush(obs) {
   this.delete(obs)
-  obs.trigger()
+  obs.trig()
 }
 
 export function hasHidden(val, key) {
@@ -462,5 +460,8 @@ function isStr(val) {return typeof val === 'string'}
 function isSym(val) {return typeof val === 'symbol'}
 
 function valid(val, test) {
-  if (!test(val)) throw Error(`expected ${val} to satisfy test ${test}`)
+  if (!test(val)) throw Error(`expected ${show(val)} to satisfy test ${show(test)}`)
 }
+
+// Placeholder, might improve.
+function show(val) {return String(val)}
