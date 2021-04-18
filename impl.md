@@ -1,9 +1,5 @@
 # Implementation Notes
 
-## State Storage
-
-Observables have hidden state, associated via a `WeakMap`. This avoids pollution and collisions.
-
 ## Automatic Deinit
 
 This library has a standard destructor interface:
@@ -14,12 +10,12 @@ interface isDe {
 }
 ```
 
-Whenever an observable property is replaced or deleted, we call `.deinit()` on the previous value, if implemented. In addition, when an observable is deinited, all properties are cleared with `.deinit()`, as appropriate. This allows convenient, _correct_ state management.
+Whenever a property of an object proxied via `DeinitPh` or `ObsPh` is replaced or deleted, we call `.deinit()` on the previous value, if implemented. In addition, when an observable is deinited, all properties are cleared with `.deinit()`, as appropriate. This allows convenient, _correct_ state management.
 
 Non-enumerable properties are exempt. In this case, `.owner` will _not_ be auto-deinited, but `.owned` will be:
 
 ```js
-class State extends es.Obs {
+class State extends es.Deinit {
   constructor(owner, owned) {
     super()
     Object.defineProperty(this, 'owner', {value: owner})

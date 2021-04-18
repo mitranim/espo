@@ -1,79 +1,33 @@
 // See `impl.md` for implementation notes.
 
-export const ctx = {subber: undefined}
+/* Primary API */
 
-export function isDe(val)      {return isComplex(val) && 'deinit' in val}
-export function isObs(val)     {return isDe(val) && isTrig(val) && 'sub' in val && 'unsub' in val}
-export function isTrig(val)    {return isComplex(val) && 'trig' in val}
-export function isSub(val)     {return isFun(val) || isTrig(val)}
-export function isSubber(val)  {return isFun(val) || (isComplex(val) && 'subTo' in val)}
+export function isDe(val) {return isComplex(val) && 'deinit' in val}
+export function isObs(val) {return isDe(val) && isTrig(val) && 'sub' in val && 'unsub' in val}
+export function isTrig(val) {return isComplex(val) && 'trig' in val}
+export function isSub(val) {return isFun(val) || isTrig(val)}
+export function isSubber(val) {return isFun(val) || (isComplex(val) && 'subTo' in val)}
 export function isRunTrig(val) {return isComplex(val) && 'run' in val && isTrig(val)}
-export function deinit(val)    {if (isDe(val)) val.deinit()}
+export function deinit(val) {if (isDe(val)) val.deinit()}
 
-export function deinitAll(ref) {
-  valid(ref, isComplex)
-  for (const key in ref) if (ownEnum(ref, key)) deinit(ref[key])
-}
+export function ph(ref) {return ref ? ref[keyPh] : undefined}
+export function self(ref) {return ref ? ref[keySelf] : undefined}
 
-export function de(src) {return mut(new Deinit(), src)}
+export function de(ref) {return new Proxy(ref, deinitPh)}
+export function obs(ref) {return new Proxy(ref, new (getPh(ref) || ObsPh)())}
+export function lazyComp(ref, fun) {return pro(ref, new (getPh(ref) || LazyCompPh)(fun))}
+export function comp(ref, fun) {return pro(ref, new (getPh(ref) || CompPh)(fun))}
 
-export class Deinit {
-  constructor()   {return new Proxy(this, this.constructor.ph)}
-  deinit()        {deinitAll(this.self)}
-  get self()      {return this}
-  static get ph() {return deinitPh}
-}
+export class Deinit {constructor() {return de(this)}}
+export class Obs {constructor() {return obs(this)}}
+export class LazyComp {constructor(fun) {return lazyComp(this, fun)}}
+export class Comp {constructor(fun) {return comp(this, fun)}}
 
-export function asObs(val) {return new Proxy(val, fakeObsPh)}
-export function obs(src) {return mut(new Obs(), src)}
+/* Secondary API (lower level, semi-undocumented) */
 
-export class Obs extends Deinit {
-  onInit() {}
-  onDeinit() {}
-
-  sub(val) {
-    valid(val, isSub)
-    const state = stateGoc(this, this.constructor.st || Obs.st)
-    if (state.has(val)) return
-
-    const {size} = state
-    state.add(val)
-    if (!size) this.onInit()
-  }
-
-  unsub(val) {
-    const state = stateGet(this)
-    if (!state) return
-
-    const {size} = state
-    state.delete(val)
-    if (size && !state.size) this.onDeinit()
-  }
-
-  trig() {
-    if (sch.paused) {
-      sch.add(this)
-      return
-    }
-
-    const state = stateGet(this)
-    if (state) state.forEach(subTrig, this)
-  }
-
-  deinit() {
-    const state = stateGet(this)
-    if (state) state.forEach(this.unsub, this)
-    super.deinit()
-  }
-
-  // Provided for debugging.
-  get state() {return stateGet(this)}
-
-  static get st() {return ObsState}
-  static get ph() {return obsPh}
-}
-
-export class ObsState extends Set {}
+export const ctx = {subber: undefined}
+export const keyPh = Symbol.for('ph')
+export const keySelf = Symbol.for('self')
 
 export class Rec extends Set {
   constructor() {
@@ -154,32 +108,107 @@ export class Loop extends Rec {
   }
 }
 
-export function lazyComp(fun) {return new LazyComp(fun)}
+export class DeinitPh {
+  has(tar, key) {
+    return key in tar || key === keyPh || key === keySelf || key === 'deinit'
+  }
 
-export class LazyComp extends Obs {
+  get(tar, key) {
+    if (key === keyPh) return this
+    if (key === keySelf) return tar
+    if (key === 'deinit') return dePhDeinit
+    return tar[key]
+  }
+
+  set(tar, key, val) {
+    set(tar, key, val)
+    return true
+  }
+
+  deleteProperty(tar, key) {
+    del(tar, key)
+    return true
+  }
+}
+
+export const deinitPh = new DeinitPh()
+
+export class ObsPh extends Set {
+  has() {
+    return DeinitPh.prototype.has.apply(this, arguments)
+  }
+
+  get(tar, key) {
+    if (key === keyPh) return this
+    if (key === keySelf) return tar
+    if (key === 'deinit') return phDeinit
+    if (!hidden(tar, key)) ctxSub(this)
+    return tar[key]
+  }
+
+  set(tar, key, val) {
+    if (set(tar, key, val)) this.trig()
+    return true
+  }
+
+  deleteProperty(tar, key) {
+    if (del(tar, key)) this.trig()
+    return true
+  }
+
+  // Override in subclass.
+  onInit() {}
+  onDeinit() {}
+
+  sub(val) {
+    valid(val, isSub)
+    const {size} = this
+    this.add(val)
+    if (!size) this.onInit()
+  }
+
+  unsub(val) {
+    const {size} = this
+    this.delete(val)
+    if (size && !this.size) this.onDeinit()
+  }
+
+  trig() {
+    if (sch.paused) {
+      sch.add(this)
+      return
+    }
+    this.forEach(subTrig)
+  }
+
+  deinit() {
+    this.forEach(this.unsub, this)
+  }
+}
+
+export class LazyCompPh extends ObsPh {
   constructor(fun) {
     valid(fun, isFun)
     super()
-    stateSet(this, new this.constructor.st(this, fun))
-  }
-
-  onInit() {stateGet(this).init()}
-  onDeinit() {stateGet(this).deinit()}
-
-  static get st() {return LazyCompState}
-  static get ph() {return compPh}
-}
-
-export class LazyCompState extends ObsState {
-  constructor(obs, fun) {
-    super()
-    this.cre = new CompRec(this)
-    this.obs = obs
     this.fun = fun
+    this.pro = undefined
     this.out = true // "outdated"
+    this.cre = new CompRec(this)
   }
 
-  // Invoked by proxy.
+  get(tar, key) {
+    if (key === keyPh) return this
+    if (key === keySelf) return tar
+    if (key === 'deinit') return phDeinit
+
+    if (!hidden(tar, key) && !this.act()) {
+      ctxSub(this)
+      this.rec()
+    }
+
+    return tar[key]
+  }
+
   rec() {
     if (!this.out || this.act()) return
     this.out = false
@@ -187,25 +216,15 @@ export class LazyCompState extends ObsState {
   }
 
   // Invoked by `CompRec`.
-  run() {
-    const {fun} = this
-    return fun(this.obs)
-  }
-
-  // Invoked by `CompRec`.
+  run() {return this.fun.call(this.pro, this.pro)}
   trig() {this.out = true}
+
   act() {return ctx.subber === this.cre}
-  init() {this.cre.init()}
-  deinit() {this.cre.deinit()}
+  onInit() {this.cre.init()}
+  onDeinit() {this.cre.deinit()}
 }
 
-export function comp(fun) {return new Comp(fun)}
-
-export class Comp extends LazyComp {
-  static get st() {return CompState}
-}
-
-export class CompState extends LazyCompState {
+export class CompPh extends LazyCompPh {
   trig() {
     super.trig()
     this.rec()
@@ -246,113 +265,6 @@ export class Scheduler extends Set {
 
 export const sch = new Scheduler()
 
-export const states = new WeakMap()
-
-export function stateGoc(obs, cls) {
-  valid(cls, isFun)
-  return stateGet(obs) || stateSet(obs, new cls())
-}
-
-export function stateGet(obs) {
-  return states.get(obs.self)
-}
-
-export function stateSet(obs, state) {
-  states.set(obs.self, state)
-  return state
-}
-
-export class DeinitPh {
-  get(tar, key) {
-    if (key === 'self') return tar
-    return tar[key]
-  }
-
-  set(tar, key, val) {
-    set(tar, key, val)
-    return true
-  }
-
-  deleteProperty(tar, key) {
-    del(tar, key)
-    return true
-  }
-}
-
-export const deinitPh = new DeinitPh()
-
-export class ObsPh {
-  get(tar, key, proxy) {
-    if (key === 'self') return tar
-    if (!hidden(tar, key)) ctxSub(proxy)
-    return tar[key]
-  }
-
-  set(tar, key, val, proxy) {
-    if (set(tar, key, val)) proxy.trig()
-    return true
-  }
-
-  deleteProperty(tar, key) {
-    if (del(tar, key)) tar.trig()
-    return true
-  }
-}
-
-export const obsPh = new ObsPh()
-
-export class CompPh extends ObsPh {
-  get(tar, key, proxy) {
-    if (key === 'self') return tar
-
-    if (!hidden(tar, key)) {
-      const state = stateGet(tar)
-      if (!state.act()) {
-        ctxSub(proxy)
-        state.rec()
-      }
-    }
-
-    return tar[key]
-  }
-}
-
-export const compPh = new CompPh()
-
-export class FakeObsPh extends ObsPh {
-  get(tar, key, proxy) {
-    if (key === 'self') return tar
-    if (!hidden(tar, key)) ctxSub(proxy)
-    if (key in tar) return tar[key]
-    if (hasOwn(Obs.prototype, key)) return Obs.prototype[key]
-    return undefined
-  }
-
-  has(tar, key) {
-    return key in tar || hasOwn(Obs.prototype, key)
-  }
-}
-
-export const fakeObsPh = new FakeObsPh()
-
-function set(ref, key, next) {
-  const de = ownEnum(ref, key)
-  const prev = ref[key]
-  ref[key] = next
-  if (Object.is(prev, next)) return false
-  if (de) deinit(prev)
-  return true
-}
-
-function del(ref, key) {
-  if (!own(ref, key)) return false
-  const de = ownEnum(ref, key)
-  const val = ref[key]
-  delete ref[key]
-  if (de) deinit(val)
-  return true
-}
-
 export function ctxSub(obs) {
   const {subber} = ctx
   if (isFun(subber)) subber(obs)
@@ -387,17 +299,60 @@ export function bind(ref, ...names) {
   names.forEach(bindMethod, ref)
 }
 
-function bindMethod(key) {
-  const val = this[key]
-  if (!isFun(val)) throw Error(`expected method at key ${key}, found ${val}`)
-  priv(this, key, val.bind(this))
-}
-
 export function paused(fun, ...args) {
   valid(fun, isFun)
   sch.pause()
   try {return fun.apply(this, args)}
   finally {sch.resume()}
+}
+
+/* Internal utils */
+
+function getPh(ref) {return ref.constructor && ref.constructor.ph}
+
+function pro(ref, ph) {
+  const pro = new Proxy(ref, ph)
+  ph.pro = pro
+  return pro
+}
+
+function set(ref, key, next) {
+  const de = ownEnum(ref, key)
+  const prev = ref[key]
+  ref[key] = next
+  if (Object.is(prev, next)) return false
+  if (de) deinit(prev)
+  return true
+}
+
+function del(ref, key) {
+  if (!own(ref, key)) return false
+  const de = ownEnum(ref, key)
+  const val = ref[key]
+  delete ref[key]
+  if (de) deinit(val)
+  return true
+}
+
+function dePhDeinit() {
+  deinitAll(this)
+  deinit(self(this))
+}
+
+function phDeinit() {
+  ph(this).deinit()
+  deinit(self(this))
+}
+
+export function deinitAll(ref) {
+  valid(ref, isComplex)
+  for (const key in ref) if (ownEnum(ref, key)) deinit(ref[key])
+}
+
+function bindMethod(key) {
+  const val = this[key]
+  if (!isFun(val)) throw Error(`expected method at key ${key}, found ${val}`)
+  priv(this, key, val.bind(this))
 }
 
 function subTrig(val) {

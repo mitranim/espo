@@ -158,8 +158,8 @@ void function testUtilityFuns() {
   // es.deinitAll
 }()
 
-void function testClassDeinit() {
-  const ref    = new es.Deinit()
+void function testDe() {
+  const ref    = es.de({})
   const first  = new Tracker()
   const second = new Tracker()
   const third  = new Tracker()
@@ -193,32 +193,33 @@ void function testClassDeinit() {
 }()
 
 // The test is rudimentary, maybe about 5% complete.
-void function testClassObs() {
+void function testObs() {
   void function testImperative() {
-    const ref = new es.Obs()
+    const ref = es.obs({})
+    const obs = es.ph(ref)
     const first = new Tracker()
     const second = new Tracker()
 
-    ref.sub(first.trig)
-    ref.sub(second.trig)
+    obs.sub(first.trig)
+    obs.sub(second.trig)
     eq(first, {de: 0, tr: 0})
     eq(second, {de: 0, tr: 0})
 
-    ref.trig()
+    obs.trig()
     eq(first, {de: 0, tr: 1})
     eq(second, {de: 0, tr: 1})
 
-    // Implicit trig.
+    // Implicit trigger.
     ref.val = 10
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 2})
 
-    // Rudimentary change detection prevents another trig.
+    // Rudimentary change detection prevents another trigger.
     ref.val = 10
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 2})
 
-    ref.unsub(first.trig)
+    obs.unsub(first.trig)
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 2})
 
@@ -230,7 +231,7 @@ void function testClassObs() {
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 3})
 
-    ref.trig()
+    obs.trig()
     eq(first, {de: 0, tr: 2})
     eq(second, {de: 0, tr: 3})
   }()
