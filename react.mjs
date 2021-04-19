@@ -5,26 +5,9 @@ Triggers in those observables cause a re-render. Unsubscription is automatic
 via `componentWillUnmount`.
 
 This has NOT been tested after the 0.6.0 rework, due to a switch from React to
-Prax.
+Prax and custom DOM elements.
 
-Usage:
-
-  import {viewInit} from 'espo/react.mjs'
-
-  // Base class for all your views.
-  class View extends Component {
-    constructor() {
-      super(...arguments)
-      viewInit(this)
-    }
-  }
-
-  class SomePage extends View {
-    render() {
-      // Implicit subscription, causes re-render on trigger.
-      const {val} = someEspoObservable
-    }
-  }
+See examples in `readme.md`.
 */
 
 import {Moebius} from './espo.mjs'

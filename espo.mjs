@@ -1,5 +1,3 @@
-// See `impl.md` for implementation notes.
-
 /* Primary API */
 
 export function isDe(val) {return isComplex(val) && 'deinit' in val}
@@ -8,20 +6,21 @@ export function isTrig(val) {return isComplex(val) && 'trig' in val}
 export function isSub(val) {return isFun(val) || isTrig(val)}
 export function isSubber(val) {return isFun(val) || (isComplex(val) && 'subTo' in val)}
 export function isRunTrig(val) {return isComplex(val) && 'run' in val && isTrig(val)}
-export function deinit(val) {if (isDe(val)) val.deinit()}
 
 export function ph(ref) {return ref ? ref[keyPh] : undefined}
-export function self(ref) {return ref ? ref[keySelf] : undefined}
+export function self(ref) {return ref ? ref[keySelf] || ref : undefined}
 
 export function de(ref) {return new Proxy(ref, deinitPh)}
-export function obs(ref) {return new Proxy(ref, new (getPh(ref) || ObsPh)())}
-export function lazyComp(ref, fun) {return pro(ref, new (getPh(ref) || LazyCompPh)(fun))}
+export function obs(ref) {return pro(ref, new (getPh(ref) || ObsPh)())}
 export function comp(ref, fun) {return pro(ref, new (getPh(ref) || CompPh)(fun))}
+export function lazyComp(ref, fun) {return pro(ref, new (getPh(ref) || LazyCompPh)(fun))}
 
 export class Deinit {constructor() {return de(this)}}
 export class Obs {constructor() {return obs(this)}}
-export class LazyComp {constructor(fun) {return lazyComp(this, fun)}}
 export class Comp {constructor(fun) {return comp(this, fun)}}
+export class LazyComp {constructor(fun) {return lazyComp(this, fun)}}
+
+export function deinit(val) {if (isDe(val)) val.deinit()}
 
 /* Secondary API (lower level, semi-undocumented) */
 
@@ -258,7 +257,7 @@ export class CompRec extends Moebius {
   }
 }
 
-export class Scheduler extends Set {
+export class Sched extends Set {
   constructor() {
     super()
     this.p = 0
@@ -275,7 +274,7 @@ export class Scheduler extends Set {
   }
 }
 
-export const sch = new Scheduler()
+export const sch = new Sched()
 
 export function ctxSub(obs) {
   const {subber} = ctx
