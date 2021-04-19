@@ -353,7 +353,9 @@ function dePhDeinit() {
 
 function phDeinit() {
   ph(this).deinit()
-  deinit(self(this))
+  const ref = self(this)
+  deinitAll(ref)
+  deinit(ref)
 }
 
 export function deinitAll(ref) {
