@@ -85,8 +85,8 @@ export class Moebius extends Rec {
     return this.ref.run(...args)
   }
 
-  trig() {
-    if (!this.act) this.ref.trig(...arguments)
+  trig(...args) {
+    if (!this.act) this.ref.trig(...args)
   }
 }
 
@@ -98,9 +98,7 @@ export class Loop extends Rec {
   }
 
   onRun() {
-    const {ref} = this
-    if (isFun(ref)) ref()
-    else ref.trig()
+    subTrig(this.ref)
   }
 
   trig() {
@@ -133,30 +131,8 @@ export class DeinitPh {
 
 export const deinitPh = new DeinitPh()
 
-export class ObsPh extends Set {
-  has() {
-    return DeinitPh.prototype.has.apply(this, arguments)
-  }
-
-  get(tar, key) {
-    if (key === keyPh) return this
-    if (key === keySelf) return tar
-    if (key === 'deinit') return phDeinit
-    if (!hidden(tar, key)) ctxSub(this)
-    return tar[key]
-  }
-
-  set(tar, key, val) {
-    if (set(tar, key, val)) this.trig()
-    return true
-  }
-
-  deleteProperty(tar, key) {
-    if (del(tar, key)) this.trig()
-    return true
-  }
-
-  // Override in subclass.
+// WTB better name. Undocumented.
+export class ObsBase extends Set {
   onInit() {}
   onDeinit() {}
 
@@ -186,12 +162,48 @@ export class ObsPh extends Set {
   }
 }
 
+export class ObsPh extends ObsBase {
+  constructor() {
+    super()
+    this.pro = undefined
+  }
+
+  has() {
+    return DeinitPh.prototype.has.apply(this, arguments)
+  }
+
+  get(tar, key) {
+    if (key === keyPh) return this
+    if (key === keySelf) return tar
+    if (key === 'deinit') return phDeinit
+    if (!hidden(tar, key)) ctxSub(this)
+    return tar[key]
+  }
+
+  set(tar, key, val) {
+    if (set(tar, key, val)) this.trig()
+    return true
+  }
+
+  deleteProperty(tar, key) {
+    if (del(tar, key)) this.trig()
+    return true
+  }
+
+  onInit() {
+    if (this.pro && 'onInit' in this.pro) this.pro.onInit()
+  }
+
+  onDeinit() {
+    if (this.pro && 'onDeinit' in this.pro) this.pro.onDeinit()
+  }
+}
+
 export class LazyCompPh extends ObsPh {
   constructor(fun) {
     valid(fun, isFun)
     super()
     this.fun = fun
-    this.pro = undefined
     this.out = true // "outdated"
     this.cre = new CompRec(this)
   }
@@ -356,8 +368,8 @@ function bindMethod(key) {
 }
 
 function subTrig(val) {
-  if (isFun(val)) val(this)
-  else val.trig(this)
+  if (isFun(val)) val()
+  else val.trig()
 }
 
 function recDelOld(obs) {
