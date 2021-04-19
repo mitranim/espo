@@ -85,7 +85,7 @@ import * as es from 'espo'
 
 const target = {someProp: 'someVal'}
 
-// Same as `es.obs(target)`.
+// Same as `es.obs(target)`, but without support for `.onInit`/`.onDeinit`.
 const obs = new Proxy(target, new es.ObsPh())
 
 obs.someProp // 'someVal'
