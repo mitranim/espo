@@ -237,8 +237,7 @@ export class LazyCompPh extends ObsPh {
 
 export class CompPh extends LazyCompPh {
   trig() {
-    super.trig()
-    this.rec()
+    if (!this.act()) this.cre.run()
   }
 }
 

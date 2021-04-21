@@ -71,7 +71,7 @@ import * as es from 'espo'
 
 import * as es from './node_modules/espo/espo.mjs'
 
-import * as es from 'https://unpkg.com/espo@0.6.0/espo.mjs'
+import * as es from 'https://unpkg.com/espo/espo.mjs'
 ```
 
 ### Trichotomy of proxy/handler/target
@@ -100,7 +100,7 @@ ph.sub(function onTrigger() {})
 
 Espo provides features, such as [`comp`](#function-compref-fun) or [`Loop`](#class-loopref-issub), where you provide a function, and within that function, access to any observables' properties automatically establishes subscriptions. Triggering those observables causes a recomputation or a rerun. The timing of these events can be fine-tuned for your needs; [`lazyComp`](#function-lazycompref-fun) doesn't immediately recompute, and [`Moebius`](#class-moebiusref-isruntrig) doesn't immediately rerun.
 
-See `Loop` for a simple example.
+See [`Loop`](#class-loopref-issub) for a simple example.
 
 This is extremely handy for UI programming. Espo comes with optional adapters for React (`react.mjs`) and custom DOM elements (`elem.mjs`).
 
@@ -150,6 +150,7 @@ class Total extends HTMLElement {
     this.textContent = `current total: ${one.val + two.val}`
   }
 }
+ese.rec(Total)
 customElements.define('a-total', Total)
 ```
 
@@ -200,7 +201,7 @@ es.privs(this, {owner})
 
 ### `new Proxy` vs function vs subclass
 
-The core of Espo's functionality is the proxy handler classes. Ultimately, functions like [`obs`](#function-obsref) and classes like [`Obs`](#class-obs) are shortcuts for the following, but with some additional wiring:
+The core of Espo's functionality is the proxy handler classes. Ultimately, functions like [`obs`](#function-obsref) and classes like [`Obs`](#class-obs) are shortcuts for the following, with some additional wiring:
 
 ```js
 new Proxy(target, new es.ObsPh())
@@ -326,7 +327,7 @@ When implementing your own classes, the recommended approach is to subclass [`De
 
 ### `function obs(ref)`
 
-Shortcut for the following, but with some additional wiring:
+Shortcut for the following, with some additional wiring:
 
 ```js
 new Proxy(ref, new es.ObsPh())
@@ -365,7 +366,7 @@ new X()
 
 ### `function comp(ref, fun)`
 
-Shortcut for the following, but with some additional wiring:
+Shortcut for the following, with some additional wiring:
 
 ```js
 new Proxy(ref, new es.CompPh(fun))
@@ -389,6 +390,9 @@ const ref = es.comp({val: 30}, ref => {
   ref.total = ref.val + one.val + two.val
 })
 
+// Allows active recomputation. Without this, changes would be ignored.
+es.ph(ref).sub(function onUpdate() {})
+
 console.log(ref.total) // 60
 
 one.val = 40
@@ -402,7 +406,7 @@ Just like `obs`, this function supports overriding the preferred proxy handler c
 
 ### `function lazyComp(ref, fun)`
 
-Shortcut for the following, but with some additional wiring:
+Shortcut for the following, with some additional wiring:
 
 ```js
 new Proxy(ref, new es.LazyCompPh(fun))
@@ -566,6 +570,14 @@ Calls `val.deinit()` if implemented. Otherwise a nop. Convenient for deiniting a
 Espo is friendly to 🔧🐒. Many useful tools are exposed but undocumented, to avoid bloating the docs. Take the time to skim the source file `espo.mjs`.
 
 ## Changelog
+
+### 0.6.2
+
+After the initial computation on first property access, comp now recomputes only when triggered.
+
+### 0.6.1
+
+Minor correction in files pushed to NPM.
 
 ### 0.6.0
 
