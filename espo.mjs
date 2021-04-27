@@ -71,6 +71,8 @@ export class Rec extends Set {
   deinit() {
     this.forEach(recDel, this)
   }
+
+  get [Symbol.toStringTag]() {return this.constructor.name}
 }
 
 export class Moebius extends Rec {
@@ -159,6 +161,8 @@ export class ObsBase extends Set {
   deinit() {
     this.forEach(this.unsub, this)
   }
+
+  get [Symbol.toStringTag]() {return this.constructor.name}
 }
 
 export class ObsPh extends ObsBase {
@@ -212,33 +216,26 @@ export class LazyCompPh extends ObsPh {
     if (key === keySelf) return tar
     if (key === 'deinit') return phDeinit
 
-    if (!hidden(tar, key) && !this.act()) {
+    if (!hidden(tar, key)) {
       ctxSub(this)
-      this.rec()
+      if (this.out) {
+        this.out = false
+        this.cre.run()
+      }
     }
 
     return tar[key]
   }
 
-  rec() {
-    if (!this.out || this.act()) return
-    this.out = false
-    this.cre.run()
-  }
-
   // Invoked by `CompRec`.
   run() {return this.fun.call(this.pro, this.pro)}
-  trig() {this.out = true}
-
-  act() {return ctx.subber === this.cre}
+  onTrig() {this.out = true}
   onInit() {this.cre.init()}
   onDeinit() {this.cre.deinit()}
 }
 
 export class CompPh extends LazyCompPh {
-  trig() {
-    if (!this.act()) this.cre.run()
-  }
+  onTrig() {this.cre.run()}
 }
 
 export class CompRec extends Moebius {
@@ -247,12 +244,16 @@ export class CompRec extends Moebius {
     this.new.add(obs)
     if (this.ref.size) {
       this.add(obs)
-      obs.sub(this.ref)
+      obs.sub(this)
     }
   }
 
   init() {
     this.new.forEach(compRecSub, this)
+  }
+
+  trig() {
+    if (!this.act) this.ref.onTrig()
   }
 }
 
@@ -271,6 +272,8 @@ export class Sched extends Set {
     this.p--
     if (!this.p) this.forEach(schFlush, this)
   }
+
+  get [Symbol.toStringTag]() {return this.constructor.name}
 }
 
 export const sch = new Sched()
@@ -383,7 +386,7 @@ function recDel(obs) {
 
 function compRecSub(obs) {
   this.add(obs)
-  obs.sub(this.ref)
+  obs.sub(this)
 }
 
 function schFlush(obs) {

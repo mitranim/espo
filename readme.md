@@ -16,6 +16,7 @@ Tiny (a few KiB _un_-minified) and dependency-free. Native JS module.
 Known limitations:
 
 * No special support for collections.
+* When targeting IE, requires transpilation and ES2015 polyfills.
 
 ## TOC
 
@@ -570,6 +571,10 @@ Calls `val.deinit()` if implemented. Otherwise a nop. Convenient for deiniting a
 Espo is friendly to 🔧🐒. Many useful tools are exposed but undocumented, to avoid bloating the docs. Take the time to skim the source file `espo.mjs`.
 
 ## Changelog
+
+### 0.6.3
+
+Comps should now properly notify their subs.
 
 ### 0.6.2
 
