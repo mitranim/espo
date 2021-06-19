@@ -72,12 +72,12 @@ import * as es from 'espo'
 
 import * as es from './node_modules/espo/espo.mjs'
 
-import * as es from 'https://unpkg.com/espo/espo.mjs'
+import * as es from 'https://cdn.jsdelivr.net/npm/espo@0.6.4/espo.mjs'
 ```
 
 ### Trichotomy of proxy/handler/target
 
-While Espo is fairly magical (fairy magical?), the user must be aware of proxies. In Espo, your objects aren't "observables" in a classic sense, full of special properties and methods. Instead, they remain clean, but wrapped into a `Proxy`, together with a _proxy handler_ object, which is the actual state of the observable, with subscribers, explicit sub/unsub methods, and so on.
+While Espo is fairly magical (🧚 fairy magical?), the user must be aware of proxies. In Espo, your objects aren't "observables" in a classic sense, full of special properties and methods. Instead, they remain clean, but wrapped into a `Proxy`, together with a _proxy handler_ object, which is the actual state of the observable, with subscribers, explicit sub/unsub methods, and so on.
 
 Mostly, you wrap via [`obs`](#function-obsref) or by subclassing [`Obs`](#class-obs), and just use the resulting proxy as if it was the original object. [Implicit sub/resub](#implicit-subresub) relies on proxy features. For explicit sub/unsub, access the proxy handler via [`ph`](#function-phref), and call the handler's methods.
 
@@ -571,6 +571,12 @@ Calls `val.deinit()` if implemented. Otherwise a nop. Convenient for deiniting a
 Espo is friendly to 🔧🐒. Many useful tools are exposed but undocumented, to avoid bloating the docs. Take the time to skim the source file `espo.mjs`.
 
 ## Changelog
+
+### 0.6.4
+
+The React adapter works properly again. (After the `0.6.0` rework, wasn't tested until now.)
+
+Added `inert` (undocumented).
 
 ### 0.6.3
 

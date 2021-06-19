@@ -86,8 +86,8 @@ export class Moebius extends Rec {
     return this.ref.run(...args)
   }
 
-  trig(...args) {
-    if (!this.act) this.ref.trig(...args)
+  trig() {
+    if (!this.act) this.ref.trig()
   }
 }
 
@@ -317,6 +317,13 @@ export function paused(fun, ...args) {
   sch.pause()
   try {return fun.apply(this, args)}
   finally {sch.resume()}
+}
+
+export function inert(fun, ...args) {
+  const {subber} = ctx
+  ctx.subber = undefined
+  try {return fun(...args)}
+  finally {ctx.subber = subber}
 }
 
 /* Internal utils */

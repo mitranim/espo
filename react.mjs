@@ -4,9 +4,6 @@ observables accessed during the `render` call are implicitly subscribed to.
 Triggers in those observables cause a re-render. Unsubscription is automatic
 via `componentWillUnmount`.
 
-This has NOT been tested after the 0.6.0 rework, due to a switch from React to
-Prax and custom DOM elements.
-
 See examples in `readme.md`.
 */
 
@@ -14,9 +11,6 @@ import {Moebius} from './espo.mjs'
 
 export function viewInit(view) {
   if (!view.render) return
-
-  // Invoked by `espoViewRender`.
-  view.rec = new Moebius(view)
 
   // Invoked by `view.rec`.
   view.run = view.render
@@ -26,6 +20,9 @@ export function viewInit(view) {
   view.render = espoViewRender
 
   view.componentWillUnmount = espoComponentWillUnmount
+
+  // Invoked by `espoViewRender`.
+  view.rec = new Moebius(view)
 }
 
 export function espoComponentWillUnmount() {
