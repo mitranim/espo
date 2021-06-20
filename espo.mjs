@@ -322,7 +322,7 @@ export function paused(fun, ...args) {
 export function inert(fun, ...args) {
   const {subber} = ctx
   ctx.subber = undefined
-  try {return fun(...args)}
+  try {return fun.apply(this, args)}
   finally {ctx.subber = subber}
 }
 

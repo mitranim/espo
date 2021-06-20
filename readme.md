@@ -572,6 +572,10 @@ Espo is friendly to 🔧🐒. Many useful tools are exposed but undocumented, to
 
 ## Changelog
 
+### 0.6.5
+
+Minor enhancement: `inert` preserves `this`, just like `paused`.
+
 ### 0.6.4
 
 The React adapter works properly again. (After the `0.6.0` rework, wasn't tested until now.)
