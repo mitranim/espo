@@ -572,6 +572,10 @@ Espo is friendly to 🔧🐒. Many useful tools are exposed but undocumented, to
 
 ## Changelog
 
+### 0.7.0
+
+Improvements in undocumented function `bind`. Instead of taking method names, it takes methods themselves, and binds them by name. This is compatible with minifiers because they usually don't mangle method names.
+
 ### 0.6.5
 
 Minor enhancement: `inert` preserves `this`, just like `paused`.

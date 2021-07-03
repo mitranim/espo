@@ -307,9 +307,15 @@ export function privs(ref, vals) {
   for (const key in vals) priv(ref, key, vals[key])
 }
 
-export function bind(ref, ...names) {
+export function bind(ref, ...funs) {
   valid(ref, isComplex)
-  names.forEach(bindMethod, ref)
+  funs.forEach(bindTo, ref)
+}
+
+function bindTo(fun) {
+  valid(fun, isFun)
+  if (!fun.name) throw Error(`can't bind anon function ${fun}`)
+  priv(this, fun.name, fun.bind(this))
 }
 
 export function paused(fun, ...args) {
@@ -369,12 +375,6 @@ function phDeinit() {
 export function deinitAll(ref) {
   valid(ref, isComplex)
   for (const key in ref) if (ownEnum(ref, key)) deinit(ref[key])
-}
-
-function bindMethod(key) {
-  const val = this[key]
-  if (!isFun(val)) throw Error(`expected method at key ${key}, found ${val}`)
-  priv(this, key, val.bind(this))
 }
 
 function subTrig(val) {

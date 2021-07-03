@@ -143,7 +143,7 @@ void function testUtilityFuns() {
       two() {return this}
     }()
 
-    es.bind(ref, 'one', 'two')
+    es.bind(ref, ref.one, ref.two)
     eq(Object.keys(ref), [])
     eq(Object.getOwnPropertyNames(ref), ['one', 'two'])
 
