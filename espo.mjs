@@ -318,6 +318,23 @@ function bindTo(fun) {
   priv(this, fun.name, fun.bind(this))
 }
 
+export function bindAll(ref) {
+  bindAllFrom(ref, Object.getPrototypeOf(ref))
+}
+
+function bindAllFrom(ref, proto) {
+  if (!proto || proto === Object.prototype) return
+  const descs = Object.getOwnPropertyDescriptors(proto)
+
+  for (const key in descs) {
+    if (key === 'constructor' || hasOwn(ref, key)) continue
+    const {value} = descs[key]
+    if (isFun(value)) priv(ref, key, value.bind(ref))
+  }
+
+  bindAllFrom(ref, Object.getPrototypeOf(proto))
+}
+
 export function paused(fun, ...args) {
   valid(fun, isFun)
   sch.pause()
