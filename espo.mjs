@@ -299,7 +299,12 @@ export function mut(tar, src) {
 
 export function priv(ref, key, val) {
   valid(key, isKey)
-  Object.defineProperty(ref, key, {value: val, writable: true, configurable: true})
+  Object.defineProperty(ref, key, {
+    value: val,
+    writable: true,
+    configurable: true,
+    enumerable: false,
+  })
 }
 
 export function privs(ref, vals) {

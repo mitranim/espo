@@ -116,9 +116,18 @@ void function test_utility_funs() {
     is(es.hasOwnEnum(ref, 'one'), true)
     is(es.hasOwn(ref, 'two'),     true)
     is(es.hasOwnEnum(ref, 'two'), false)
+
+    void function test_priv_redef() {
+      const ref = {one: 10}
+      es.priv(ref, 'one', 20)
+
+      eq(ref, {one: 20})
+      eq(Object.keys(ref), [])
+      eq(Object.getOwnPropertyNames(ref), ['one'])
+    }()
   }()
 
-  void function test_priv() {
+  void function test_privs() {
     const ref = {one: 10}
     es.privs(ref, {two: 20, three: 30})
     eq(ref, {one: 10, two: 20, three: 30})
