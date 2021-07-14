@@ -72,7 +72,7 @@ import * as es from 'espo'
 
 import * as es from './node_modules/espo/espo.mjs'
 
-import * as es from 'https://cdn.jsdelivr.net/npm/espo@0.7.2/espo.mjs'
+import * as es from 'https://cdn.jsdelivr.net/npm/espo@0.7.3/espo.mjs'
 ```
 
 ### Trichotomy of proxy/handler/target
@@ -571,6 +571,10 @@ Calls `val.deinit()` if implemented. Otherwise a nop. Convenient for deiniting a
 Espo is friendly to 🔧🐒. Many useful tools are exposed but undocumented, to avoid bloating the docs. Take the time to skim the source file `espo.mjs`.
 
 ## Changelog
+
+### 0.7.3
+
+Added `pub` and `pubs` (undocumented).
 
 ### 0.7.2
 

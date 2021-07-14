@@ -77,9 +77,8 @@ export class Rec extends Set {
 
 export class Moebius extends Rec {
   constructor(ref) {
-    valid(ref, isRunTrig)
     super()
-    this.ref = ref
+    this.ref = valid(ref, isRunTrig)
   }
 
   onRun(...args) {
@@ -93,9 +92,8 @@ export class Moebius extends Rec {
 
 export class Loop extends Rec {
   constructor(ref) {
-    valid(ref, isSub)
     super()
-    this.ref = ref
+    this.ref = valid(ref, isSub)
   }
 
   onRun() {
@@ -138,9 +136,8 @@ export class ObsBase extends Set {
   onDeinit() {}
 
   sub(val) {
-    valid(val, isSub)
     const {size} = this
-    this.add(val)
+    this.add(valid(val, isSub))
     if (!size) this.onInit()
   }
 
@@ -204,10 +201,9 @@ export class ObsPh extends ObsBase {
 
 export class LazyCompPh extends ObsPh {
   constructor(fun) {
-    valid(fun, isFun)
     super()
-    this.fun = fun
-    this.out = true // "outdated"
+    this.fun = valid(fun, isFun)
+    this.out = true // means "outdated"
     this.cre = new CompRec(this)
   }
 
@@ -298,8 +294,7 @@ export function mut(tar, src) {
 }
 
 export function priv(ref, key, val) {
-  valid(key, isKey)
-  Object.defineProperty(ref, key, {
+  Object.defineProperty(ref, valid(key, isKey), {
     value: val,
     writable: true,
     configurable: true,
@@ -312,9 +307,22 @@ export function privs(ref, vals) {
   for (const key in vals) priv(ref, key, vals[key])
 }
 
+export function pub(ref, key, val) {
+  Object.defineProperty(ref, valid(key, isKey), {
+    value: val,
+    writable: true,
+    configurable: true,
+    enumerable: true,
+  })
+}
+
+export function pubs(ref, vals) {
+  valid(vals, isStruct)
+  for (const key in vals) pub(ref, key, vals[key])
+}
+
 export function bind(ref, ...funs) {
-  valid(ref, isComplex)
-  funs.forEach(bindTo, ref)
+  funs.forEach(bindTo, valid(ref, isComplex))
 }
 
 function bindTo(fun) {
@@ -341,7 +349,6 @@ function bindAllFrom(ref, proto) {
 }
 
 export function paused(fun, ...args) {
-  valid(fun, isFun)
   sch.pause()
   try {return fun.apply(this, args)}
   finally {sch.resume()}
@@ -460,6 +467,7 @@ function isSym(val) {return typeof val === 'symbol'}
 
 function valid(val, test) {
   if (!test(val)) throw Error(`expected ${show(val)} to satisfy test ${show(test)}`)
+  return val
 }
 
 // Placeholder, might improve.

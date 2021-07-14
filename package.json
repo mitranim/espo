@@ -1,13 +1,11 @@
 {
   "name": "espo",
-  "version": "0.7.2",
-  "description": "Library for stateful and reactive programming: queues, observables, ownership and lifetimes, procedural reactivity. Lightweight alternative to MobX.",
+  "version": "0.7.3",
+  "description": "Library for stateful and reactive programming: observables, ownership and lifetimes, automatic deinit, procedural reactivity. Lightweight alternative to MobX.",
   "type": "module",
   "main": "./espo.mjs",
   "scripts": {
-    "w": "watchexec -c -r -d=0 'node test/test.mjs'",
-    "test": "node test/test.mjs",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "make prep"
   },
   "keywords": [
     "reactive",
