@@ -1,6 +1,6 @@
 {
   "name": "espo",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Library for stateful and reactive programming: observables, ownership and lifetimes, automatic deinit, procedural reactivity. Lightweight alternative to MobX.",
   "type": "module",
   "main": "./espo.mjs",

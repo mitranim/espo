@@ -6,6 +6,7 @@ work in progress after the rework.
 import {
   // assert as ok,
   assertStrictEquals as is,
+  assertNotStrictEquals as isNot,
   assertEquals as eq,
   // assertThrows as throws,
 } from 'https://deno.land/std@0.100.0/testing/asserts.ts'
@@ -342,6 +343,124 @@ void function test_bindAll() {
   is(funOverride()[0], ref)
   is(funOverride()[1], 'funOverride outer')
 }()
+
+void function test_lazy() {
+  void function test_lazy_only_ancestor() {
+    const [Anc, Mid, Des] = testInitLazy()
+    es.lazy(Anc)
+
+    const ref = new Des()
+    eq(Object.keys(ref), [])
+
+    is(ref.anc0, ref.anc0)
+    eq(Object.keys(ref), [`anc0`])
+
+    is(ref.anc1, ref.anc1)
+    eq(Object.keys(ref), [`anc0`, `anc1`])
+
+    isNot(ref.mid0, ref.mid0)
+    isNot(ref.mid1, ref.mid1)
+
+    isNot(ref.des0, ref.des0)
+    isNot(ref.des1, ref.des1)
+
+    testLazyDoesNotAffectPrototype(Anc, Mid, Des)
+  }()
+
+  void function test_lazy_only_descendant() {
+    const [Anc, Mid, Des] = testInitLazy()
+    es.lazy(Des)
+
+    const ref = new Des()
+    eq(Object.keys(ref), [])
+
+    isNot(ref.anc0, ref.anc0)
+    isNot(ref.anc1, ref.anc1)
+
+    isNot(ref.mid0, ref.mid0)
+    isNot(ref.mid1, ref.mid1)
+
+    is(ref.des0, ref.des0)
+    eq(Object.keys(ref), [`des0`])
+
+    is(ref.des1, ref.des1)
+    eq(Object.keys(ref), [`des0`, `des1`])
+
+    testLazyDoesNotAffectPrototype(Anc, Mid, Des)
+  }()
+
+  void function test_lazy_all() {
+    const [Anc, Mid, Des] = testInitLazy()
+    es.lazy(Anc)
+    es.lazy(Mid)
+    es.lazy(Des)
+
+    const ref = new Des()
+    eq(Object.keys(ref), [])
+
+    is(ref.anc0, ref.anc0)
+    eq(Object.keys(ref), [`anc0`])
+
+    is(ref.anc1, ref.anc1)
+    eq(Object.keys(ref), [`anc0`, `anc1`])
+
+    is(ref.mid0, ref.mid0)
+    eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`])
+
+    is(ref.mid1, ref.mid1)
+    eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`])
+
+    is(ref.des0, ref.des0)
+    eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`, `des0`])
+
+    is(ref.des1, ref.des1)
+    eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`, `des0`, `des1`])
+
+    testLazyDoesNotAffectPrototype(Anc, Mid, Des)
+  }()
+
+  void function test_set() {
+    const [Anc, Mid, Des] = testInitLazy()
+    es.lazy(Anc)
+
+    const ref = new Des()
+    const manual = Symbol(`manual`)
+
+    ref.anc0 = manual
+    is(ref.anc0, manual)
+    eq(Object.keys(ref), [`anc0`])
+
+    is(ref.anc1, ref.anc1)
+    eq(Object.keys(ref), [`anc0`, `anc1`])
+
+    testLazyDoesNotAffectPrototype(Anc, Mid, Des)
+  }()
+}()
+
+function testInitLazy() {
+  class Anc {
+    get anc0() {return Symbol(`anc0`)}
+    get anc1() {return Symbol(`anc1`)}
+  }
+
+  class Mid extends Anc {
+    get mid0() {return Symbol(`mid0`)}
+    get mid1() {return Symbol(`mid1`)}
+  }
+
+  class Des extends Mid {
+    get des0() {return Symbol(`des0`)}
+    get des1() {return Symbol(`des1`)}
+  }
+
+  return [Anc, Mid, Des]
+}
+
+function testLazyDoesNotAffectPrototype(Anc, Mid, Des) {
+  eq(Object.keys(Anc.prototype), [])
+  eq(Object.keys(Mid.prototype), [])
+  eq(Object.keys(Des.prototype), [])
+}
 
 void function test_de() {
   const ref    = es.de({})

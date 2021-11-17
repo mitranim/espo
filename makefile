@@ -4,17 +4,17 @@ DENO := deno run --no-check
 TEST := test/test.mjs
 
 watch:
-	$(PAR) test-w lint-w
+	$(PAR) test_w lint_w
 
 prep: lint test
 
-test-w:
+test_w:
 	$(DENO) --watch $(TEST)
 
 test:
 	$(DENO) $(TEST)
 
-lint-w:
+lint_w:
 	watchexec -r -d=0 -e=mjs -n -- make lint
 
 lint:

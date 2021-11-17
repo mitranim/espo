@@ -61,7 +61,7 @@ export class Rec extends Set {
   trig() {}
 
   subTo(obs) {
-    valid(obs, isObs)
+    req(obs, isObs)
     if (this.new.has(obs)) return
     this.new.add(obs)
     this.add(obs)
@@ -78,7 +78,7 @@ export class Rec extends Set {
 export class Moebius extends Rec {
   constructor(ref) {
     super()
-    this.ref = valid(ref, isRunTrig)
+    this.ref = req(ref, isRunTrig)
   }
 
   onRun(...args) {
@@ -93,7 +93,7 @@ export class Moebius extends Rec {
 export class Loop extends Rec {
   constructor(ref) {
     super()
-    this.ref = valid(ref, isSub)
+    this.ref = req(ref, isSub)
   }
 
   onRun() {
@@ -137,7 +137,7 @@ export class ObsBase extends Set {
 
   sub(val) {
     const {size} = this
-    this.add(valid(val, isSub))
+    this.add(req(val, isSub))
     if (!size) this.onInit()
   }
 
@@ -202,7 +202,7 @@ export class ObsPh extends ObsBase {
 export class LazyCompPh extends ObsPh {
   constructor(fun) {
     super()
-    this.fun = valid(fun, isFun)
+    this.fun = req(fun, isFun)
     this.out = true // means "outdated"
     this.cre = new CompRec(this)
   }
@@ -236,7 +236,7 @@ export class CompPh extends LazyCompPh {
 
 export class CompRec extends Moebius {
   subTo(obs) {
-    valid(obs, isObs)
+    req(obs, isObs)
     this.new.add(obs)
     if (this.ref.size) {
       this.add(obs)
@@ -281,9 +281,9 @@ export function ctxSub(obs) {
 }
 
 export function mut(tar, src) {
-  valid(tar, isStruct)
+  req(tar, isStruct)
   if (!src) return tar
-  valid(src, isStruct)
+  req(src, isStruct)
 
   sch.pause()
   try {
@@ -294,7 +294,7 @@ export function mut(tar, src) {
 }
 
 export function priv(ref, key, val) {
-  Object.defineProperty(ref, valid(key, isKey), {
+  Object.defineProperty(ref, req(key, isKey), {
     value: val,
     writable: true,
     configurable: true,
@@ -303,12 +303,12 @@ export function priv(ref, key, val) {
 }
 
 export function privs(ref, vals) {
-  valid(vals, isStruct)
+  req(vals, isStruct)
   for (const key in vals) priv(ref, key, vals[key])
 }
 
 export function pub(ref, key, val) {
-  Object.defineProperty(ref, valid(key, isKey), {
+  Object.defineProperty(ref, req(key, isKey), {
     value: val,
     writable: true,
     configurable: true,
@@ -317,35 +317,57 @@ export function pub(ref, key, val) {
 }
 
 export function pubs(ref, vals) {
-  valid(vals, isStruct)
+  req(vals, isStruct)
   for (const key in vals) pub(ref, key, vals[key])
 }
 
 export function bind(ref, ...funs) {
-  funs.forEach(bindTo, valid(ref, isComplex))
+  funs.forEach(bindTo, req(ref, isComplex))
 }
 
 function bindTo(fun) {
-  valid(fun, isFun)
+  req(fun, isFun)
   if (!fun.name) throw Error(`can't bind anon function ${fun}`)
   priv(this, fun.name, fun.bind(this))
 }
 
 export function bindAll(ref) {
-  bindAllFrom(ref, Object.getPrototypeOf(ref))
+  bindFrom(ref, Object.getPrototypeOf(ref))
 }
 
-function bindAllFrom(ref, proto) {
-  if (!proto || proto === Object.prototype) return
-  const descs = Object.getOwnPropertyDescriptors(proto)
+function bindFrom(ref, proto) {
+  if (!proto || proto === root) return
+  each(descs(proto), bindAt, ref)
+  bindFrom(ref, Object.getPrototypeOf(proto))
+}
 
-  for (const key in descs) {
-    if (key === 'constructor' || hasOwn(ref, key)) continue
-    const {value} = descs[key]
-    if (isFun(value)) priv(ref, key, value.bind(ref))
-  }
+function bindAt(desc, key, ref) {
+  if (key === 'constructor' || hasOwn(ref, key)) return
+  const {value} = desc
+  if (isFun(value)) priv(ref, key, value.bind(ref))
+}
 
-  bindAllFrom(ref, Object.getPrototypeOf(proto))
+export function lazy(cls) {
+  req(cls, isCls)
+  const proto = cls.prototype
+  each(descs(proto), lazyAt, proto)
+}
+
+function lazyAt({get, set, enumerable, configurable}, key, proto) {
+  if (!get || set || !configurable) return
+
+  Object.defineProperty(proto, key, {
+    get: function lazyGet() {
+      const val = get.call(this)
+      pub(this, key, val)
+      return val
+    },
+    set: function lazySet(val) {
+      pub(this, key, val)
+    },
+    enumerable,
+    configurable: true,
+  })
 }
 
 export function paused(fun, ...args) {
@@ -402,7 +424,7 @@ function phDeinit() {
 }
 
 export function deinitAll(ref) {
-  valid(ref, isComplex)
+  req(ref, isComplex)
   for (const key in ref) if (ownEnum(ref, key)) deinit(ref[key])
 }
 
@@ -431,7 +453,7 @@ function schFlush(obs) {
 }
 
 export function hasHidden(val, key) {
-  valid(key, isKey)
+  req(key, isKey)
   return isComplex(val) && hidden(val, key)
 }
 
@@ -440,21 +462,28 @@ function hidden(val, key) {
 }
 
 export function hasOwn(val, key) {
-  valid(key, isKey)
+  req(key, isKey)
   return isComplex(val) && own(val, key)
 }
 
 function own(val, key) {
-  return Object.prototype.hasOwnProperty.call(val, key)
+  return root.hasOwnProperty.call(val, key)
 }
 
 export function hasOwnEnum(val, key) {
-  valid(key, isKey)
+  req(key, isKey)
   return isComplex(val) && ownEnum(val, key)
 }
 
 export function ownEnum(val, key) {
-  return Object.prototype.propertyIsEnumerable.call(val, key)
+  return root.propertyIsEnumerable.call(val, key)
+}
+
+const root = Object.prototype
+const descs = Object.getOwnPropertyDescriptors
+
+function each(vals, fun, ...args) {
+  for (const key in vals) fun(vals[key], key, ...args)
 }
 
 function isFun(val) {return typeof val === 'function'}
@@ -464,8 +493,9 @@ function isStruct(val) {return isObj(val) && !Array.isArray(val) }
 function isKey(val) {return isStr(val) || isSym(val) }
 function isStr(val) {return typeof val === 'string'}
 function isSym(val) {return typeof val === 'symbol'}
+export function isCls(val) {return isFun(val) && typeof val.prototype === 'object'}
 
-function valid(val, test) {
+function req(val, test) {
   if (!test(val)) throw Error(`expected ${show(val)} to satisfy test ${show(test)}`)
   return val
 }
