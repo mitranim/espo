@@ -1,11 +1,11 @@
 /* Primary API */
 
-export function isDe(val) {return isComplex(val) && 'deinit' in val}
-export function isObs(val) {return isDe(val) && isTrig(val) && 'sub' in val && 'unsub' in val}
-export function isTrig(val) {return isComplex(val) && 'trig' in val}
+export function isDe(val) {return isComplex(val) && hasMeth(val, `deinit`)}
+export function isObs(val) {return isDe(val) && isTrig(val) && hasMeth(val, `sub`) && hasMeth(val, `unsub`)}
+export function isTrig(val) {return isComplex(val) && hasMeth(val, `trig`)}
 export function isSub(val) {return isFun(val) || isTrig(val)}
-export function isSubber(val) {return isFun(val) || (isComplex(val) && 'subTo' in val)}
-export function isRunTrig(val) {return isComplex(val) && 'run' in val && isTrig(val)}
+export function isSubber(val) {return isFun(val) || (isComplex(val) && hasMeth(val, `subTo`))}
+export function isRunTrig(val) {return isComplex(val) && hasMeth(val, `run`) && isTrig(val)}
 
 export function ph(ref) {return ref ? ref[keyPh] : undefined}
 export function self(ref) {return ref ? ref[keySelf] || ref : undefined}
@@ -25,8 +25,8 @@ export function deinit(val) {if (isDe(val)) val.deinit()}
 /* Secondary API (lower level, semi-undocumented) */
 
 export const ctx = {subber: undefined}
-export const keyPh = Symbol.for('ph')
-export const keySelf = Symbol.for('self')
+export const keyPh = Symbol.for(`ph`)
+export const keySelf = Symbol.for(`self`)
 
 export class Rec extends Set {
   constructor() {
@@ -107,13 +107,13 @@ export class Loop extends Rec {
 
 export class DeinitPh {
   has(tar, key) {
-    return key in tar || key === keyPh || key === keySelf || key === 'deinit'
+    return key in tar || key === keyPh || key === keySelf || key === `deinit`
   }
 
   get(tar, key) {
     if (key === keyPh) return this
     if (key === keySelf) return tar
-    if (key === 'deinit') return dePhDeinit
+    if (key === `deinit`) return dePhDeinit
     return tar[key]
   }
 
@@ -175,7 +175,7 @@ export class ObsPh extends ObsBase {
   get(tar, key) {
     if (key === keyPh) return this
     if (key === keySelf) return tar
-    if (key === 'deinit') return phDeinit
+    if (key === `deinit`) return phDeinit
     if (!hidden(tar, key)) ctxSub(this)
     return tar[key]
   }
@@ -191,11 +191,13 @@ export class ObsPh extends ObsBase {
   }
 
   onInit() {
-    if (this.pro && 'onInit' in this.pro) this.pro.onInit()
+    const {pro} = this
+    if (hasMeth(pro, `onInit`)) pro.onInit()
   }
 
   onDeinit() {
-    if (this.pro && 'onDeinit' in this.pro) this.pro.onDeinit()
+    const {pro} = this
+    if (hasMeth(pro, `onDeinit`)) pro.onDeinit()
   }
 }
 
@@ -210,7 +212,7 @@ export class LazyCompPh extends ObsPh {
   get(tar, key) {
     if (key === keyPh) return this
     if (key === keySelf) return tar
-    if (key === 'deinit') return phDeinit
+    if (key === `deinit`) return phDeinit
 
     if (!hidden(tar, key)) {
       ctxSub(this)
@@ -342,12 +344,12 @@ function bindFrom(ref, proto) {
 }
 
 function bindAt(desc, key, ref) {
-  if (key === 'constructor' || hasOwn(ref, key)) return
+  if (key === `constructor` || hasOwn(ref, key)) return
   const {value} = desc
   if (isFun(value)) priv(ref, key, value.bind(ref))
 }
 
-export function lazy(cls) {
+export function lazyGet(cls) {
   req(cls, isCls)
   const proto = cls.prototype
   each(descs(proto), lazyAt, proto)
@@ -486,14 +488,16 @@ function each(vals, fun, ...args) {
   for (const key in vals) fun(vals[key], key, ...args)
 }
 
-function isFun(val) {return typeof val === 'function'}
+function isFun(val) {return typeof val === `function`}
 function isComplex(val) {return isObj(val) || isFun(val) }
-function isObj(val) {return val !== null && typeof val === 'object'}
+function isObj(val) {return val !== null && typeof val === `object`}
 function isStruct(val) {return isObj(val) && !Array.isArray(val) }
 function isKey(val) {return isStr(val) || isSym(val) }
-function isStr(val) {return typeof val === 'string'}
-function isSym(val) {return typeof val === 'symbol'}
-export function isCls(val) {return isFun(val) && typeof val.prototype === 'object'}
+function isStr(val) {return typeof val === `string`}
+function isSym(val) {return typeof val === `symbol`}
+function isCls(val) {return isFun(val) && typeof val.prototype === `object`}
+function isComp(val) {return isObj(val) || isFun(val)}
+function hasMeth(val, key) {return isComp(val) && key in val && isFun(val[key])}
 
 function req(val, test) {
   if (!test(val)) throw Error(`expected ${show(val)} to satisfy test ${show(test)}`)

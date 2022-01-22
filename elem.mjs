@@ -15,6 +15,7 @@ to support implicit reactivity with Espo observables. Usage:
     init() {void obs.val}
     reinit() {this.textContent = obs.val}
   }
+  ese.rec(Elem)
 
 Accessing any observables in `.init` and `.reinit` automatically subscribes the
 element to them. Observables call the element's `.trig` (standard Espo
@@ -24,14 +25,14 @@ initial DOM update.
 */
 export function rec(cls) {
   const {prototype: proto} = cls
-  const {init, reinit} = proto
 
-  if (!isFun(init)) throw Error(`class provided to "rec" must have an "init" method`)
-  if (!isFun(reinit)) throw Error(`class provided to "rec" must have a "reinit" method`)
+  if (!isFun(proto.reinit)) {
+    throw TypeError(`class provided to "rec" must have a "reinit" method`)
+  }
 
-  mixin(proto, 'connectedCallback', espoConnectedCallback)
-  mixin(proto, 'disconnectedCallback', espoDisconnectedCallback)
-  mixin(proto, 'trig', espoTrig)
+  mixin(proto, `connectedCallback`, espoConnectedCallback)
+  mixin(proto, `disconnectedCallback`, espoDisconnectedCallback)
+  mixin(proto, `trig`, espoTrig)
 }
 
 function espoConnectedCallback() {
@@ -48,7 +49,8 @@ const inited = new WeakSet()
 function espoTrig() {
   if (!inited.has(this)) {
     inited.add(this)
-    this.init()
+    if (isFun(this.init)) this.init()
+    else this.reinit()
   }
   else {
     this.reinit()
@@ -69,4 +71,4 @@ function mixin(proto, key, fun) {
   })
 }
 
-function isFun(val) {return typeof val === 'function'}
+function isFun(val) {return typeof val === `function`}
