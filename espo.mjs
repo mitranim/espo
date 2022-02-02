@@ -353,6 +353,7 @@ export function lazyGet(cls) {
   req(cls, isCls)
   const proto = cls.prototype
   each(descs(proto), lazyAt, proto)
+  return cls
 }
 
 function lazyAt({get, set, enumerable, configurable}, key, proto) {
@@ -488,19 +489,26 @@ function each(vals, fun, ...args) {
   for (const key in vals) fun(vals[key], key, ...args)
 }
 
-function isFun(val) {return typeof val === `function`}
-function isComplex(val) {return isObj(val) || isFun(val) }
-function isObj(val) {return val !== null && typeof val === `object`}
-function isStruct(val) {return isObj(val) && !Array.isArray(val) }
-function isKey(val) {return isStr(val) || isSym(val) }
-function isStr(val) {return typeof val === `string`}
-function isSym(val) {return typeof val === `symbol`}
-function isCls(val) {return isFun(val) && typeof val.prototype === `object`}
-function isComp(val) {return isObj(val) || isFun(val)}
-function hasMeth(val, key) {return isComp(val) && key in val && isFun(val[key])}
+export function isFun(val) {return typeof val === `function`}
+export function isComplex(val) {return isObj(val) || isFun(val) }
+export function isObj(val) {return val !== null && typeof val === `object`}
+export function isStruct(val) {return isObj(val) && !Array.isArray(val) }
+export function isKey(val) {return isStr(val) || isSym(val) }
+export function isStr(val) {return typeof val === `string`}
+export function isSym(val) {return typeof val === `symbol`}
+export function isCls(val) {return isFun(val) && typeof val.prototype === `object`}
+export function isComp(val) {return isObj(val) || isFun(val)}
+export function hasMeth(val, key) {return isComp(val) && key in val && isFun(val[key])}
 
-function req(val, test) {
+export function req(val, test) {
   if (!test(val)) throw Error(`expected ${show(val)} to satisfy test ${show(test)}`)
+  return val
+}
+
+export function reqInst(val, cls) {
+  if (!(val instanceof cls)) {
+    throw TypeError(`expected ${show(val)} to be an instance of ${show(cls)}`)
+  }
   return val
 }
 

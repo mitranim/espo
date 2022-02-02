@@ -1,168 +1,190 @@
 /*
 TODO more tests:
 
-  * es.mut
-  * es.paused
-  * es.deinitAll
+  * e.mut
+  * e.paused
+  * e.deinitAll
   * all classes
 */
 
-import {
-  assertStrictEquals as is,
-  assertNotStrictEquals as isNot,
-  assertEquals as eq,
-} from 'https://deno.land/std@0.100.0/testing/asserts.ts'
+import 'https://cdn.jsdelivr.net/npm/@mitranim/test@0.1.1/emptty.mjs'
+import * as t from 'https://cdn.jsdelivr.net/npm/@mitranim/test@0.1.1/test.mjs'
+import * as e from '../espo.mjs'
 
-import * as es from '../espo.mjs'
+const cli = t.Args.os()
+t.conf.testFilterFrom(cli.get(`run`))
+if (cli.bool(`v`)) t.conf.testRep = t.conf.benchRep
+
+/* Utils */
 
 function nop() {}
 function id(val) {return val}
 
-class Tracker {
-  constructor() {
-    this.tr = 0
-    this.de = 0
-    Object.defineProperty(this, 'trig', {value: this.trig.bind(this)})
-    Object.defineProperty(this, 'deinit', {value: this.deinit.bind(this)})
+class Track {
+  constructor(tr, de) {
+    // Counts trigger calls.
+    this.tr = t.onlyInt(tr) ?? 0
+
+    // Counts deinit calls.
+    this.de = t.onlyInt(de) ?? 0
+
+    // Bind methods, keeping these properties non-enumerable.
+    Object.defineProperty(this, `trig`, {value: this.trig.bind(this)})
+    Object.defineProperty(this, `deinit`, {value: this.deinit.bind(this)})
   }
 
   trig() {this.tr++}
   deinit() {this.de++}
+  toString() {return `new Track(${this.tr}, ${this.de})`}
+  get [Symbol.toStringTag]() {return this.constructor.name}
 }
 
-void function test_isDe() {
-  is(es.isDe(),                                false)
-  is(es.isDe({}),                              false)
-  is(es.isDe(new Tracker()),                   true)
-  is(es.isDe(Object.create(new Tracker())),    true)
-  is(es.isDe(Object.assign(deinit, {deinit})), true)
+/* Tests */
+
+t.test(function test_isDe() {
+  t.no(e.isDe())
+  t.no(e.isDe({}))
+
+  t.ok(e.isDe(new Track()))
+  t.ok(e.isDe(Object.create(new Track())))
+  t.ok(e.isDe(Object.assign(deinit, {deinit})))
 
   function deinit() {}
-}()
+})
 
-void function test_isObs() {
-  is(es.isObs(),              false)
-  is(es.isObs({}),            false)
-  is(es.isObs(new Tracker()), false)
-  is(es.isObs({
+t.test(function test_isObs() {
+  t.no(e.isObs())
+  t.no(e.isObs({}))
+  t.no(e.isObs(new Track()))
+
+  t.ok(e.isObs({
     sub() {},
     unsub() {},
     trig() {},
     deinit() {},
-  }), true)
-}()
+  }))
+})
 
-void function test_isTrig() {
-  is(es.isTrig(),                           false)
-  is(es.isTrig({}),                         false)
-  is(es.isTrig({trig() {}}),                true)
-  is(es.isTrig(Object.create({trig() {}})), true)
-  is(es.isTrig(nop),                        false)
-}()
+t.test(function test_isTrig() {
+  t.no(e.isTrig())
+  t.no(e.isTrig({}))
+  t.no(e.isTrig(nop))
 
-void function test_isSub() {
-  is(es.isSub(),                           false)
-  is(es.isSub({}),                         false)
-  is(es.isSub({trig() {}}),                true)
-  is(es.isSub(Object.create({trig() {}})), true)
-  is(es.isSub(nop),                        true)
-}()
+  t.ok(e.isTrig({trig() {}}))
+  t.ok(e.isTrig(Object.create({trig() {}})))
+})
 
-void function test_hasHidden() {
-  is(es.hasHidden(undefined,                   'key'), false)
-  is(es.hasHidden({},                          'key'), false)
-  is(es.hasHidden({key: 'val'},                'key'), false)
-  is(es.hasHidden(Object.create({key: 'val'}), 'key'), true)
+t.test(function test_isSub() {
+  t.no(e.isSub())
+  t.no(e.isSub({}))
+
+  t.ok(e.isSub({trig() {}}))
+  t.ok(e.isSub(Object.create({trig() {}})))
+  t.ok(e.isSub(nop))
+})
+
+t.test(function test_hasHidden() {
+  t.no(e.hasHidden(undefined,                   `key`))
+  t.no(e.hasHidden({},                          `key`))
+  t.no(e.hasHidden({key: `val`},                `key`))
+
+  t.ok(e.hasHidden(Object.create({key: `val`}), `key`))
 
   {
     const ref = {}
-    Object.defineProperty(ref, 'key', {enumerable: false, value: 'val'})
-    is(es.hasHidden(ref, 'key'), true)
+    Object.defineProperty(ref, `key`, {enumerable: false, value: `val`})
+    t.ok(e.hasHidden(ref, `key`))
   }
 
   {
     const ref = new class {get key() {return undefined}}()
-    is(es.hasHidden(ref, 'key'), true)
+    t.ok(e.hasHidden(ref, `key`))
   }
-}()
+})
 
-void function test_hasOwnEnum() {
-  is(es.hasOwnEnum(undefined,                   'key'), false)
-  is(es.hasOwnEnum({},                          'key'), false)
-  is(es.hasOwnEnum({key: 'val'},                'key'), true)
-  is(es.hasOwnEnum(Object.create({key: 'val'}), 'key'), false)
+t.test(function test_hasOwnEnum() {
+  t.no(e.hasOwnEnum(undefined,                   `key`))
+  t.no(e.hasOwnEnum({},                          `key`))
+  t.no(e.hasOwnEnum(Object.create({key: `val`}), `key`))
 
-  const ref = {}
-  Object.defineProperty(ref, 'key', {enumerable: false, value: 'val'})
-  is(es.hasOwnEnum(ref, 'key'), false)
-}()
-
-void function test_hasOwn() {
-  is(es.hasOwn(undefined,                   'key'), false)
-  is(es.hasOwn({},                          'key'), false)
-  is(es.hasOwn({key: 'val'},                'key'), true)
-  is(es.hasOwn(Object.create({key: 'val'}), 'key'), false)
-}()
-
-void function test_hasOwnEnum() {
-  is(es.hasOwnEnum(undefined,                   'key'), false)
-  is(es.hasOwnEnum({},                          'key'), false)
-  is(es.hasOwnEnum({key: 'val'},                'key'), true)
-  is(es.hasOwnEnum(Object.create({key: 'val'}), 'key'), false)
+  t.ok(e.hasOwnEnum({key: `val`},                `key`))
 
   const ref = {}
-  Object.defineProperty(ref, 'key', {enumerable: false, value: 'val'})
-  is(es.hasOwnEnum(ref, 'key'), false)
-}()
+  Object.defineProperty(ref, `key`, {enumerable: false, value: `val`})
+  t.no(e.hasOwnEnum(ref, `key`))
+})
 
-void function test_deinit() {
-  es.deinit()
-  es.deinit({})
+t.test(function test_hasOwn() {
+  t.no(e.hasOwn(undefined,                   `key`))
+  t.no(e.hasOwn({},                          `key`))
+  t.no(e.hasOwn(Object.create({key: `val`}), `key`))
 
-  const counter = new Tracker()
-  is(es.deinit(counter), undefined)
-  is(counter.de, 1)
-}()
+  t.ok(e.hasOwn({key: `val`},                `key`))
+})
 
-void function test_priv() {
-  void function test_new_property() {
+t.test(function test_hasOwnEnum() {
+  t.no(e.hasOwnEnum(undefined,                   `key`))
+  t.no(e.hasOwnEnum({},                          `key`))
+  t.no(e.hasOwnEnum(Object.create({key: `val`}), `key`))
+
+  t.ok(e.hasOwnEnum({key: `val`},                `key`))
+
+  const ref = {}
+  Object.defineProperty(ref, `key`, {enumerable: false, value: `val`})
+  t.no(e.hasOwnEnum(ref, `key`))
+})
+
+t.test(function test_deinit() {
+  e.deinit()
+  e.deinit({})
+
+  const counter = new Track()
+  t.is(e.deinit(counter), undefined)
+  t.eq(counter, new Track(0, 1))
+})
+
+t.test(function test_priv() {
+  t.test(function test_new_property() {
     const ref = {one: 10}
-    es.priv(ref, 'two', 20)
+    e.priv(ref, `two`, 20)
 
-    eq(Object.getOwnPropertyDescriptor(ref, 'two'), {
+    t.eq(Object.getOwnPropertyDescriptor(ref, `two`), {
       value: 20,
       enumerable: false,
       writable: true,
       configurable: true,
     })
 
-    eq(ref, {one: 10})
-    eq(Object.keys(ref), ['one'])
-    eq(Object.getOwnPropertyNames(ref), ['one', 'two'])
-    is(ref.one, 10)
-    is(ref.two, 20)
-    is(es.hasOwn(ref, 'one'),     true)
-    is(es.hasOwnEnum(ref, 'one'), true)
-    is(es.hasOwn(ref, 'two'),     true)
-    is(es.hasOwnEnum(ref, 'two'), false)
-  }()
+    t.eq(ref, {one: 10})
+    t.eq(Object.keys(ref), [`one`])
+    t.eq(Object.getOwnPropertyNames(ref), [`one`, `two`])
 
-  void function test_redefine_property() {
+    t.is(ref.one, 10)
+    t.is(ref.two, 20)
+
+    t.no(e.hasOwnEnum(ref, `two`))
+
+    t.ok(e.hasOwn(ref, `one`))
+    t.ok(e.hasOwnEnum(ref, `one`))
+    t.ok(e.hasOwn(ref, `two`))
+  })
+
+  t.test(function test_redefine_property() {
     const ref = {one: 10}
-    es.priv(ref, 'one', 20)
+    e.priv(ref, `one`, 20)
 
-    eq(ref, {})
-    eq(Object.keys(ref), [])
-    eq(Object.getOwnPropertyNames(ref), ['one'])
-    is(ref.one, 20)
-  }()
-}()
+    t.eq(ref, {})
+    t.eq(Object.keys(ref), [])
+    t.eq(Object.getOwnPropertyNames(ref), [`one`])
+    t.is(ref.one, 20)
+  })
+})
 
-void function test_privs() {
+t.test(function test_privs() {
   const ref = {one: 10, get two() {return 40}}
-  es.privs(ref, {two: 20, three: 30})
+  e.privs(ref, {two: 20, three: 30})
 
-  eq(Object.getOwnPropertyDescriptors(ref), {
+  t.eq(Object.getOwnPropertyDescriptors(ref), {
     one: {
       value: 10,
       enumerable: true,
@@ -183,75 +205,78 @@ void function test_privs() {
     },
   })
 
-  eq(ref, {one: 10})
-  eq(Object.keys(ref), ['one'])
-  eq(Object.getOwnPropertyNames(ref), ['one', 'two', 'three'])
-  is(ref.one, 10)
-  is(ref.two, 20)
-  is(ref.three, 30)
-  is(es.hasOwn(ref, 'one'),       true)
-  is(es.hasOwnEnum(ref, 'one'),   true)
-  is(es.hasOwn(ref, 'two'),       true)
-  is(es.hasOwnEnum(ref, 'two'),   false)
-  is(es.hasOwn(ref, 'three'),     true)
-  is(es.hasOwnEnum(ref, 'three'), false)
-}()
+  t.eq(ref, {one: 10})
+  t.eq(Object.keys(ref), [`one`])
+  t.eq(Object.getOwnPropertyNames(ref), [`one`, `two`, `three`])
+  t.is(ref.one, 10)
+  t.is(ref.two, 20)
+  t.is(ref.three, 30)
 
-void function test_pub() {
-  void function test_new_property() {
+  t.no(e.hasOwnEnum(ref, `two`))
+  t.no(e.hasOwnEnum(ref, `three`))
+
+  t.ok(e.hasOwn(ref, `one`))
+  t.ok(e.hasOwnEnum(ref, `one`))
+  t.ok(e.hasOwn(ref, `two`))
+  t.ok(e.hasOwn(ref, `three`))
+})
+
+t.test(function test_pub() {
+  t.test(function test_new_property() {
     const ref = {one: 10}
-    es.priv(ref, 'three', 30)
-    es.pub(ref, 'two', 20)
+    e.priv(ref, `three`, 30)
+    e.pub(ref, `two`, 20)
 
-    eq(Object.getOwnPropertyDescriptor(ref, 'two'), {
+    t.eq(Object.getOwnPropertyDescriptor(ref, `two`), {
       value: 20,
       enumerable: true,
       writable: true,
       configurable: true,
     })
 
-    eq(ref, {one: 10, two: 20})
-    eq(Object.keys(ref), ['one', 'two'])
-    eq(Object.getOwnPropertyNames(ref), ['one', 'three', 'two'])
+    t.eq(ref, {one: 10, two: 20})
+    t.eq(Object.keys(ref), [`one`, `two`])
+    t.eq(Object.getOwnPropertyNames(ref), [`one`, `three`, `two`])
 
-    is(ref.one, 10)
-    is(ref.two, 20)
-    is(ref.three, 30)
+    t.is(ref.one, 10)
+    t.is(ref.two, 20)
+    t.is(ref.three, 30)
 
-    is(es.hasOwn(ref, 'one'),     true)
-    is(es.hasOwnEnum(ref, 'one'), true)
-    is(es.hasOwn(ref, 'two'),     true)
-    is(es.hasOwnEnum(ref, 'two'), true)
-    is(es.hasOwn(ref, 'two'),     true)
-    is(es.hasOwnEnum(ref, 'three'), false)
-  }()
+    t.no(e.hasOwnEnum(ref, `three`))
 
-  void function test_redefine_property() {
+    t.ok(e.hasOwn(ref, `one`))
+    t.ok(e.hasOwnEnum(ref, `one`))
+    t.ok(e.hasOwn(ref, `two`))
+    t.ok(e.hasOwnEnum(ref, `two`))
+    t.ok(e.hasOwn(ref, `two`))
+  })
+
+  t.test(function test_redefine_property() {
     const ref = {one: 10}
-    es.priv(ref, 'two', 20)
-    es.pub(ref, 'two', 30)
+    e.priv(ref, `two`, 20)
+    e.pub(ref, `two`, 30)
 
-    eq(Object.getOwnPropertyDescriptor(ref, 'two'), {
+    t.eq(Object.getOwnPropertyDescriptor(ref, `two`), {
       value: 30,
       enumerable: true,
       writable: true,
       configurable: true,
     })
 
-    eq(ref, {one: 10, two: 30})
-    eq(Object.keys(ref), ['one', 'two'])
-    eq(Object.getOwnPropertyNames(ref), ['one', 'two'])
-    is(ref.one, 10)
-    is(ref.two, 30)
-  }()
-}()
+    t.eq(ref, {one: 10, two: 30})
+    t.eq(Object.keys(ref), [`one`, `two`])
+    t.eq(Object.getOwnPropertyNames(ref), [`one`, `two`])
+    t.is(ref.one, 10)
+    t.is(ref.two, 30)
+  })
+})
 
-void function test_pubs() {
+t.test(function test_pubs() {
   const ref = {one: 10, get two() {return 40}}
-  es.priv(ref, 'three', 50)
-  es.pubs(ref, {two: 20, three: 30})
+  e.priv(ref, `three`, 50)
+  e.pubs(ref, {two: 20, three: 30})
 
-  eq(Object.getOwnPropertyDescriptors(ref), {
+  t.eq(Object.getOwnPropertyDescriptors(ref), {
     one: {
       value: 10,
       enumerable: true,
@@ -272,165 +297,166 @@ void function test_pubs() {
     },
   })
 
-  eq(ref, {one: 10, two: 20, three: 30})
-  is(ref.one, 10)
-  is(ref.two, 20)
-  is(ref.three, 30)
-  is(es.hasOwn(ref, 'one'),       true)
-  is(es.hasOwnEnum(ref, 'one'),   true)
-  is(es.hasOwn(ref, 'two'),       true)
-  is(es.hasOwnEnum(ref, 'two'),   true)
-  is(es.hasOwn(ref, 'three'),     true)
-  is(es.hasOwnEnum(ref, 'three'), true)
-}()
+  t.eq(ref, {one: 10, two: 20, three: 30})
+  t.is(ref.one, 10)
+  t.is(ref.two, 20)
+  t.is(ref.three, 30)
 
-void function test_bind() {
+  t.ok(e.hasOwn(ref, `one`))
+  t.ok(e.hasOwnEnum(ref, `one`))
+  t.ok(e.hasOwn(ref, `two`))
+  t.ok(e.hasOwnEnum(ref, `two`))
+  t.ok(e.hasOwn(ref, `three`))
+  t.ok(e.hasOwnEnum(ref, `three`))
+})
+
+t.test(function test_bind() {
   const ref = new class {
     one() {return this}
     two() {return this}
   }()
 
-  es.bind(ref, ref.one, ref.two)
-  eq(Object.keys(ref), [])
-  eq(Object.getOwnPropertyNames(ref), ['one', 'two'])
+  e.bind(ref, ref.one, ref.two)
+  t.eq(Object.keys(ref), [])
+  t.eq(Object.getOwnPropertyNames(ref), [`one`, `two`])
 
   const {one, two} = ref
-  is(one(), ref)
-  is(two(), ref)
-}()
+  t.is(one(), ref)
+  t.is(two(), ref)
+})
 
-void function test_bindAll() {
+t.test(function test_bindAll() {
   class Inner {
-    methInner() {return [this, 'meth inner']}
-    methOverride() {return [this, 'methOverride inner']}
+    methInner() {return [this, `meth inner`]}
+    methOverride() {return [this, `methOverride inner`]}
   }
-  Inner.prototype.innerNonMethod = 'inner non method'
-  Inner.prototype.funOverride = function funInner() {return [this, 'funOverride inner']}
+  Inner.prototype.innerNonMethod = `inner non method`
+  Inner.prototype.funOverride = function funInner() {return [this, `funOverride inner`]}
 
   class Outer extends Inner {
-    methOverride() {return [this, 'methOverride outer']}
-    methOuter() {return [this, 'meth outer']}
+    methOverride() {return [this, `methOverride outer`]}
+    methOuter() {return [this, `meth outer`]}
   }
-  Outer.prototype.outerNonMethod = 'outer non method'
-  Outer.prototype.funOverride = function funOuter() {return [this, 'funOverride outer']}
+  Outer.prototype.outerNonMethod = `outer non method`
+  Outer.prototype.funOverride = function funOuter() {return [this, `funOverride outer`]}
 
   const ref = new Outer()
-  es.bindAll(ref)
+  e.bindAll(ref)
 
-  eq(Object.keys(ref), [])
+  t.eq(Object.keys(ref), [])
 
-  eq(
+  t.eq(
     Object.getOwnPropertyNames(ref).sort(),
-    ['methInner', 'methOverride', 'methOuter', 'funOverride'].sort(),
+    [`methInner`, `methOverride`, `methOuter`, `funOverride`].sort(),
   )
 
   const {methInner, methOverride, methOuter, funOverride} = ref
 
-  is(methInner()[0], ref)
-  is(methInner()[1], 'meth inner')
+  t.is(methInner()[0], ref)
+  t.is(methInner()[1], `meth inner`)
 
-  is(methOverride()[0], ref)
-  is(methOverride()[1], 'methOverride outer')
+  t.is(methOverride()[0], ref)
+  t.is(methOverride()[1], `methOverride outer`)
 
-  is(methOuter()[0], ref)
-  is(methOuter()[1], 'meth outer')
+  t.is(methOuter()[0], ref)
+  t.is(methOuter()[1], `meth outer`)
 
-  is(funOverride()[0], ref)
-  is(funOverride()[1], 'funOverride outer')
-}()
+  t.is(funOverride()[0], ref)
+  t.is(funOverride()[1], `funOverride outer`)
+})
 
-void function test_lazyGet() {
-  void function test_lazyGet_only_ancestor() {
+t.test(function test_lazyGet() {
+  t.test(function test_lazyGet_only_ancestor() {
     const [Anc, Mid, Des] = testInitLazy()
-    es.lazyGet(Anc)
+    e.lazyGet(Anc)
 
     const ref = new Des()
-    eq(Object.keys(ref), [])
+    t.eq(Object.keys(ref), [])
 
-    is(ref.anc0, ref.anc0)
-    eq(Object.keys(ref), [`anc0`])
+    t.is(ref.anc0, ref.anc0)
+    t.eq(Object.keys(ref), [`anc0`])
 
-    is(ref.anc1, ref.anc1)
-    eq(Object.keys(ref), [`anc0`, `anc1`])
+    t.is(ref.anc1, ref.anc1)
+    t.eq(Object.keys(ref), [`anc0`, `anc1`])
 
-    isNot(ref.mid0, ref.mid0)
-    isNot(ref.mid1, ref.mid1)
+    t.isnt(ref.mid0, ref.mid0)
+    t.isnt(ref.mid1, ref.mid1)
 
-    isNot(ref.des0, ref.des0)
-    isNot(ref.des1, ref.des1)
+    t.isnt(ref.des0, ref.des0)
+    t.isnt(ref.des1, ref.des1)
 
     testClearPrototype(Anc, Mid, Des)
-  }()
+  })
 
-  void function test_lazyGet_only_descendant() {
+  t.test(function test_lazyGet_only_descendant() {
     const [Anc, Mid, Des] = testInitLazy()
-    es.lazyGet(Des)
+    e.lazyGet(Des)
 
     const ref = new Des()
-    eq(Object.keys(ref), [])
+    t.eq(Object.keys(ref), [])
 
-    isNot(ref.anc0, ref.anc0)
-    isNot(ref.anc1, ref.anc1)
+    t.isnt(ref.anc0, ref.anc0)
+    t.isnt(ref.anc1, ref.anc1)
 
-    isNot(ref.mid0, ref.mid0)
-    isNot(ref.mid1, ref.mid1)
+    t.isnt(ref.mid0, ref.mid0)
+    t.isnt(ref.mid1, ref.mid1)
 
-    is(ref.des0, ref.des0)
-    eq(Object.keys(ref), [`des0`])
+    t.is(ref.des0, ref.des0)
+    t.eq(Object.keys(ref), [`des0`])
 
-    is(ref.des1, ref.des1)
-    eq(Object.keys(ref), [`des0`, `des1`])
+    t.is(ref.des1, ref.des1)
+    t.eq(Object.keys(ref), [`des0`, `des1`])
 
     testClearPrototype(Anc, Mid, Des)
-  }()
+  })
 
-  void function test_lazyGet_all() {
+  t.test(function test_lazyGet_all() {
     const [Anc, Mid, Des] = testInitLazy()
-    es.lazyGet(Anc)
-    es.lazyGet(Mid)
-    es.lazyGet(Des)
+    e.lazyGet(Anc)
+    e.lazyGet(Mid)
+    e.lazyGet(Des)
 
     const ref = new Des()
-    eq(Object.keys(ref), [])
+    t.eq(Object.keys(ref), [])
 
-    is(ref.anc0, ref.anc0)
-    eq(Object.keys(ref), [`anc0`])
+    t.is(ref.anc0, ref.anc0)
+    t.eq(Object.keys(ref), [`anc0`])
 
-    is(ref.anc1, ref.anc1)
-    eq(Object.keys(ref), [`anc0`, `anc1`])
+    t.is(ref.anc1, ref.anc1)
+    t.eq(Object.keys(ref), [`anc0`, `anc1`])
 
-    is(ref.mid0, ref.mid0)
-    eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`])
+    t.is(ref.mid0, ref.mid0)
+    t.eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`])
 
-    is(ref.mid1, ref.mid1)
-    eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`])
+    t.is(ref.mid1, ref.mid1)
+    t.eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`])
 
-    is(ref.des0, ref.des0)
-    eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`, `des0`])
+    t.is(ref.des0, ref.des0)
+    t.eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`, `des0`])
 
-    is(ref.des1, ref.des1)
-    eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`, `des0`, `des1`])
+    t.is(ref.des1, ref.des1)
+    t.eq(Object.keys(ref), [`anc0`, `anc1`, `mid0`, `mid1`, `des0`, `des1`])
 
     testClearPrototype(Anc, Mid, Des)
-  }()
+  })
 
-  void function test_lazyGet_set() {
+  t.test(function test_lazyGet_set() {
     const [Anc, Mid, Des] = testInitLazy()
-    es.lazyGet(Anc)
+    e.lazyGet(Anc)
 
     const ref = new Des()
     const manual = Symbol(`manual`)
 
     ref.anc0 = manual
-    is(ref.anc0, manual)
-    eq(Object.keys(ref), [`anc0`])
+    t.is(ref.anc0, manual)
+    t.eq(Object.keys(ref), [`anc0`])
 
-    is(ref.anc1, ref.anc1)
-    eq(Object.keys(ref), [`anc0`, `anc1`])
+    t.is(ref.anc1, ref.anc1)
+    t.eq(Object.keys(ref), [`anc0`, `anc1`])
 
     testClearPrototype(Anc, Mid, Des)
-  }()
-}()
+  })
+})
 
 function testInitLazy() {
   class Anc {
@@ -453,88 +479,88 @@ function testInitLazy() {
 
 function testClearPrototype(...classes) {
   for (const cls of classes) {
-    eq(Object.keys(cls.prototype), [])
+    t.eq(Object.keys(cls.prototype), [])
   }
 }
 
-void function test_de() {
-  const ref    = es.de({})
-  const first  = new Tracker()
-  const second = new Tracker()
-  const third  = new Tracker()
+t.test(function test_de() {
+  const ref    = e.de({})
+  const first  = new Track()
+  const second = new Track()
+  const third  = new Track()
 
-  Object.defineProperty(ref, 'hidden', {value: third, enumerable: false})
+  Object.defineProperty(ref, `hidden`, {value: third, enumerable: false})
 
   ref.val = first
-  is(ref.val, first)
-  eq(ref, {val: {de: 0, tr: 0}})
+  t.is(ref.val, first)
+  t.eq(ref, {val: new Track(0, 0)})
 
   // Hide self-assign from linters.
   ref.val = id(ref.val)
-  is(ref.val, first)
-  eq(ref, {val: {de: 0, tr: 0}})
+  t.is(ref.val, first)
+  t.eq(ref, {val: new Track(0, 0)})
 
   ref.val = second
-  is(ref.val, second)
-  eq(ref, {val: {de: 0, tr: 0}})
-  eq(first, {de: 1, tr: 0})
+  t.is(ref.val, second)
+  t.eq(ref, {val: new Track(0, 0)})
+  t.eq(first, new Track(0, 1))
 
   ref.deinit()
-  is(ref.val, second)
-  eq(ref, {val: {de: 1, tr: 0}})
+  t.is(ref.val, second)
+  t.eq(ref, {val: new Track(0, 1)})
 
   delete ref.val
-  is(ref.val, undefined)
-  is(es.hasOwn(ref, 'val'), false)
-  eq(second, {de: 2, tr: 0})
+  t.is(ref.val, undefined)
+  t.is(e.hasOwn(ref, `val`), false)
+  t.eq(second, new Track(0, 2))
 
-  is(ref.hidden, third)
-  eq(third, {de: 0, tr: 0})
-}()
+  t.is(ref.hidden, third)
+  t.eq(third, new Track(0, 0))
+})
 
 // The test is rudimentary, maybe about 5% complete.
-void function test_obs() {
-  void function test_imperative() {
-    const ref = es.obs({})
-    const obs = es.ph(ref)
-    const first = new Tracker()
-    const second = new Tracker()
+t.test(function test_obs() {
+  t.test(function test_imperative() {
+    const ref = e.obs({})
+    const obs = e.ph(ref)
+    const first = new Track()
+    const second = new Track()
 
     obs.sub(first.trig)
     obs.sub(second.trig)
-    eq(first, {de: 0, tr: 0})
-    eq(second, {de: 0, tr: 0})
+    t.eq(first, new Track(0, 0))
+    t.eq(second, new Track(0, 0))
 
     obs.trig()
-    eq(first, {de: 0, tr: 1})
-    eq(second, {de: 0, tr: 1})
+    t.eq(first, new Track(1, 0))
+    t.eq(second, new Track(1, 0))
 
     // Implicit trigger.
     ref.val = 10
-    eq(first, {de: 0, tr: 2})
-    eq(second, {de: 0, tr: 2})
+    t.eq(first, new Track(2, 0))
+    t.eq(second, new Track(2, 0))
 
     // Rudimentary change detection prevents another trigger.
     ref.val = 10
-    eq(first, {de: 0, tr: 2})
-    eq(second, {de: 0, tr: 2})
+    t.eq(first, new Track(2, 0))
+    t.eq(second, new Track(2, 0))
 
     obs.unsub(first.trig)
-    eq(first, {de: 0, tr: 2})
-    eq(second, {de: 0, tr: 2})
+    t.eq(first, new Track(2, 0))
+    t.eq(second, new Track(2, 0))
 
     ref.val = 20
-    eq(first, {de: 0, tr: 2})
-    eq(second, {de: 0, tr: 3})
+    t.eq(first, new Track(2, 0))
+    t.eq(second, new Track(3, 0))
 
     ref.deinit()
-    eq(first, {de: 0, tr: 2})
-    eq(second, {de: 0, tr: 3})
+    t.eq(first, new Track(2, 0))
+    t.eq(second, new Track(3, 0))
 
     obs.trig()
-    eq(first, {de: 0, tr: 2})
-    eq(second, {de: 0, tr: 3})
-  }()
-}()
+    t.eq(first, new Track(2, 0))
+    t.eq(second, new Track(3, 0))
+  })
+})
 
-console.log('[test] ok')
+console.log(`[test] ok`)
