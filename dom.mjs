@@ -1,7 +1,11 @@
 import * as e from './espo.mjs'
 
+// Stubs to allow importing this module in non-browser environments.
+const E = typeof HTMLElement === `function` ? HTMLElement : Object
+const T = typeof Text === `function` ? Text : Object
+
 // Short for "reactive element". Automatically watches observables.
-export class RecElem extends HTMLElement {
+export class RecElem extends E {
   constructor() {
     super()
     this.loop = new e.Moebius(this)
@@ -21,7 +25,7 @@ export class RecElem extends HTMLElement {
 }
 
 // Short for "reactive text". Automatically watches observables.
-export class RecText extends Text {
+export class RecText extends T {
   constructor(val) {
     super(text(val))
     this.loop = new e.Moebius(this)

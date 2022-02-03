@@ -71,7 +71,7 @@ import * as es from 'espo'
 
 import * as es from './node_modules/espo/espo.mjs'
 
-import * as es from 'https://cdn.jsdelivr.net/npm/espo@0.8.0/espo.mjs'
+import * as es from 'https://cdn.jsdelivr.net/npm/espo@0.8.1/espo.mjs'
 ```
 
 ### Trichotomy of proxy/handler/target

@@ -1,29 +1,11 @@
 {
   "name": "espo",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Library for stateful and reactive programming: observables, ownership and lifetimes, automatic deinit, procedural reactivity. Lightweight alternative to MobX.",
   "type": "module",
   "main": "./espo.mjs",
-  "scripts": {
-    "prepublishOnly": "make prep"
-  },
-  "keywords": [
-    "reactive",
-    "reactivity",
-    "observable",
-    "ownership",
-    "lifetime",
-    "lifecycle",
-    "queue",
-    "atom",
-    "agent",
-    "rx",
-    "rxjs",
-    "mobx"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mitranim/espo.git"
-  },
+  "scripts": {"prepublishOnly": "make prep"},
+  "keywords": ["reactive", "reactivity", "observable", "ownership", "lifetime", "lifecycle", "queue", "atom", "agent", "rx", "rxjs", "mobx"],
+  "repository": {"type": "git", "url": "https://github.com/mitranim/espo.git"},
   "license": "Unlicense"
 }

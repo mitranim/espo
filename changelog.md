@@ -1,3 +1,7 @@
+## 0.8.1
+
+`dom.mjs` now can be imported in non-browser environments. When DOM is not available, the exported classes are subclasses of `Object`.
+
 ## 0.8.0
 
 No significant changes in `espo.mjs`.
