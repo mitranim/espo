@@ -1,3 +1,11 @@
+/*
+Optional adapter that enables implicit reactivity for custom DOM elements,
+along with a scheduling system for async batching of updates.
+Updates run hierarchically from ancestors to descendants.
+
+See examples in `readme.md`.
+*/
+
 import * as e from './espo.mjs'
 
 // Stubs to allow importing this module in non-browser environments.
@@ -56,7 +64,7 @@ export class FunText extends RecText {
 
 /*
 Node que used internally by `Sched`. Updates are scheduled by adding nodes to
-the que, and flushed together as a batch by calling `.flush()`. Nodes must
+the que, and flushed together as a batch by calling `.run()`. Nodes must
 implement interface `isUpdNode` by providing method `.upd()`. Reentrant flush
 is a nop.
 
@@ -66,22 +74,23 @@ with each other.
 export class Que extends Set {
   constructor() {
     super()
-    this.flushing = false
+    this.running = false
   }
 
   add(val) {return super.add(e.req(val, isUpdNode))}
 
-  flush() {
-    if (this.flushing) return
-    this.flushing = true
+  run() {
+    if (this.running) return this
+    this.running = true
 
     try {
       for (const val of this) if (val.isConnected) val.upd()
     }
     finally {
-      this.flushing = false
+      this.running = false
       this.clear()
     }
+    return this
   }
 
   get [Symbol.toStringTag]() {return this.constructor.name}
@@ -104,23 +113,17 @@ export class BaseTimer {
   }
 
   // Override in subclass.
-  initTimer() {}
-  deinitTimer() {}
+  timerInit() {}
+  timerDeinit() {}
 
-  run() {
-    try {this.ref.run()}
-    finally {this.unschedule()}
-  }
-
-  schedule() {
-    if (!this.id) this.id = this.initTimer(this.run)
-  }
+  run() {try {this.ref.run()} finally {this.unschedule()}}
+  schedule() {if (!this.id) this.id = this.timerInit(this.run)}
 
   unschedule() {
     const {id} = this
     if (id) {
       this.id = undefined
-      this.deinitTimer(id)
+      this.timerDeinit(id)
     }
   }
 
@@ -131,14 +134,14 @@ export class BaseTimer {
 
 // Default recommended timer.
 export class RofTimer extends BaseTimer {
-  initTimer(run) {return requestAnimationFrame(run)}
-  deinitTimer(id) {cancelAnimationFrame(id)}
+  timerInit(run) {return requestAnimationFrame(run)}
+  timerDeinit(id) {cancelAnimationFrame(id)}
 }
 
 // Fallback alternative to `requestAnimationFrame`.
 export class TimeoutTimer extends BaseTimer {
-  initTimer(run) {return setTimeout(run)}
-  deinitTimer(id) {clearTimeout(id)}
+  timerInit(run) {return setTimeout(run)}
+  timerDeinit(id) {clearTimeout(id)}
 }
 
 /*
@@ -158,7 +161,8 @@ export class Sched {
   // Called by timer. Can also be flushed manually.
   run() {
     this.unschedule()
-    for (const que of this.ques) if (que) que.flush()
+    for (const que of this.ques) if (que) que.run()
+    return this
   }
 
   add(val) {
@@ -171,8 +175,8 @@ export class Sched {
     return this.ques[depth] || (this.ques[depth] = new this.Que())
   }
 
-  schedule() {this.timer.schedule()}
-  unschedule() {this.timer.unschedule()}
+  schedule() {return this.timer.schedule(), this}
+  unschedule() {return this.timer.unschedule(), this}
   deinit() {this.unschedule()}
 
   get Timer() {return RofTimer}

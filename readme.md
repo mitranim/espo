@@ -71,7 +71,7 @@ import * as es from 'espo'
 
 import * as es from './node_modules/espo/espo.mjs'
 
-import * as es from 'https://cdn.jsdelivr.net/npm/espo@0.8.1/espo.mjs'
+import * as es from 'https://cdn.jsdelivr.net/npm/espo@0.8.2/espo.mjs'
 ```
 
 ### Trichotomy of proxy/handler/target
@@ -138,17 +138,18 @@ import * as ed from 'espo/dom.mjs'
 const one = es.obs({val: 10})
 const two = es.obs({val: 20})
 
-class Total extends ed.Rec {
-  // Runs on initialization and on observable triggers.
+class TotalElem extends ed.RecElem {
+  // Runs on initialization and when triggered by observables.
   run() {
     this.textContent = `current total: ${one.val + two.val}`
   }
 }
-customElements.define(`a-total`, Total)
+customElements.define(`a-total`, TotalElem)
 
 class TotalText extends ed.RecText {
   constructor() {super(), this.upd()}
 
+  // Runs on initialization and when triggered by observables.
   run() {
     this.textContent = `current total: ${one.val + two.val}`
   }

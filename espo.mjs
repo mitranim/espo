@@ -289,7 +289,7 @@ export function mut(tar, src) {
 
   sch.pause()
   try {
-    for (const key in src) tar[key] = src[key]
+    for (const key of keys(src)) tar[key] = src[key]
     return tar
   }
   finally {sch.resume()}
@@ -306,7 +306,7 @@ export function priv(ref, key, val) {
 
 export function privs(ref, vals) {
   req(vals, isStruct)
-  for (const key in vals) priv(ref, key, vals[key])
+  for (const key of keys(vals)) priv(ref, key, vals[key])
 }
 
 export function pub(ref, key, val) {
@@ -320,7 +320,7 @@ export function pub(ref, key, val) {
 
 export function pubs(ref, vals) {
   req(vals, isStruct)
-  for (const key in vals) pub(ref, key, vals[key])
+  for (const key of keys(vals)) pub(ref, key, vals[key])
 }
 
 export function bind(ref, ...funs) {
@@ -339,7 +339,8 @@ export function bindAll(ref) {
 
 function bindFrom(ref, proto) {
   if (!proto || proto === root) return
-  each(descs(proto), bindAt, ref)
+  const src = descs(proto)
+  for (const key of keys(src)) bindAt(src[key], key, ref)
   bindFrom(ref, Object.getPrototypeOf(proto))
 }
 
@@ -352,7 +353,8 @@ function bindAt(desc, key, ref) {
 export function lazyGet(cls) {
   req(cls, isCls)
   const proto = cls.prototype
-  each(descs(proto), lazyAt, proto)
+  const src = descs(proto)
+  for (const key of keys(src)) lazyAt(src[key], key, proto)
   return cls
 }
 
@@ -365,9 +367,7 @@ function lazyAt({get, set, enumerable, configurable}, key, proto) {
       pub(this, key, val)
       return val
     },
-    set: function lazySet(val) {
-      pub(this, key, val)
-    },
+    set: function lazySet(val) {pub(this, key, val)},
     enumerable,
     configurable: true,
   })
@@ -428,7 +428,7 @@ function phDeinit() {
 
 export function deinitAll(ref) {
   req(ref, isComplex)
-  for (const key in ref) if (ownEnum(ref, key)) deinit(ref[key])
+  for (const key of keys(ref)) deinit(ref[key])
 }
 
 function subTrig(val) {
@@ -485,14 +485,12 @@ export function ownEnum(val, key) {
 const root = Object.prototype
 const descs = Object.getOwnPropertyDescriptors
 
-function each(vals, fun, ...args) {
-  for (const key in vals) fun(vals[key], key, ...args)
-}
+function keys(val) {return Object.keys(req(val, isStruct))}
 
 export function isFun(val) {return typeof val === `function`}
-export function isComplex(val) {return isObj(val) || isFun(val) }
+export function isComplex(val) {return isObj(val) || isFun(val)}
 export function isObj(val) {return val !== null && typeof val === `object`}
-export function isStruct(val) {return isObj(val) && !Array.isArray(val) }
+export function isStruct(val) {return isObj(val) && !Array.isArray(val)}
 export function isKey(val) {return isStr(val) || isSym(val) }
 export function isStr(val) {return typeof val === `string`}
 export function isSym(val) {return typeof val === `symbol`}

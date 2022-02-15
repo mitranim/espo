@@ -1,3 +1,9 @@
+## 0.8.2
+
+Whenever Espo iterates over object keys, it now consistently iterates only _own_ enumerable properties via `Object.keys`, rather than _all_ enumerable properties via `for in`. This is faster and makes a difference in rarer scenarios such as using `deinitAll` on custom DOM element instances.
+
+Minor tweaks in the internal implementation details of `dom.mjs`.
+
 ## 0.8.1
 
 `dom.mjs` now can be imported in non-browser environments. When DOM is not available, the exported classes are subclasses of `Object`.
